@@ -1,0 +1,213 @@
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { FiPlus, FiEdit2, FiTrash2, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi'
+import DataTable, { Pagination, SearchBox } from '@/components/data/DataTable'
+import { PageHeader, Card } from '@/components/ui/Card'
+import Breadcrumb from '@/components/layout/Breadcrumb'
+import Button from '@/components/ui/Button'
+import { ErrorState } from '@/components/ui/Feedback'
+import { StatusBadge } from '@/components/ui/Feedback'
+import { usePagination, useDebounce } from '@/hooks/usePagination'
+import { unwrapList, getErrorMessage } from '@/api/client'
+import { confirmDelete } from '@/utils/confirm'
+import { exportToCsv } from '@/utils/format'
+
+import { resolveRecordId } from '@/utils/record'
+
+export default function ResourceListPage({
+  title,
+  subtitle,
+  breadcrumb,
+  queryKey,
+  listFn,
+  deleteFn,
+  basePath,
+  columns,
+  exportColumns,
+  enableBulkDelete = false,
+  bulkDeleteFn,
+  extraActions,
+  filters,
+  onView,
+}) {
+  const queryClient = useQueryClient()
+  const pagination = usePagination()
+  const debouncedSearch = useDebounce(pagination.search)
+  const [rowSelection, setRowSelection] = useState({})
+  const [sorting, setSorting] = useState([])
+
+  const ordering = sorting[0] ? `${sorting[0].desc ? '-' : ''}${sorting[0].id}` : undefined
+
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: [queryKey, 'list', pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
+    queryFn: () =>
+      listFn({
+        ...pagination.queryParams,
+        search: debouncedSearch || undefined,
+        ordering,
+      }),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteFn(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] })
+      toast.success('Deleted successfully')
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  })
+
+  const list = unwrapList(data)
+  const rows = list.results || []
+  const total = list.count || 0
+
+  const tableColumns = useMemo(
+    () => [
+      ...columns,
+      {
+        id: 'actions',
+        header: 'Actions',
+        enableSorting: false,
+        cell: ({ row }) => {
+          const item = row.original
+          const id = resolveRecordId(item)
+          return (
+            <div className="flex items-center gap-1">
+              {onView ? (
+                <button
+                  type="button"
+                  onClick={() => onView(item, id)}
+                  className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary"
+                  title="View details"
+                >
+                  <FiEye className="h-4 w-4" />
+                </button>
+              ) : (
+                <Link to={`${basePath}/${id}`} className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary" title="View details">
+                  <FiEye className="h-4 w-4" />
+                </Link>
+              )}
+              {basePath.includes('/audit-logs') || basePath.includes('/notifications') ? null : (
+                <>
+                  <Link to={`${basePath}/${id}/edit`} className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary">
+                    <FiEdit2 className="h-4 w-4" />
+                  </Link>
+                  {deleteFn && (
+                    <button
+                      onClick={async () => {
+                        if (await confirmDelete()) deleteMutation.mutate(id)
+                      }}
+                      className="rounded-lg p-2 text-muted hover:bg-red-50 hover:text-danger"
+                    >
+                      <FiTrash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )
+        },
+      },
+    ],
+    [columns, basePath, deleteMutation, onView],
+  )
+
+  const selectedIds = Object.keys(rowSelection).map((idx) => resolveRecordId(rows[Number(idx)])).filter(Boolean)
+
+  const handleExport = () => {
+    const cols = exportColumns || columns.filter((c) => c.accessorKey || c.id !== 'actions')
+    exportToCsv(
+      rows,
+      cols.map((c) => ({
+        header: typeof c.header === 'string' ? c.header : c.accessorKey,
+        accessor: (row) => {
+          const key = c.accessorKey || c.id
+          const val = row[key]
+          if (c.cell && typeof c.cell !== 'function') return val
+          if (typeof val === 'boolean') return val ? 'Active' : 'Inactive'
+          return val ?? ''
+        },
+      })),
+      `${queryKey}-export.csv`,
+    )
+    toast.success('Export downloaded')
+  }
+
+  if (error) return <ErrorState message={getErrorMessage(error, 'Failed to load data')} onRetry={refetch} />
+
+  return (
+    <div className="w-full">
+      <Breadcrumb items={breadcrumb || [{ label: title }]} />
+      <PageHeader
+        title={title}
+        subtitle={subtitle}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => refetch()} loading={isFetching}>
+              <FiRefreshCw /> Refresh
+            </Button>
+            <Button variant="secondary" onClick={handleExport}>
+              <FiDownload /> Export
+            </Button>
+            {extraActions}
+            {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
+              <Link to={`${basePath}/new`}>
+                <Button><FiPlus /> Add New</Button>
+              </Link>
+            )}
+          </>
+        }
+      />
+
+      <Card padding={false} className="p-4">
+        <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <SearchBox value={pagination.search} onChange={pagination.setSearch} />
+          {filters}
+          {enableBulkDelete && selectedIds.length > 0 && bulkDeleteFn && (
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (await confirmDelete(`${selectedIds.length} items`)) {
+                  await bulkDeleteFn(selectedIds)
+                  queryClient.invalidateQueries({ queryKey: [queryKey] })
+                  setRowSelection({})
+                  toast.success('Bulk delete completed')
+                }
+              }}
+            >
+              Delete Selected ({selectedIds.length})
+            </Button>
+          )}
+        </div>
+
+        <DataTable
+          columns={tableColumns}
+          data={rows}
+          loading={isLoading}
+          sorting={sorting}
+          onSortingChange={setSorting}
+          enableSelection={enableBulkDelete}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+        />
+
+        <div className="px-2 pb-2">
+          <Pagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={total}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={(size) => {
+              pagination.setPageSize(size)
+              pagination.setPage(1)
+            }}
+          />
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+export { StatusBadge }
