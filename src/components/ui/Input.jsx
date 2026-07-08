@@ -1,4 +1,55 @@
+import { useState } from 'react'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { cn } from '@/utils/format'
+
+export function PasswordInput({
+  label,
+  error,
+  hint,
+  className,
+  containerClassName,
+  required,
+  value,
+  onChange,
+  ...props
+}) {
+  const [visible, setVisible] = useState(false)
+
+  return (
+    <div className={cn('space-y-1.5', containerClassName)}>
+      {label && (
+        <label className="block text-sm font-medium text-text">
+          {label}
+          {required && <span className="text-danger ml-1">*</span>}
+        </label>
+      )}
+      <div className="relative">
+        <input
+          type={visible ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          className={cn(
+            'w-full rounded-xl border border-border bg-white px-4 py-2.5 pr-11 text-sm text-text placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20',
+            error && 'border-danger focus:border-danger focus:ring-danger/20',
+            className,
+          )}
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-muted transition hover:bg-slate-100 hover:text-text"
+          title={visible ? 'Hide password' : 'Show password'}
+          tabIndex={-1}
+        >
+          {visible ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+        </button>
+      </div>
+      {error && <p className="text-xs text-danger">{error}</p>}
+      {hint && !error && <p className="text-xs text-muted">{hint}</p>}
+    </div>
+  )
+}
 
 export default function Input({
   label,

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FiEdit2 } from 'react-icons/fi'
 import ResourceListPage, { StatusBadge } from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
+import UserPasswordModal from '@/components/users/UserPasswordModal'
 import Button from '@/components/ui/Button'
 import { userService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
@@ -11,14 +13,43 @@ import { downloadBlob } from '@/utils/format'
 import { resolveRecordId } from '@/utils/record'
 import { confirmDialog } from '@/utils/confirm'
 
-const columns = [
-  { accessorKey: 'first_name', header: 'First Name' },
-  { accessorKey: 'last_name', header: 'Last Name' },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'mobile_number', header: 'Mobile' },
-  { accessorKey: 'organization_name', header: 'Organization' },
-  { accessorKey: 'is_active', header: 'Status', cell: ({ getValue }) => <StatusBadge active={getValue()} /> },
-]
+function getUserDisplayName(user) {
+  return (
+    user?.full_name ||
+    `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
+    user?.email ||
+    user?.mobile_number ||
+    'User'
+  )
+}
+
+function buildColumns(onNameClick) {
+  return [
+    {
+      id: 'name',
+      header: 'Name',
+      accessorFn: (row) => getUserDisplayName(row),
+      cell: ({ row }) => {
+        const user = row.original
+        const name = getUserDisplayName(user)
+        return (
+          <button
+            type="button"
+            onClick={() => onNameClick(user)}
+            className="font-medium text-primary hover:underline text-left"
+            title="View password"
+          >
+            {name}
+          </button>
+        )
+      },
+    },
+    { accessorKey: 'email', header: 'Email' },
+    { accessorKey: 'mobile_number', header: 'Mobile' },
+    { accessorKey: 'organization_name', header: 'Organization' },
+    { accessorKey: 'is_active', header: 'Status', cell: ({ getValue }) => <StatusBadge active={getValue()} /> },
+  ]
+}
 
 const DETAIL_FIELDS = [
   { key: 'first_name', label: 'First Name' },
@@ -109,6 +140,9 @@ function UserDetailModal({ userId, open, onClose }) {
 
 export default function UserList() {
   const { viewId, isOpen, openView, closeView } = useListDetailModal()
+  const [passwordUser, setPasswordUser] = useState(null)
+
+  const columns = buildColumns((user) => setPasswordUser(user))
 
   return (
     <>
@@ -140,6 +174,13 @@ export default function UserList() {
       />
 
       <UserDetailModal userId={viewId} open={isOpen} onClose={closeView} />
+
+      <UserPasswordModal
+        user={passwordUser}
+        userId={passwordUser ? resolveRecordId(passwordUser) : null}
+        open={Boolean(passwordUser)}
+        onClose={() => setPasswordUser(null)}
+      />
     </>
   )
 }

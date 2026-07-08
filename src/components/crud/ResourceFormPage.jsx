@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { PageHeader, Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
-import Input, { Textarea, SelectField, CheckboxField } from '@/components/ui/Input'
+import Input, { Textarea, SelectField, CheckboxField, PasswordInput } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { getErrorMessage, unwrapData } from '@/api/client'
 
@@ -21,6 +21,7 @@ export default function ResourceFormPage({
   fields,
   transformSubmit,
   transformLoad,
+  onSuccess,
 }) {
   const { id } = useParams()
   const isEdit = Boolean(id)
@@ -67,8 +68,9 @@ export default function ResourceFormPage({
       const payload = transformSubmit ? transformSubmit(formData) : formData
       return isEdit ? updateFn(id, payload) : createFn(payload)
     },
-    onSuccess: () => {
+    onSuccess: (response, formData) => {
       queryClient.invalidateQueries({ queryKey: [queryKey] })
+      onSuccess?.({ response, formData, isEdit })
       toast.success(isEdit ? 'Updated successfully' : 'Created successfully')
       navigate(basePath)
     },
@@ -111,7 +113,7 @@ export default function ResourceFormPage({
       case 'checkbox':
         return <CheckboxField label={field.label} {...register(field.name)} />
       case 'password':
-        return <Input {...common} type="password" />
+        return <PasswordInput {...common} />
       case 'email':
         return <Input {...common} type="email" />
       case 'date':
