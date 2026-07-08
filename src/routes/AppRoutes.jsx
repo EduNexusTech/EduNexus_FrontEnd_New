@@ -49,6 +49,10 @@ import AuditLogDetail from '@/pages/audit-logs/AuditLogDetail'
 
 import SettingsPage from '@/pages/settings/SettingsPage'
 import NotificationsPage from '@/pages/notifications/NotificationsPage'
+import EduNexusPostPage from '@/pages/edu-nexus-post/EduNexusPostPage'
+import AiHubPage from '@/pages/ai-hub/AiHubPage'
+import AiAssistantPage from '@/pages/ai-hub/AiAssistantPage'
+import AutomationsPage from '@/pages/ai-hub/AutomationsPage'
 
 export default function AppRoutes() {
   return (
@@ -63,6 +67,10 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/edu-nexus-post" element={<EduNexusPostPage />} />
+          <Route path="/ai-hub" element={<AiHubPage />} />
+          <Route path="/ai-hub/assistant" element={<AiAssistantPage />} />
+          <Route path="/ai-hub/automations" element={<AutomationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
 

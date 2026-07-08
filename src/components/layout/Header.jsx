@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { FiMenu, FiBell, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown } from 'react-icons/fi'
+import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
 import { notificationService } from '@/api/services'
 import { Drawer } from '@/components/ui/Modal'
@@ -68,9 +68,26 @@ export default function Header({ onMenuClick }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/ai-hub"
+            title="AI Hub"
+            className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+          >
+            <FiZap className="h-5 w-5" />
+          </Link>
+
+          <Link
+            to="/edu-nexus-post"
+            title="EduNexus Mailer"
+            className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+          >
+            <FiMail className="h-5 w-5" />
+          </Link>
+
           <button
             onClick={() => setNotifOpen(true)}
             className="relative rounded-xl p-2.5 text-muted hover:bg-slate-100 hover:text-text transition"
+            title="Notifications"
           >
             <FiBell className="h-5 w-5" />
             {unreadCount > 0 && (

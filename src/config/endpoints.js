@@ -98,4 +98,7 @@ export const API_ENDPOINTS = {
     MARK_ALL_READ: '/api/v1/notifications/mark-all-read/',
     UNREAD_COUNT: '/api/v1/notifications/unread-count/',
   },
+  NEXUS_MAIL: {
+    SEND: '/api/v1/nexus-mail/send/',
+  },
 }

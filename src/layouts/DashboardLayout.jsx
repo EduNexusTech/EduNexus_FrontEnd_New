@@ -3,10 +3,12 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import PageContainer from '@/components/layout/PageContainer'
+import useAutomationRunner from '@/hooks/useAutomationRunner'
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  useAutomationRunner()
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

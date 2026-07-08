@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FiPlus, FiEdit2, FiTrash2, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi'
 import DataTable, { Pagination, SearchBox } from '@/components/data/DataTable'
@@ -13,6 +13,7 @@ import { usePagination, useDebounce } from '@/hooks/usePagination'
 import { unwrapList, getErrorMessage } from '@/api/client'
 import { confirmDelete } from '@/utils/confirm'
 import { exportToCsv } from '@/utils/format'
+import { markInactiveInListCache, removeFromListCache } from '@/utils/listCache'
 
 import { resolveRecordId } from '@/utils/record'
 
@@ -31,6 +32,8 @@ export default function ResourceListPage({
   extraActions,
   filters,
   onView,
+  deleteSuccessMessage = 'Deleted successfully',
+  deleteBehavior = 'remove',
 }) {
   const queryClient = useQueryClient()
   const pagination = usePagination()
@@ -40,21 +43,32 @@ export default function ResourceListPage({
 
   const ordering = sorting[0] ? `${sorting[0].desc ? '-' : ''}${sorting[0].id}` : undefined
 
+  const listQueryKey = useMemo(
+    () => [queryKey, 'list', pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
+    [queryKey, pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
+  )
+
   const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: [queryKey, 'list', pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
+    queryKey: listQueryKey,
     queryFn: () =>
       listFn({
         ...pagination.queryParams,
         search: debouncedSearch || undefined,
         ordering,
       }),
+    placeholderData: keepPreviousData,
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteFn(id),
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
+      queryClient.setQueryData(listQueryKey, (old) =>
+        deleteBehavior === 'deactivate'
+          ? markInactiveInListCache(old, deletedId)
+          : removeFromListCache(old, deletedId),
+      )
       queryClient.invalidateQueries({ queryKey: [queryKey] })
-      toast.success('Deleted successfully')
+      toast.success(deleteSuccessMessage)
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
@@ -161,7 +175,12 @@ export default function ResourceListPage({
         }
       />
 
-      <Card padding={false} className="p-4">
+      <Card padding={false} className="relative p-4">
+        {isFetching && !isLoading && (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-t-xl bg-slate-100">
+            <div className="h-full w-1/3 animate-pulse bg-primary/70" />
+          </div>
+        )}
         <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <SearchBox value={pagination.search} onChange={pagination.setSearch} />
           {filters}
@@ -185,7 +204,7 @@ export default function ResourceListPage({
         <DataTable
           columns={tableColumns}
           data={rows}
-          loading={isLoading}
+          loading={isLoading && !data}
           sorting={sorting}
           onSortingChange={setSorting}
           enableSelection={enableBulkDelete}

@@ -13,6 +13,10 @@ import {
   FiChevronLeft,
   FiLayers,
   FiBook,
+  FiMail,
+  FiCpu,
+  FiMessageSquare,
+  FiZap,
 } from 'react-icons/fi'
 import { APP_NAME } from '@/config/constants'
 import { cn } from '@/utils/format'
@@ -62,8 +66,17 @@ const defaultNav = [
     ],
   },
   {
+    label: 'AI & Automation',
+    children: [
+      { label: 'AI Hub', path: '/ai-hub', icon: FiCpu },
+      { label: 'Nexus AI', path: '/ai-hub/assistant', icon: FiMessageSquare },
+      { label: 'Automations', path: '/ai-hub/automations', icon: FiZap },
+    ],
+  },
+  {
     label: 'System',
     children: [
+      { label: 'EduNexus Post', path: '/edu-nexus-post', icon: FiMail },
       { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
       { label: 'Settings', path: '/settings', icon: FiSettings },
       { label: 'Notifications', path: '/notifications', icon: FiBell },
@@ -110,7 +123,10 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                 )}
                 {group.children.map((item) => {
                   const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
-                  const active = location.pathname.startsWith(item.path)
+                  const active =
+                    item.path === '/ai-hub'
+                      ? location.pathname === '/ai-hub'
+                      : location.pathname.startsWith(item.path)
                   return (
                     <NavLink
                       key={item.path}

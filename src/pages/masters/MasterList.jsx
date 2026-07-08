@@ -6,6 +6,9 @@ import { MASTER_DEFINITIONS } from '@/config/masterDefinitions'
 import { masterServices } from '@/api/services'
 import { resolveRecordId } from '@/utils/record'
 import { formatDateTime } from '@/utils/format'
+import { getErrorMessage } from '@/api/client'
+import { PageLoader, ErrorState } from '@/components/ui/Feedback'
+import { useMasterFormFields, transformMasterLoad } from '@/hooks/useMasterFormFields'
 
 export function MasterList() {
   const { masterKey } = useParams()
@@ -60,9 +63,13 @@ export function MasterList() {
 
 export function MasterForm() {
   const { masterKey } = useParams()
-  const def = MASTER_DEFINITIONS[masterKey]
+  const { def, fields, loading, error, refetch } = useMasterFormFields(masterKey)
 
   if (!def) return <div className="p-8 text-center text-muted">Master type not found</div>
+  if (loading) return <PageLoader />
+  if (error) {
+    return <ErrorState message={getErrorMessage(error, 'Failed to load form options')} onRetry={refetch} />
+  }
 
   const service = masterServices[def.serviceKey]
 
@@ -75,7 +82,15 @@ export function MasterForm() {
       createFn={service.create}
       updateFn={service.update}
       basePath={`/masters/${masterKey}`}
-      fields={def.fields}
+      fields={fields}
+      transformLoad={transformMasterLoad}
+      transformSubmit={(data) => {
+        const payload = { ...data }
+        Object.keys(payload).forEach((key) => {
+          if (payload[key] === '') delete payload[key]
+        })
+        return payload
+      }}
     />
   )
 }

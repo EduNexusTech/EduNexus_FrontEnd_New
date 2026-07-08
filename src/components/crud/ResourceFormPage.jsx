@@ -28,6 +28,7 @@ export default function ResourceFormPage({
   const queryClient = useQueryClient()
 
   const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm()
+  const formValues = watch()
 
   const { data, isLoading, error } = useQuery({
     queryKey: [queryKey, id],
@@ -43,6 +44,24 @@ export default function ResourceFormPage({
     }
   }, [data, isEdit, reset, transformLoad])
 
+  // Clear dependent fields when their parent select changes
+  useEffect(() => {
+    const subscription = watch((_values, { name, type }) => {
+      if (!name || (type && type !== 'change')) return
+      fields.forEach((field) => {
+        const parents = Array.isArray(field.dependsOn)
+          ? field.dependsOn
+          : field.dependsOn
+            ? [field.dependsOn]
+            : []
+        if (parents.includes(name)) {
+          setValue(field.name, '')
+        }
+      })
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, setValue, fields])
+
   const mutation = useMutation({
     mutationFn: (formData) => {
       const payload = transformSubmit ? transformSubmit(formData) : formData
@@ -57,12 +76,16 @@ export default function ResourceFormPage({
   })
 
   const renderField = (field) => {
+    const isDisabled =
+      (isEdit && field.readOnlyOnEdit) ||
+      (typeof field.disabled === 'function' ? field.disabled(formValues) : Boolean(field.disabled))
+
     const common = {
       key: field.name,
       label: field.label,
       error: errors[field.name]?.message,
       required: field.required,
-      disabled: isEdit && field.readOnlyOnEdit,
+      disabled: isDisabled,
       ...register(field.name, {
         required: field.required ? `${field.label} is required` : false,
         valueAsNumber: field.type === 'number',
@@ -72,8 +95,19 @@ export default function ResourceFormPage({
     switch (field.type) {
       case 'textarea':
         return <Textarea {...common} placeholder={field.placeholder} />
-      case 'select':
-        return <SelectField {...common} options={field.options || []} />
+      case 'select': {
+        const options =
+          typeof field.getOptions === 'function'
+            ? field.getOptions(formValues)
+            : (field.options || [])
+        return (
+          <SelectField
+            {...common}
+            options={options}
+            placeholder={field.placeholder}
+          />
+        )
+      }
       case 'checkbox':
         return <CheckboxField label={field.label} {...register(field.name)} />
       case 'password':

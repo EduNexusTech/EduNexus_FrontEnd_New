@@ -122,6 +122,10 @@ export const notificationService = {
   unreadCount: () => apiGet(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT),
 }
 
+export const nexusMailService = {
+  send: (data) => apiPost(API_ENDPOINTS.NEXUS_MAIL.SEND, data),
+}
+
 export function createMasterService(apiPath) {
   const detail = (id) => (apiPath.endsWith('/') ? `${apiPath}${id}/` : `${apiPath}/${id}/`)
   return {

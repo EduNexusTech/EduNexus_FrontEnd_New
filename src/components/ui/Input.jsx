@@ -53,7 +53,7 @@ export function Textarea({ label, error, className, required, ...props }) {
   )
 }
 
-export function SelectField({ label, error, options = [], required, className, ...props }) {
+export function SelectField({ label, error, options = [], required, className, placeholder = 'Select...', ...props }) {
   return (
     <div className="space-y-1.5">
       {label && (
@@ -64,13 +64,13 @@ export function SelectField({ label, error, options = [], required, className, .
       )}
       <select
         className={cn(
-          'w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20',
+          'w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-muted',
           error && 'border-danger',
           className,
         )}
         {...props}
       >
-        <option value="">Select...</option>
+        <option value="">{placeholder}</option>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}

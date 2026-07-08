@@ -118,6 +118,8 @@ export default function UserList() {
         queryKey="users"
         listFn={userService.list}
         deleteFn={userService.delete}
+        deleteSuccessMessage="User deactivated"
+        deleteBehavior="deactivate"
         basePath="/users"
         columns={columns}
         enableBulkDelete
