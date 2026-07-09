@@ -1,24 +1,48 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { setAuthHandlers } from '@/api/axios'
 import { authService } from '@/api/services'
 import { unwrapData } from '@/api/client'
+import { AuthSyncEvent, notifyAuthSync, subscribeAuthSync } from '@/utils/authSync'
 import { loadAuth, saveAuth, clearAuth, getStoredAccessToken, getStoredRefreshToken, getStoredUser } from '@/utils/storage'
 
 const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [state, setState] = useState(() => {
-    const saved = loadAuth()
+function buildAuthState(saved) {
+  if (!saved?.accessToken) {
     return {
-      user: saved?.user || null,
-      accessToken: saved?.accessToken || null,
-      refreshToken: saved?.refreshToken || null,
-      rememberMe: saved?.rememberMe || false,
-      isAuthenticated: Boolean(saved?.accessToken),
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      rememberMe: false,
+      isAuthenticated: false,
       isLoading: false,
-      isHydrated: false,
+      isHydrated: true,
     }
-  })
+  }
+
+  return {
+    user: saved.user || null,
+    accessToken: saved.accessToken,
+    refreshToken: saved.refreshToken,
+    rememberMe: saved.rememberMe || false,
+    isAuthenticated: true,
+    isLoading: false,
+    isHydrated: true,
+  }
+}
+
+function resolveUserId(user) {
+  if (!user) return null
+  return user.user_id || user.id || user.email || user.username || null
+}
+
+export function AuthProvider({ children }) {
+  const queryClient = useQueryClient()
+  const [state, setState] = useState(() => buildAuthState(loadAuth()))
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   useEffect(() => {
     setState((prev) => ({ ...prev, isHydrated: true }))
@@ -36,9 +60,51 @@ export function AuthProvider({ children }) {
     )
   }, [])
 
+  const applyAuthFromStorage = useCallback(
+    (options = {}) => {
+      const { silent = false } = options
+      const saved = loadAuth()
+      const nextState = buildAuthState(saved)
+      const prevUserId = resolveUserId(stateRef.current.user)
+      const nextUserId = resolveUserId(nextState.user)
+
+      setState(nextState)
+
+      if (!nextState.isAuthenticated) {
+        queryClient.clear()
+        return 'logout'
+      }
+
+      if (nextUserId && nextUserId !== prevUserId) {
+        queryClient.clear()
+        if (!silent) {
+          const label =
+            nextState.user?.full_name ||
+            `${nextState.user?.first_name || ''} ${nextState.user?.last_name || ''}`.trim() ||
+            nextState.user?.email ||
+            'another account'
+          toast(`Session updated — signed in as ${label}`)
+        }
+      }
+
+      return 'updated'
+    },
+    [queryClient],
+  )
+
+  useEffect(() => {
+    return subscribeAuthSync(({ event }) => {
+      if (event === AuthSyncEvent.LOGOUT) {
+        applyAuthFromStorage({ silent: false })
+        return
+      }
+      applyAuthFromStorage({ silent: false })
+    })
+  }, [applyAuthFromStorage])
+
   const logout = useCallback(async () => {
     try {
-      const refreshToken = state.refreshToken || getStoredRefreshToken()
+      const refreshToken = stateRef.current.refreshToken || getStoredRefreshToken()
       if (refreshToken) {
         await authService.logout(refreshToken)
       }
@@ -46,16 +112,10 @@ export function AuthProvider({ children }) {
       // ignore logout errors
     }
     clearAuth()
-    setState({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      rememberMe: false,
-      isAuthenticated: false,
-      isLoading: false,
-      isHydrated: true,
-    })
-  }, [state.refreshToken])
+    setState(buildAuthState(null))
+    queryClient.clear()
+    notifyAuthSync(AuthSyncEvent.LOGOUT)
+  }, [queryClient])
 
   const updateTokens = useCallback(
     ({ accessToken, refreshToken }) => {
@@ -64,51 +124,57 @@ export function AuthProvider({ children }) {
         persist(next, prev.rememberMe)
         return next
       })
+      notifyAuthSync(AuthSyncEvent.UPDATED)
     },
     [persist],
   )
-  const login = useCallback(async (credentials, rememberMe = false) => {
-    setState((prev) => ({ ...prev, isLoading: true }))
-    try {
-      const response = await authService.login(credentials)
-      const data = unwrapData(response) || response?.data || response
-      const user = data?.user
-      const accessToken = data?.access_token || data?.access
-      const refreshToken = data?.refresh_token || data?.refresh
 
-      if (!accessToken) {
-        throw new Error('Login succeeded but no access token was returned.')
+  const login = useCallback(
+    async (credentials, rememberMe = false) => {
+      setState((prev) => ({ ...prev, isLoading: true }))
+      try {
+        const response = await authService.login(credentials)
+        const data = unwrapData(response) || response?.data || response
+        const user = data?.user
+        const accessToken = data?.access_token || data?.access
+        const refreshToken = data?.refresh_token || data?.refresh
+
+        if (!accessToken) {
+          throw new Error('Login succeeded but no access token was returned.')
+        }
+
+        const next = {
+          user,
+          accessToken,
+          refreshToken,
+          rememberMe,
+          isAuthenticated: true,
+          isLoading: false,
+          isHydrated: true,
+        }
+
+        persist(next, rememberMe)
+        setState(next)
+        queryClient.clear()
+        notifyAuthSync(AuthSyncEvent.UPDATED)
+
+        setAuthHandlers({
+          getAccessToken: () => accessToken,
+          getRefreshToken: () => refreshToken,
+          getUser: () => user,
+          isSuperAdmin: () => Boolean(user?.is_super_admin),
+          onTokensUpdated: updateTokens,
+          onUnauthorized: logout,
+        })
+
+        return next
+      } catch (error) {
+        setState((prev) => ({ ...prev, isLoading: false }))
+        throw error
       }
-
-      const next = {
-        user,
-        accessToken,
-        refreshToken,
-        rememberMe,
-        isAuthenticated: true,
-        isLoading: false,
-        isHydrated: true,
-      }
-
-      // Save to storage BEFORE state update so axios can read token immediately
-      persist(next, rememberMe)
-      setState(next)
-
-      setAuthHandlers({
-        getAccessToken: () => accessToken,
-        getRefreshToken: () => refreshToken,
-        getUser: () => user,
-        isSuperAdmin: () => Boolean(user?.is_super_admin),
-        onTokensUpdated: updateTokens,
-        onUnauthorized: logout,
-      })
-
-      return next
-    } catch (error) {
-      setState((prev) => ({ ...prev, isLoading: false }))
-      throw error
-    }
-  }, [persist, updateTokens, logout])
+    },
+    [persist, updateTokens, logout, queryClient],
+  )
 
   const refreshProfile = useCallback(async () => {
     const response = await authService.profile()
@@ -119,6 +185,7 @@ export function AuthProvider({ children }) {
       persist(next, prev.rememberMe)
       return next
     })
+    notifyAuthSync(AuthSyncEvent.UPDATED)
   }, [persist])
 
   useEffect(() => {
