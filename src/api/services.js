@@ -1,5 +1,15 @@
 import { API_ENDPOINTS } from '@/config/endpoints'
-import { apiGet, apiPost, apiPatch, apiDelete, apiGetPaginated, apiGetBlob, buildQuery } from './client'
+import {
+  apiGet,
+  apiPost,
+  apiPatch,
+  apiPostForm,
+  apiPatchForm,
+  apiDelete,
+  apiGetPaginated,
+  apiGetBlob,
+  buildQuery,
+} from './client'
 
 export const authService = {
   login: (payload) => apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true }),
@@ -10,6 +20,7 @@ export const authService = {
 
 export const dashboardService = {
   superAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SUPER_ADMIN, params),
+  schoolAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN, params),
 }
 
 export const organizationService = {
@@ -28,6 +39,13 @@ export const schoolService = {
   create: (data) => apiPost(API_ENDPOINTS.SCHOOLS.LIST, data),
   update: (id, data) => apiPatch(API_ENDPOINTS.SCHOOLS.DETAIL(id), data),
   delete: (id) => apiDelete(API_ENDPOINTS.SCHOOLS.DETAIL(id)),
+  getProfile: (id) => apiGet(id ? API_ENDPOINTS.SCHOOLS.PROFILE(id) : API_ENDPOINTS.SCHOOL_PROFILE),
+  updateProfile: (id, data) => {
+    const isForm = typeof FormData !== 'undefined' && data instanceof FormData
+    const url = id ? API_ENDPOINTS.SCHOOLS.PROFILE(id) : API_ENDPOINTS.SCHOOL_PROFILE
+    return isForm ? apiPatchForm(url, data) : apiPatch(url, data)
+  },
+  regenerateQr: (id) => apiPost(API_ENDPOINTS.SCHOOLS.PROFILE_REGENERATE_QR(id)),
 }
 
 export const userService = {
@@ -43,6 +61,31 @@ export const userService = {
   bulkAction: (userIds, action) =>
     apiPost(API_ENDPOINTS.USERS.BULK_ACTION, { user_ids: userIds, action }),
   export: (params) => apiGetBlob(API_ENDPOINTS.USERS.EXPORT, params),
+}
+
+function schoolUserWrite(url, data, method = 'post') {
+  const isForm = typeof FormData !== 'undefined' && data instanceof FormData
+  if (method === 'post') {
+    return isForm ? apiPostForm(url, data) : apiPost(url, data)
+  }
+  return isForm ? apiPatchForm(url, data) : apiPatch(url, data)
+}
+
+export const schoolUserService = {
+  list: (params) => apiGetPaginated(API_ENDPOINTS.SCHOOL_USERS.LIST, params),
+  get: (id) => apiGet(API_ENDPOINTS.SCHOOL_USERS.DETAIL(id)),
+  create: (data) => schoolUserWrite(API_ENDPOINTS.SCHOOL_USERS.LIST, data, 'post'),
+  update: (id, data) => schoolUserWrite(API_ENDPOINTS.SCHOOL_USERS.DETAIL(id), data, 'patch'),
+  delete: (id) => apiDelete(API_ENDPOINTS.SCHOOL_USERS.DETAIL(id)),
+  activate: (id) => apiPost(API_ENDPOINTS.SCHOOL_USERS.ACTIVATE(id)),
+  deactivate: (id) => apiPost(API_ENDPOINTS.SCHOOL_USERS.DEACTIVATE(id)),
+  resetPassword: (id, payload = {}) =>
+    apiPost(API_ENDPOINTS.SCHOOL_USERS.RESET_PASSWORD(id), payload),
+  sendCredentials: (id, payload = {}) =>
+    apiPost(API_ENDPOINTS.SCHOOL_USERS.SEND_CREDENTIALS(id), payload),
+  loginHistory: (id) => apiGet(API_ENDPOINTS.SCHOOL_USERS.LOGIN_HISTORY(id)),
+  devices: (id) => apiGet(API_ENDPOINTS.SCHOOL_USERS.DEVICES(id)),
+  staffRoles: () => apiGet(API_ENDPOINTS.SCHOOL_USERS.STAFF_ROLES),
 }
 
 export const roleService = {
@@ -137,6 +180,19 @@ export function createMasterService(apiPath) {
   }
 }
 
+export function createAcademicService(apiPath) {
+  const detail = (id) => (apiPath.endsWith('/') ? `${apiPath}${id}/` : `${apiPath}/${id}/`)
+  return {
+    list: (params) => apiGetPaginated(apiPath, params),
+    get: (id) => apiGet(detail(id)),
+    create: (data) => apiPost(apiPath, data),
+    update: (id, data) => apiPatch(detail(id), data),
+    delete: (id) => apiDelete(detail(id)),
+    bulkUpload: (items) => apiPost(`${apiPath}bulk-upload/`, { items }),
+    bulkUpdate: (items) => apiPatch(`${apiPath}bulk-update/`, { items }),
+  }
+}
+
 export const masterServices = {
   countries: createMasterService(API_ENDPOINTS.MASTERS.COUNTRIES),
   states: createMasterService(API_ENDPOINTS.MASTERS.STATES),
@@ -145,8 +201,25 @@ export const masterServices = {
   classes: createMasterService(API_ENDPOINTS.MASTERS.CLASSES),
   sections: createMasterService(API_ENDPOINTS.MASTERS.SECTIONS),
   subjects: createMasterService(API_ENDPOINTS.MASTERS.SUBJECTS),
+  streams: createMasterService(API_ENDPOINTS.MASTERS.STREAMS),
+  subjectGroups: createMasterService(API_ENDPOINTS.MASTERS.SUBJECT_GROUPS),
   departments: createMasterService(API_ENDPOINTS.MASTERS.DEPARTMENTS),
   designations: createMasterService(API_ENDPOINTS.MASTERS.DESIGNATIONS),
   categories: createMasterService(API_ENDPOINTS.MASTERS.CATEGORIES),
   academicYears: createMasterService(API_ENDPOINTS.ACADEMIC_YEARS.LIST),
+}
+
+export const academicServices = {
+  academicYears: createMasterService(API_ENDPOINTS.ACADEMIC_YEARS.LIST),
+  terms: createAcademicService(API_ENDPOINTS.ACADEMICS.TERMS),
+  classSections: createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_SECTIONS),
+  curriculums: createAcademicService(API_ENDPOINTS.ACADEMICS.CURRICULUMS),
+  curriculumSubjects: createAcademicService(API_ENDPOINTS.ACADEMICS.CURRICULUM_SUBJECTS),
+  electiveSubjects: createAcademicService(API_ENDPOINTS.ACADEMICS.ELECTIVE_SUBJECTS),
+  classTeachers: createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_TEACHERS),
+  calendarEvents: createAcademicService(API_ENDPOINTS.ACADEMICS.CALENDAR_EVENTS),
+  classTimings: createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_TIMINGS),
+  periods: createAcademicService(API_ENDPOINTS.ACADEMICS.PERIODS),
+  workingDays: createAcademicService(API_ENDPOINTS.ACADEMICS.WORKING_DAYS),
+  holidays: createAcademicService(API_ENDPOINTS.ACADEMICS.HOLIDAYS),
 }

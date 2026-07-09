@@ -25,7 +25,10 @@ export default function SchoolDetail() {
         { key: 'is_active', label: 'Active', render: (item) => <StatusBadge active={item.is_active} /> },
       ]}
       actions={() => (
-        <Link to={`/schools/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+        <>
+          <Link to={`/schools/${id}/profile`}><Button variant="outline">School Profile</Button></Link>
+          <Link to={`/schools/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+        </>
       )}
     />
   )

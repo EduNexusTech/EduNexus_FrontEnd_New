@@ -141,6 +141,40 @@ export const MASTER_DEFINITIONS = {
       { accessorKey: 'subject_type', header: 'Type' },
     ],
   },
+  streams: {
+    key: 'streams',
+    label: 'Stream',
+    labelPlural: 'Streams',
+    serviceKey: 'streams',
+    fields: [
+      { name: 'organization_id', label: 'Organization ID', type: 'text', required: true },
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
+      { name: 'description', label: 'Description', type: 'textarea', fullWidth: true },
+      { name: 'is_active', label: 'Active', type: 'checkbox' },
+    ],
+    columns: [
+      { accessorKey: 'name', header: 'Name' },
+      { accessorKey: 'code', header: 'Code' },
+    ],
+  },
+  'subject-groups': {
+    key: 'subject-groups',
+    label: 'Subject Group',
+    labelPlural: 'Subject Groups',
+    serviceKey: 'subjectGroups',
+    fields: [
+      { name: 'organization_id', label: 'Organization ID', type: 'text', required: true },
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
+      { name: 'description', label: 'Description', type: 'textarea', fullWidth: true },
+      { name: 'is_active', label: 'Active', type: 'checkbox' },
+    ],
+    columns: [
+      { accessorKey: 'name', header: 'Name' },
+      { accessorKey: 'code', header: 'Code' },
+    ],
+  },
   departments: {
     key: 'departments',
     label: 'Department',

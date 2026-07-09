@@ -7,6 +7,7 @@ import { PasswordInput } from '@/components/ui/Input'
 import { LoadingSpinner } from '@/components/ui/Feedback'
 import { userService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
+import { getUserPassword, saveUserPassword } from '@/utils/userPasswordStorage'
 
 function getDisplayName(user) {
   if (!user) return 'User'
@@ -33,7 +34,10 @@ export default function UserPasswordModal({ user, userId, open, onClose }) {
   })
 
   const detail = unwrapData(data)
-  const existingPassword = detail?.viewable_password || ''
+  const existingPassword =
+    detail?.viewable_password ||
+    getUserPassword(id, detail?.email || user?.email) ||
+    ''
 
   useEffect(() => {
     if (!open) return
@@ -43,7 +47,8 @@ export default function UserPasswordModal({ user, userId, open, onClose }) {
 
   const resetMutation = useMutation({
     mutationFn: (nextPassword) => userService.resetPassword(id, nextPassword),
-    onSuccess: () => {
+    onSuccess: (_response, nextPassword) => {
+      saveUserPassword(id, nextPassword, detail?.email || user?.email)
       queryClient.invalidateQueries({ queryKey: ['users', id] })
       queryClient.invalidateQueries({ queryKey: ['users'] })
       refetch()

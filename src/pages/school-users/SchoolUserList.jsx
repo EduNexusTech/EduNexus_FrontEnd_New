@@ -1,30 +1,46 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FiEdit2, FiKey } from 'react-icons/fi'
 import ResourceListPage, { StatusBadge } from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
-import UserPasswordModal from '@/components/users/UserPasswordModal'
+import SchoolUserCredentialsModal from '@/components/school-users/SchoolUserCredentialsModal'
 import Button from '@/components/ui/Button'
-import { userService } from '@/api/services'
+import { SelectField } from '@/components/ui/Input'
+import { Avatar } from '@/components/ui/Feedback'
+import { schoolUserService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
-import { downloadBlob } from '@/utils/format'
+import { SCHOOL_STAFF_ROLES } from '@/config/constants'
 import { resolveRecordId } from '@/utils/record'
 import { confirmDialog } from '@/utils/confirm'
+import { resolveMediaUrl } from '@/utils/format'
 
 function getUserDisplayName(user) {
   return (
     user?.full_name ||
     `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
+    user?.username ||
     user?.email ||
     user?.mobile_number ||
     'User'
   )
 }
 
-function buildColumns(onPasswordClick) {
+function buildColumns(onCredentialsClick) {
   return [
+    {
+      id: 'photo',
+      header: 'Photo',
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Avatar
+          name={getUserDisplayName(row.original)}
+          src={resolveMediaUrl(row.original.profile_image_url || row.original.profile_image)}
+          size="sm"
+        />
+      ),
+    },
     {
       id: 'name',
       header: 'Name',
@@ -33,24 +49,25 @@ function buildColumns(onPasswordClick) {
         <span className="font-medium text-text">{getUserDisplayName(row.original)}</span>
       ),
     },
+    { accessorKey: 'username', header: 'Username' },
+    { accessorKey: 'staff_role_name', header: 'Role' },
     { accessorKey: 'email', header: 'Email' },
     { accessorKey: 'mobile_number', header: 'Mobile' },
-    { accessorKey: 'organization_name', header: 'Organization' },
     { accessorKey: 'is_active', header: 'Status', cell: ({ getValue }) => <StatusBadge active={getValue()} /> },
     {
-      id: 'password',
-      header: 'Password',
+      id: 'credentials',
+      header: 'Credentials',
       enableSorting: false,
       cell: ({ row }) => (
         <Button
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => onPasswordClick(row.original)}
-          title="View password"
+          onClick={() => onCredentialsClick(row.original)}
+          title="View credentials"
         >
           <FiKey className="h-4 w-4" />
-          Password
+          Credentials
         </Button>
       ),
     },
@@ -58,42 +75,41 @@ function buildColumns(onPasswordClick) {
 }
 
 const DETAIL_FIELDS = [
+  { key: 'username', label: 'Username' },
   { key: 'first_name', label: 'First Name' },
   { key: 'last_name', label: 'Last Name' },
+  { key: 'staff_role_name', label: 'Role' },
   { key: 'email', label: 'Email' },
   { key: 'mobile_number', label: 'Mobile' },
-  { key: 'organization_name', label: 'Organization' },
   { key: 'school_name', label: 'School' },
-  { key: 'is_super_admin', label: 'Super Admin', render: (item) => (item.is_super_admin ? 'Yes' : 'No') },
-  { key: 'is_org_admin', label: 'Org Admin', render: (item) => (item.is_org_admin ? 'Yes' : 'No') },
-  { key: 'is_school_admin', label: 'School Admin', render: (item) => (item.is_school_admin ? 'Yes' : 'No') },
+  { key: 'must_change_password', label: 'Must Change Password', render: (item) => (item.must_change_password ? 'Yes' : 'No') },
   { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
 ]
 
-function UserDetailModal({ userId, open, onClose, onViewPassword }) {
+function SchoolUserDetailModal({ userId, open, onClose, onViewCredentials }) {
   const queryClient = useQueryClient()
   const id = userId
 
   const activateMutation = useMutation({
-    mutationFn: () => userService.activate(id),
+    mutationFn: () => schoolUserService.activate(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['school-users'] })
       toast.success('User activated')
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
 
   const deactivateMutation = useMutation({
-    mutationFn: () => userService.deactivate(id),
+    mutationFn: () => schoolUserService.deactivate(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['school-users'] })
       toast.success('User deactivated')
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
 
   const resetPasswordMutation = useMutation({
-    mutationFn: (password) => userService.resetPassword(id, password),
+    mutationFn: () => schoolUserService.resetPassword(id, { send_credentials: false }),
     onSuccess: () => toast.success('Password reset successfully'),
     onError: (e) => toast.error(getErrorMessage(e)),
   })
@@ -101,11 +117,10 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
   const handleResetPassword = async () => {
     const confirmed = await confirmDialog({
       title: 'Reset Password',
-      input: 'text',
-      inputPlaceholder: 'Enter new password',
-      inputAttributes: { minlength: 8 },
+      text: 'Generate a new temporary password for this user?',
+      confirmButtonText: 'Reset',
     })
-    if (confirmed?.value) resetPasswordMutation.mutate(confirmed.value)
+    if (confirmed) resetPasswordMutation.mutate()
   }
 
   return (
@@ -113,26 +128,29 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
       recordId={id}
       open={open}
       onClose={onClose}
-      queryKey="users"
-      getFn={userService.get}
-      getTitle={(item) => item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.email}
+      queryKey="school-users"
+      getFn={schoolUserService.get}
+      getTitle={(item) => getUserDisplayName(item)}
       fields={DETAIL_FIELDS}
       renderFooter={(item, recordId, close) => {
-        const userRecordId = item.id || item.user_id || recordId
+        const userRecordId = item.user_id || item.id || recordId
         return (
           <>
             <Button variant="secondary" onClick={close}>Close</Button>
             <Button
               variant="outline"
               onClick={() => {
-                onViewPassword?.(item)
+                onViewCredentials?.(item)
                 close()
               }}
             >
-              <FiKey className="h-4 w-4" /> View Password
+              <FiKey className="h-4 w-4" /> Credentials
             </Button>
-            <Link to={`/users/${userRecordId}/edit`} onClick={close}>
+            <Link to={`/school-users/${userRecordId}/edit`} onClick={close}>
               <Button variant="outline"><FiEdit2 className="h-4 w-4" /> Edit</Button>
+            </Link>
+            <Link to={`/school-users/${userRecordId}`} onClick={close}>
+              <Button variant="outline">Full Detail</Button>
             </Link>
             <Button variant="secondary" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>
               Reset Password
@@ -153,53 +171,57 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
   )
 }
 
-export default function UserList() {
+export default function SchoolUserList() {
   const { viewId, isOpen, openView, closeView } = useListDetailModal()
-  const [passwordUser, setPasswordUser] = useState(null)
+  const [credentialsUser, setCredentialsUser] = useState(null)
+  const [staffRole, setStaffRole] = useState('')
 
-  const columns = buildColumns((user) => setPasswordUser(user))
+  const listParams = useMemo(
+    () => (staffRole ? { staff_role: staffRole } : {}),
+    [staffRole],
+  )
+
+  const columns = buildColumns((user) => setCredentialsUser(user))
+
+  const roleFilter = (
+    <SelectField
+      label=""
+      value={staffRole}
+      onChange={(e) => setStaffRole(e.target.value)}
+      options={[{ label: 'All roles', value: '' }, ...SCHOOL_STAFF_ROLES]}
+      className="min-w-[180px]"
+    />
+  )
 
   return (
     <>
       <ResourceListPage
-        title="Users"
-        subtitle="Manage platform users"
-        queryKey="users"
-        listFn={userService.list}
-        deleteFn={userService.delete}
+        title="School Users"
+        subtitle="Teachers, students, parents, and school staff"
+        queryKey="school-users"
+        listFn={schoolUserService.list}
+        listParams={listParams}
+        deleteFn={schoolUserService.delete}
         deleteSuccessMessage="User deactivated"
         deleteBehavior="deactivate"
-        basePath="/users"
+        basePath="/school-users"
         columns={columns}
-        enableBulkDelete
-        bulkDeleteFn={async (ids) => userService.bulkAction(ids, 'deactivate')}
+        filters={roleFilter}
         onView={(item) => openView(item, resolveRecordId(item))}
-        extraActions={
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              const blob = await userService.export({})
-              downloadBlob(blob, 'users-export.csv')
-              toast.success('Export downloaded')
-            }}
-          >
-            Export CSV
-          </Button>
-        }
       />
 
-      <UserDetailModal
+      <SchoolUserDetailModal
         userId={viewId}
         open={isOpen}
         onClose={closeView}
-        onViewPassword={setPasswordUser}
+        onViewCredentials={setCredentialsUser}
       />
 
-      <UserPasswordModal
-        user={passwordUser}
-        userId={passwordUser ? resolveRecordId(passwordUser) : null}
-        open={Boolean(passwordUser)}
-        onClose={() => setPasswordUser(null)}
+      <SchoolUserCredentialsModal
+        user={credentialsUser}
+        userId={credentialsUser ? resolveRecordId(credentialsUser) : null}
+        open={Boolean(credentialsUser)}
+        onClose={() => setCredentialsUser(null)}
       />
     </>
   )

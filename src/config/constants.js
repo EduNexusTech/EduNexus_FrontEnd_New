@@ -1,6 +1,7 @@
-// Local dev: use Vite proxy (requests go to same origin /api → backend)
-// Production / direct: set full URL in .env
-const DEFAULT_API_URL = 'http://localhost:8000'
+// Local (npm run dev): http://127.0.0.1:8000
+// Live (npm run build): https://edunexusbackend-production.up.railway.app
+const LOCAL_API_URL = 'http://127.0.0.1:8000'
+const PRODUCTION_API_URL = 'https://edunexusbackend-production.up.railway.app'
 
 function normalizeBaseUrl(url) {
   return (url || '').trim().replace(/\/+$/, '')
@@ -9,14 +10,17 @@ function normalizeBaseUrl(url) {
 function resolveApiBaseUrl() {
   const fromEnv = import.meta.env.VITE_API_BASE_URL || import.meta.env.NEXT_PUBLIC_API_BASE_URL
 
-  // Empty or "proxy" in dev → use Vite proxy (/api on same host)
-  if (import.meta.env.DEV) {
-    if (!fromEnv || fromEnv === 'proxy' || fromEnv === '/api') {
-      return ''
-    }
+  // Explicit override (skip empty / proxy sentinel values)
+  if (fromEnv && fromEnv !== 'proxy' && fromEnv !== '/api') {
+    return normalizeBaseUrl(fromEnv)
   }
 
-  return normalizeBaseUrl(fromEnv || DEFAULT_API_URL)
+  // Vite: import.meta.env.DEV === true when running `npm run dev`
+  if (import.meta.env.DEV) {
+    return LOCAL_API_URL
+  }
+
+  return PRODUCTION_API_URL
 }
 
 export const APP_NAME =
@@ -34,6 +38,20 @@ export const ROLE_TYPES = [
   { label: 'Organization Admin', value: 'org_admin' },
   { label: 'School Admin', value: 'school_admin' },
   { label: 'User', value: 'user' },
+]
+
+export const SCHOOL_STAFF_ROLES = [
+  { label: 'Teacher', value: 'teacher' },
+  { label: 'Parent', value: 'parent' },
+  { label: 'Student', value: 'student' },
+  { label: 'Staff', value: 'staff' },
+  { label: 'Receptionist', value: 'receptionist' },
+  { label: 'Librarian', value: 'librarian' },
+  { label: 'Transport Manager', value: 'transport_manager' },
+  { label: 'Accountant', value: 'accountant' },
+  { label: 'Nurse', value: 'nurse' },
+  { label: 'HR Manager', value: 'hr_manager' },
+  { label: 'Sports Coach', value: 'sports_coach' },
 ]
 
 export const SETTINGS_SECTIONS = [

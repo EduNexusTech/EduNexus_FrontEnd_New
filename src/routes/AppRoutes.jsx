@@ -17,6 +17,11 @@ import OrganizationDetail from '@/pages/organizations/OrganizationDetail'
 import SchoolList from '@/pages/schools/SchoolList'
 import SchoolForm from '@/pages/schools/SchoolForm'
 import SchoolDetail from '@/pages/schools/SchoolDetail'
+import SchoolProfilePage from '@/pages/schools/SchoolProfilePage'
+
+import SchoolUserList from '@/pages/school-users/SchoolUserList'
+import SchoolUserForm from '@/pages/school-users/SchoolUserForm'
+import SchoolUserDetail from '@/pages/school-users/SchoolUserDetail'
 
 import UserList from '@/pages/users/UserList'
 import UserForm from '@/pages/users/UserForm'
@@ -43,6 +48,9 @@ import UserRoleForm from '@/pages/user-roles/UserRoleForm'
 import MastersHubPage from '@/pages/masters/MastersHubPage'
 import MasterList from '@/pages/masters/MasterList'
 import MasterForm from '@/pages/masters/MasterForm'
+
+import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
+import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
 
 import AuditLogList from '@/pages/audit-logs/AuditLogList'
 import AuditLogDetail from '@/pages/audit-logs/AuditLogDetail'
@@ -83,6 +91,13 @@ export default function AppRoutes() {
           <Route path="/schools/new" element={<SchoolForm />} />
           <Route path="/schools/:id" element={<SchoolDetail />} />
           <Route path="/schools/:id/edit" element={<SchoolForm />} />
+          <Route path="/schools/:id/profile" element={<SchoolProfilePage />} />
+          <Route path="/school-profile" element={<SchoolProfilePage />} />
+
+          <Route path="/school-users" element={<SchoolUserList />} />
+          <Route path="/school-users/new" element={<SchoolUserForm />} />
+          <Route path="/school-users/:id" element={<SchoolUserDetail />} />
+          <Route path="/school-users/:id/edit" element={<SchoolUserForm />} />
 
           <Route path="/users" element={<UserList />} />
           <Route path="/users/new" element={<UserForm />} />
@@ -119,6 +134,11 @@ export default function AppRoutes() {
           <Route path="/masters/:masterKey" element={<MasterList />} />
           <Route path="/masters/:masterKey/new" element={<MasterForm />} />
           <Route path="/masters/:masterKey/:id/edit" element={<MasterForm />} />
+
+          <Route path="/academics" element={<AcademicsHubPage />} />
+          <Route path="/academics/:entityKey" element={<AcademicList />} />
+          <Route path="/academics/:entityKey/new" element={<AcademicForm />} />
+          <Route path="/academics/:entityKey/:id/edit" element={<AcademicForm />} />
 
           <Route path="/audit-logs" element={<AuditLogList />} />
           <Route path="/audit-logs/:id" element={<AuditLogDetail />} />

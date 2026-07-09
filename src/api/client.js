@@ -30,6 +30,28 @@ export async function apiPatch(url, body, config) {
   return response.data
 }
 
+export async function apiPostForm(url, formData, config) {
+  const response = await axiosInstance.post(url, formData, {
+    ...config,
+    headers: {
+      ...(config?.headers || {}),
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return response.data
+}
+
+export async function apiPatchForm(url, formData, config) {
+  const response = await axiosInstance.patch(url, formData, {
+    ...config,
+    headers: {
+      ...(config?.headers || {}),
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return response.data
+}
+
 export async function apiPut(url, body, config) {
   const response = await axiosInstance.put(url, body, config)
   return response.data

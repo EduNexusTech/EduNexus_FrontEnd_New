@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import { FiKey } from 'react-icons/fi'
 import { ResourceDetailPage } from '@/components/crud/ResourceFormPage'
+import UserPasswordModal from '@/components/users/UserPasswordModal'
 import { userService } from '@/api/services'
 import Button from '@/components/ui/Button'
 import { getErrorMessage } from '@/api/client'
@@ -11,6 +14,7 @@ import { confirmDialog } from '@/utils/confirm'
 export default function UserDetail() {
   const { id } = useParams()
   const queryClient = useQueryClient()
+  const [passwordOpen, setPasswordOpen] = useState(false)
 
   const activateMutation = useMutation({
     mutationFn: () => userService.activate(id),
@@ -43,31 +47,42 @@ export default function UserDetail() {
   }
 
   return (
-    <ResourceDetailPage
-      title="User"
-      queryKey="users"
-      getFn={userService.get}
-      basePath="/users"
-      fields={[
-        { key: 'first_name', label: 'First Name' },
-        { key: 'last_name', label: 'Last Name' },
-        { key: 'email', label: 'Email' },
-        { key: 'mobile_number', label: 'Mobile' },
-        { key: 'organization_name', label: 'Organization' },
-        { key: 'school_name', label: 'School' },
-        { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
-      ]}
-      actions={(item) => (
-        <>
-          <Link to={`/users/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
-          <Button variant="outline" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>Reset Password</Button>
-          {item.is_active ? (
-            <Button variant="danger" onClick={() => deactivateMutation.mutate()} loading={deactivateMutation.isPending}>Deactivate</Button>
-          ) : (
-            <Button onClick={() => activateMutation.mutate()} loading={activateMutation.isPending}>Activate</Button>
-          )}
-        </>
-      )}
-    />
+    <>
+      <ResourceDetailPage
+        title="User"
+        queryKey="users"
+        getFn={userService.get}
+        basePath="/users"
+        fields={[
+          { key: 'first_name', label: 'First Name' },
+          { key: 'last_name', label: 'Last Name' },
+          { key: 'email', label: 'Email' },
+          { key: 'mobile_number', label: 'Mobile' },
+          { key: 'organization_name', label: 'Organization' },
+          { key: 'school_name', label: 'School' },
+          { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
+        ]}
+        actions={(item) => (
+          <>
+            <Button variant="outline" onClick={() => setPasswordOpen(true)}>
+              <FiKey className="h-4 w-4" /> View Password
+            </Button>
+            <Link to={`/users/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Button variant="outline" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>Reset Password</Button>
+            {item.is_active ? (
+              <Button variant="danger" onClick={() => deactivateMutation.mutate()} loading={deactivateMutation.isPending}>Deactivate</Button>
+            ) : (
+              <Button onClick={() => activateMutation.mutate()} loading={activateMutation.isPending}>Activate</Button>
+            )}
+          </>
+        )}
+      />
+
+      <UserPasswordModal
+        userId={id}
+        open={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
+      />
+    </>
   )
 }

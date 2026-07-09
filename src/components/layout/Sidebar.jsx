@@ -19,6 +19,7 @@ import {
   FiZap,
 } from 'react-icons/fi'
 import { APP_NAME } from '@/config/constants'
+import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/utils/format'
 
 const iconMap = {
@@ -38,7 +39,7 @@ const iconMap = {
   'user-roles': FiShield,
 }
 
-const defaultNav = [
+const superAdminNav = [
   { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
   {
     label: 'Management',
@@ -63,6 +64,7 @@ const defaultNav = [
     label: 'Master Data',
     children: [
       { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { label: 'Academic Structure', path: '/academics', icon: FiBook },
     ],
   },
   {
@@ -84,8 +86,97 @@ const defaultNav = [
   },
 ]
 
+const orgAdminNav = [
+  { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
+  {
+    label: 'Management',
+    children: [
+      { label: 'Schools', path: '/schools', icon: FiBook },
+      { label: 'Users', path: '/users', icon: FiUsers },
+      { label: 'Memberships', path: '/memberships', icon: FiUsers },
+    ],
+  },
+  {
+    label: 'Access Control',
+    children: [
+      { label: 'Roles', path: '/roles', icon: FiShield },
+      { label: 'User Roles', path: '/user-roles', icon: FiShield },
+    ],
+  },
+  {
+    label: 'Master Data',
+    children: [
+      { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { label: 'Academic Structure', path: '/academics', icon: FiBook },
+    ],
+  },
+  {
+    label: 'System',
+    children: [
+      { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
+      { label: 'Notifications', path: '/notifications', icon: FiBell },
+    ],
+  },
+]
+
+const schoolAdminNav = [
+  { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
+  {
+    label: 'School',
+    children: [
+      { label: 'School Profile', path: '/school-profile', icon: FiBook },
+    ],
+  },
+  {
+    label: 'Management',
+    children: [
+      { label: 'School Users', path: '/school-users', icon: FiUsers },
+    ],
+  },
+  {
+    label: 'Master Data',
+    children: [
+      { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { label: 'Academic Structure', path: '/academics', icon: FiBook },
+    ],
+  },
+  {
+    label: 'System',
+    children: [
+      { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
+      { label: 'Notifications', path: '/notifications', icon: FiBell },
+    ],
+  },
+]
+
+function resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin }) {
+  if (isSuperAdmin) return superAdminNav
+  if (isSchoolAdmin) return schoolAdminNav
+  if (isOrgAdmin) return orgAdminNav
+  return schoolAdminNav
+}
+
+function isNavItemActive(pathname, itemPath) {
+  if (itemPath === '/ai-hub') return pathname === '/ai-hub'
+  if (itemPath === '/school-profile') {
+    return pathname === '/school-profile' || /^\/schools\/[^/]+\/profile/.test(pathname)
+  }
+  if (itemPath === '/schools') {
+    return pathname.startsWith('/schools') && !/^\/schools\/[^/]+\/profile/.test(pathname)
+  }
+  if (itemPath === '/academics') {
+    return pathname === '/academics' || pathname.startsWith('/academics/')
+  }
+  if (itemPath === '/school-users') {
+    return pathname === '/school-users' || pathname.startsWith('/school-users/')
+  }
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`)
+}
+
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const location = useLocation()
+  const { isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
+  const navItems = resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin })
 
   const content = (
     <aside
@@ -112,7 +203,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
       </div>
 
       <nav className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-1">
-        {defaultNav.map((group, gi) => (
+        {navItems.map((group, gi) => (
           <div key={gi} className="mb-4">
             {group.children ? (
               <>
@@ -123,10 +214,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                 )}
                 {group.children.map((item) => {
                   const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
-                  const active =
-                    item.path === '/ai-hub'
-                      ? location.pathname === '/ai-hub'
-                      : location.pathname.startsWith(item.path)
+                  const active = isNavItemActive(location.pathname, item.path)
                   return (
                     <NavLink
                       key={item.path}
