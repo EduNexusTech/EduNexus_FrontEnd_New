@@ -31,6 +31,7 @@ export default function ResourceListPage({
   bulkDeleteFn,
   extraActions,
   filters,
+  listParams = {},
   onView,
   deleteSuccessMessage = 'Deleted successfully',
   deleteBehavior = 'remove',
@@ -44,8 +45,17 @@ export default function ResourceListPage({
   const ordering = sorting[0] ? `${sorting[0].desc ? '-' : ''}${sorting[0].id}` : undefined
 
   const listQueryKey = useMemo(
-    () => [queryKey, 'list', pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
-    [queryKey, pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters],
+    () => [
+      queryKey,
+      'list',
+      pagination.page,
+      pagination.pageSize,
+      debouncedSearch,
+      ordering,
+      pagination.filters,
+      listParams,
+    ],
+    [queryKey, pagination.page, pagination.pageSize, debouncedSearch, ordering, pagination.filters, listParams],
   )
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -55,6 +65,7 @@ export default function ResourceListPage({
         ...pagination.queryParams,
         search: debouncedSearch || undefined,
         ordering,
+        ...listParams,
       }),
     placeholderData: keepPreviousData,
   })

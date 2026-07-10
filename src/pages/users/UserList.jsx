@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FiEdit2 } from 'react-icons/fi'
+import { FiEdit2, FiKey } from 'react-icons/fi'
 import ResourceListPage, { StatusBadge } from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
 import UserPasswordModal from '@/components/users/UserPasswordModal'
@@ -23,31 +23,37 @@ function getUserDisplayName(user) {
   )
 }
 
-function buildColumns(onNameClick) {
+function buildColumns(onPasswordClick) {
   return [
     {
       id: 'name',
       header: 'Name',
       accessorFn: (row) => getUserDisplayName(row),
-      cell: ({ row }) => {
-        const user = row.original
-        const name = getUserDisplayName(user)
-        return (
-          <button
-            type="button"
-            onClick={() => onNameClick(user)}
-            className="font-medium text-primary hover:underline text-left"
-            title="View password"
-          >
-            {name}
-          </button>
-        )
-      },
+      cell: ({ row }) => (
+        <span className="font-medium text-text">{getUserDisplayName(row.original)}</span>
+      ),
     },
     { accessorKey: 'email', header: 'Email' },
     { accessorKey: 'mobile_number', header: 'Mobile' },
     { accessorKey: 'organization_name', header: 'Organization' },
     { accessorKey: 'is_active', header: 'Status', cell: ({ getValue }) => <StatusBadge active={getValue()} /> },
+    {
+      id: 'password',
+      header: 'Password',
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onPasswordClick(row.original)}
+          title="View password"
+        >
+          <FiKey className="h-4 w-4" />
+          Password
+        </Button>
+      ),
+    },
   ]
 }
 
@@ -64,7 +70,7 @@ const DETAIL_FIELDS = [
   { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
 ]
 
-function UserDetailModal({ userId, open, onClose }) {
+function UserDetailModal({ userId, open, onClose, onViewPassword }) {
   const queryClient = useQueryClient()
   const id = userId
 
@@ -116,6 +122,15 @@ function UserDetailModal({ userId, open, onClose }) {
         return (
           <>
             <Button variant="secondary" onClick={close}>Close</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                onViewPassword?.(item)
+                close()
+              }}
+            >
+              <FiKey className="h-4 w-4" /> View Password
+            </Button>
             <Link to={`/users/${userRecordId}/edit`} onClick={close}>
               <Button variant="outline"><FiEdit2 className="h-4 w-4" /> Edit</Button>
             </Link>
@@ -173,7 +188,12 @@ export default function UserList() {
         }
       />
 
-      <UserDetailModal userId={viewId} open={isOpen} onClose={closeView} />
+      <UserDetailModal
+        userId={viewId}
+        open={isOpen}
+        onClose={closeView}
+        onViewPassword={setPasswordUser}
+      />
 
       <UserPasswordModal
         user={passwordUser}

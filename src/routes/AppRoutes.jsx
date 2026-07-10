@@ -17,6 +17,37 @@ import OrganizationDetail from '@/pages/organizations/OrganizationDetail'
 import SchoolList from '@/pages/schools/SchoolList'
 import SchoolForm from '@/pages/schools/SchoolForm'
 import SchoolDetail from '@/pages/schools/SchoolDetail'
+import SchoolProfilePage from '@/pages/schools/SchoolProfilePage'
+
+import SchoolUserList from '@/pages/school-users/SchoolUserList'
+import SchoolUserForm from '@/pages/school-users/SchoolUserForm'
+import SchoolUserDetail from '@/pages/school-users/SchoolUserDetail'
+
+import StudentList from '@/pages/students/StudentList'
+import StudentForm from '@/pages/students/StudentForm'
+import StudentDetail from '@/pages/students/StudentDetail'
+import TeacherList from '@/pages/teachers/TeacherList'
+import TeacherForm from '@/pages/teachers/TeacherForm'
+import TeacherDetail from '@/pages/teachers/TeacherDetail'
+import ParentList from '@/pages/parents/ParentList'
+import ParentForm from '@/pages/parents/ParentForm'
+import ParentDetail from '@/pages/parents/ParentDetail'
+import StaffList from '@/pages/staff/StaffList'
+import StaffForm from '@/pages/staff/StaffForm'
+import StaffDetail from '@/pages/staff/StaffDetail'
+import CommunicationsHubPage from '@/pages/communications/CommunicationsHubPage'
+import CommunicationTemplateList from '@/pages/communications/CommunicationTemplateList'
+import CommunicationTemplateForm from '@/pages/communications/CommunicationTemplateForm'
+import CommunicationMessageList from '@/pages/communications/CommunicationMessageList'
+import CommunicationMessageForm from '@/pages/communications/CommunicationMessageForm'
+import CommunicationMessageDetail from '@/pages/communications/CommunicationMessageDetail'
+
+import AdmissionsHubPage from '@/pages/admissions/AdmissionsHubPage'
+import AdmissionLeadList from '@/pages/admissions/AdmissionLeadList'
+import AdmissionLeadForm from '@/pages/admissions/AdmissionLeadForm'
+import AdmissionApplicationList from '@/pages/admissions/AdmissionApplicationList'
+import AdmissionApplicationForm from '@/pages/admissions/AdmissionApplicationForm'
+import AdmissionApplicationDetail from '@/pages/admissions/AdmissionApplicationDetail'
 
 import UserList from '@/pages/users/UserList'
 import UserForm from '@/pages/users/UserForm'
@@ -43,11 +74,18 @@ import UserRoleForm from '@/pages/user-roles/UserRoleForm'
 import MastersHubPage from '@/pages/masters/MastersHubPage'
 import MasterList from '@/pages/masters/MasterList'
 import MasterForm from '@/pages/masters/MasterForm'
+import SchoolMastersHubPage from '@/pages/school-masters/SchoolMastersHubPage'
+import SchoolMasterList from '@/pages/school-masters/SchoolMasterList'
+import SchoolMasterForm from '@/pages/school-masters/SchoolMasterForm'
+
+import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
+import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
 
 import AuditLogList from '@/pages/audit-logs/AuditLogList'
 import AuditLogDetail from '@/pages/audit-logs/AuditLogDetail'
 
 import SettingsPage from '@/pages/settings/SettingsPage'
+import SchoolSettingsPage from '@/pages/school-settings/SchoolSettingsPage'
 import NotificationsPage from '@/pages/notifications/NotificationsPage'
 import EduNexusPostPage from '@/pages/edu-nexus-post/EduNexusPostPage'
 import AiHubPage from '@/pages/ai-hub/AiHubPage'
@@ -83,6 +121,54 @@ export default function AppRoutes() {
           <Route path="/schools/new" element={<SchoolForm />} />
           <Route path="/schools/:id" element={<SchoolDetail />} />
           <Route path="/schools/:id/edit" element={<SchoolForm />} />
+          <Route path="/schools/:id/profile" element={<SchoolProfilePage />} />
+          <Route path="/school-profile" element={<SchoolProfilePage />} />
+
+          <Route path="/school-settings" element={<SchoolSettingsPage />} />
+          <Route path="/school-settings/:section" element={<SchoolSettingsPage />} />
+
+          <Route path="/students" element={<StudentList />} />
+          <Route path="/students/new" element={<StudentForm />} />
+          <Route path="/students/:id" element={<StudentDetail />} />
+          <Route path="/students/:id/edit" element={<StudentForm />} />
+
+          <Route path="/teachers" element={<TeacherList />} />
+          <Route path="/teachers/new" element={<TeacherForm />} />
+          <Route path="/teachers/:id" element={<TeacherDetail />} />
+          <Route path="/teachers/:id/edit" element={<TeacherForm />} />
+
+          <Route path="/parents" element={<ParentList />} />
+          <Route path="/parents/new" element={<ParentForm />} />
+          <Route path="/parents/:id" element={<ParentDetail />} />
+          <Route path="/parents/:id/edit" element={<ParentForm />} />
+
+          <Route path="/staff" element={<StaffList />} />
+          <Route path="/staff/new" element={<StaffForm />} />
+          <Route path="/staff/:id" element={<StaffDetail />} />
+          <Route path="/staff/:id/edit" element={<StaffForm />} />
+
+          <Route path="/communications" element={<CommunicationsHubPage />} />
+          <Route path="/communications/templates" element={<CommunicationTemplateList />} />
+          <Route path="/communications/templates/new" element={<CommunicationTemplateForm />} />
+          <Route path="/communications/templates/:id/edit" element={<CommunicationTemplateForm />} />
+          <Route path="/communications/messages" element={<CommunicationMessageList />} />
+          <Route path="/communications/messages/new" element={<CommunicationMessageForm />} />
+          <Route path="/communications/messages/:id" element={<CommunicationMessageDetail />} />
+          <Route path="/communications/messages/:id/edit" element={<CommunicationMessageForm />} />
+
+          <Route path="/admissions" element={<AdmissionsHubPage />} />
+          <Route path="/admissions/leads" element={<AdmissionLeadList />} />
+          <Route path="/admissions/leads/new" element={<AdmissionLeadForm />} />
+          <Route path="/admissions/leads/:id/edit" element={<AdmissionLeadForm />} />
+          <Route path="/admissions/applications" element={<AdmissionApplicationList />} />
+          <Route path="/admissions/applications/new" element={<AdmissionApplicationForm />} />
+          <Route path="/admissions/applications/:id" element={<AdmissionApplicationDetail />} />
+          <Route path="/admissions/applications/:id/edit" element={<AdmissionApplicationForm />} />
+
+          <Route path="/school-users" element={<SchoolUserList />} />
+          <Route path="/school-users/new" element={<SchoolUserForm />} />
+          <Route path="/school-users/:id" element={<SchoolUserDetail />} />
+          <Route path="/school-users/:id/edit" element={<SchoolUserForm />} />
 
           <Route path="/users" element={<UserList />} />
           <Route path="/users/new" element={<UserForm />} />
@@ -119,6 +205,16 @@ export default function AppRoutes() {
           <Route path="/masters/:masterKey" element={<MasterList />} />
           <Route path="/masters/:masterKey/new" element={<MasterForm />} />
           <Route path="/masters/:masterKey/:id/edit" element={<MasterForm />} />
+
+          <Route path="/school-masters" element={<SchoolMastersHubPage />} />
+          <Route path="/school-masters/:masterKey" element={<SchoolMasterList />} />
+          <Route path="/school-masters/:masterKey/new" element={<SchoolMasterForm />} />
+          <Route path="/school-masters/:masterKey/:id/edit" element={<SchoolMasterForm />} />
+
+          <Route path="/academics" element={<AcademicsHubPage />} />
+          <Route path="/academics/:entityKey" element={<AcademicList />} />
+          <Route path="/academics/:entityKey/new" element={<AcademicForm />} />
+          <Route path="/academics/:entityKey/:id/edit" element={<AcademicForm />} />
 
           <Route path="/audit-logs" element={<AuditLogList />} />
           <Route path="/audit-logs/:id" element={<AuditLogDetail />} />

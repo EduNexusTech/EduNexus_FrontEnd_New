@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap } from 'react-icons/fi'
+import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
 import { notificationService } from '@/api/services'
 import { Drawer } from '@/components/ui/Modal'
@@ -10,7 +10,7 @@ import { formatDateTime, fromNow } from '@/utils/format'
 import toast from 'react-hot-toast'
 
 export default function Header({ onMenuClick }) {
-  const { user, logout } = useAuth()
+  const { user, logout, isSchoolAdmin } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [profileOpen, setProfileOpen] = useState(false)
@@ -68,21 +68,25 @@ export default function Header({ onMenuClick }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            to="/ai-hub"
-            title="AI Hub"
-            className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
-          >
-            <FiZap className="h-5 w-5" />
-          </Link>
+          {!isSchoolAdmin ? (
+            <>
+              <Link
+                to="/ai-hub"
+                title="AI Hub"
+                className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+              >
+                <FiZap className="h-5 w-5" />
+              </Link>
 
-          <Link
-            to="/edu-nexus-post"
-            title="EduNexus Mailer"
-            className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
-          >
-            <FiMail className="h-5 w-5" />
-          </Link>
+              <Link
+                to="/edu-nexus-post"
+                title="EduNexus Mailer"
+                className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+              >
+                <FiMail className="h-5 w-5" />
+              </Link>
+            </>
+          ) : null}
 
           <button
             onClick={() => setNotifOpen(true)}
@@ -124,6 +128,15 @@ export default function Header({ onMenuClick }) {
                   >
                     <FiUser className="h-4 w-4" /> Profile
                   </Link>
+                  {isSchoolAdmin ? (
+                    <Link
+                      to="/school-profile"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-slate-50"
+                    >
+                      <FiBook className="h-4 w-4" /> School Profile
+                    </Link>
+                  ) : null}
                   <Link
                     to="/change-password"
                     onClick={() => setProfileOpen(false)}

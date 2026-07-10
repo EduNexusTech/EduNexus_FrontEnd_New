@@ -165,6 +165,7 @@ export function ResourceDetailPage({
   basePath,
   fields,
   actions,
+  renderExtra,
 }) {
   const { id } = useParams()
   const { data, isLoading, error } = useQuery({
@@ -201,6 +202,7 @@ export function ResourceDetailPage({
           ))}
         </dl>
       </Card>
+      {renderExtra?.(item)}
     </div>
   )
 }

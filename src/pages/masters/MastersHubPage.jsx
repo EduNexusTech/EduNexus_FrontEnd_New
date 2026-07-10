@@ -15,11 +15,13 @@ const masterGroups = [
   {
     title: 'Academic',
     items: [
-      { key: 'academic-years', label: 'Academic Years', icon: FiBook, path: '/masters/academic-years' },
+      { key: 'academic-years', label: 'Academic Years', icon: FiBook, path: '/academics/academic-years' },
       { key: 'boards', label: 'Boards', icon: FiLayers, path: '/masters/boards' },
       { key: 'classes', label: 'Classes', icon: FiGrid, path: '/masters/classes' },
       { key: 'sections', label: 'Sections', icon: FiGrid, path: '/masters/sections' },
+      { key: 'streams', label: 'Streams', icon: FiLayers, path: '/masters/streams' },
       { key: 'subjects', label: 'Subjects', icon: FiBook, path: '/masters/subjects' },
+      { key: 'subject-groups', label: 'Subject Groups', icon: FiLayers, path: '/masters/subject-groups' },
     ],
   },
   {

@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { schoolService, userService } from '@/api/services'
+import { unwrapData } from '@/api/client'
+import { saveUserPassword } from '@/utils/userPasswordStorage'
 import { getErrorMessage, unwrapList } from '@/api/client'
 import { ROLE_TYPES } from '@/config/constants'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
@@ -102,6 +104,12 @@ export default function UserForm() {
         if (!payload.organization_id) delete payload.organization_id
         if (!payload.school_id) delete payload.school_id
         return payload
+      }}
+      onSuccess={({ response, formData, isEdit }) => {
+        if (isEdit || !formData?.password) return
+        const created = unwrapData(response)
+        const userId = created?.user_id || created?.id
+        saveUserPassword(userId, formData.password, formData.email)
       }}
     />
   )

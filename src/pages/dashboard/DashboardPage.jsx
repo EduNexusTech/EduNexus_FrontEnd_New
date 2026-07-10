@@ -27,6 +27,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import Button from '@/components/ui/Button'
 import { formatNumber, formatDateTime } from '@/utils/format'
+import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
 
 function mapChartData(charts) {
   const registrations = charts?.monthly_registrations || []
@@ -52,29 +53,12 @@ function mapChartData(charts) {
   return []
 }
 
-export default function DashboardPage() {
-  const { isSuperAdmin } = useAuth()
-
+function SuperAdminDashboardView() {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard'],
+    queryKey: ['dashboard', 'super-admin'],
     queryFn: () => dashboardService.superAdmin({ limit: 10, months: 6 }),
-    enabled: isSuperAdmin,
     refetchInterval: 60000,
   })
-
-  if (!isSuperAdmin) {
-    return (
-      <div className="w-full">
-        <Breadcrumb items={[{ label: 'Dashboard' }]} />
-        <PageHeader title="Dashboard" subtitle="Welcome to EduNexus" />
-        <Card>
-          <p className="text-muted">
-            Your account does not have super-admin access. Use the sidebar to open modules available to your role.
-          </p>
-        </Card>
-      </div>
-    )
-  }
 
   if (isLoading) return <PageLoader />
   if (error) return <ErrorState message={getErrorMessage(error)} onRetry={refetch} />
@@ -108,7 +92,7 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+      <div className="mb-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi, i) => (
           <motion.div key={kpi.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <StatCard {...kpi} />
@@ -116,11 +100,11 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 mb-8">
+      <div className="mb-8 grid gap-6 lg:grid-cols-2">
         <Card>
-          <h3 className="text-lg font-semibold mb-4">Growth Overview</h3>
+          <h3 className="mb-4 text-lg font-semibold">Growth Overview</h3>
           {chartData.length === 0 ? (
-            <p className="text-sm text-muted py-12 text-center">No chart data yet</p>
+            <p className="py-12 text-center text-sm text-muted">No chart data yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={chartData}>
@@ -136,9 +120,9 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <h3 className="text-lg font-semibold mb-4">User Trend</h3>
+          <h3 className="mb-4 text-lg font-semibold">User Trend</h3>
           {chartData.length === 0 ? (
-            <p className="text-sm text-muted py-12 text-center">No chart data yet</p>
+            <p className="py-12 text-center text-sm text-muted">No chart data yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={chartData}>
@@ -155,15 +139,15 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <h3 className="text-lg font-semibold mb-4">Recent Organizations</h3>
+          <h3 className="mb-4 text-lg font-semibold">Recent Organizations</h3>
           {recentOrgs.length === 0 ? (
-            <p className="text-muted text-sm">No recent organizations</p>
+            <p className="text-sm text-muted">No recent organizations</p>
           ) : (
             <div className="space-y-3">
               {recentOrgs.slice(0, 5).map((org) => (
                 <div key={org.organization_id || org.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                   <div>
-                    <p className="font-medium text-sm">{org.organization_name || org.name}</p>
+                    <p className="text-sm font-medium">{org.organization_name || org.name}</p>
                     <p className="text-xs text-muted">{org.organization_code || org.code}</p>
                   </div>
                   <StatusBadge active={org.is_active} />
@@ -174,18 +158,18 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+          <h3 className="mb-4 text-lg font-semibold">Recent Activity</h3>
           {recentActivity.length === 0 ? (
-            <p className="text-muted text-sm">No recent activity</p>
+            <p className="text-sm text-muted">No recent activity</p>
           ) : (
             <div className="space-y-3">
               {recentActivity.slice(0, 5).map((item) => (
                 <div key={item.id} className="flex gap-3 rounded-xl border border-border p-3">
-                  <div className="h-2 w-2 mt-2 rounded-full bg-primary shrink-0" />
+                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
                   <div>
                     <p className="text-sm font-medium">{item.title || item.action || item.description}</p>
                     <p className="text-xs text-muted">{item.description || item.title}</p>
-                    <p className="text-xs text-muted mt-1">{formatDateTime(item.timestamp || item.created_at)}</p>
+                    <p className="mt-1 text-xs text-muted">{formatDateTime(item.timestamp || item.created_at)}</p>
                   </div>
                 </div>
               ))}
@@ -199,8 +183,32 @@ export default function DashboardPage() {
 
 function StatusBadge({ active }) {
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${active !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-muted'}`}>
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${active !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-muted'}`}>
       {active !== false ? 'Active' : 'Inactive'}
     </span>
+  )
+}
+
+export default function DashboardPage() {
+  const { isSuperAdmin, isSchoolAdmin } = useAuth()
+
+  if (isSuperAdmin) {
+    return <SuperAdminDashboardView />
+  }
+
+  if (isSchoolAdmin) {
+    return <SchoolDashboardView />
+  }
+
+  return (
+    <div className="w-full">
+      <Breadcrumb items={[{ label: 'Dashboard' }]} />
+      <PageHeader title="Dashboard" subtitle="Welcome to EduNexus" />
+      <Card>
+        <p className="text-muted">
+          Your account does not have a dashboard for this role yet. Use the sidebar to open modules available to you.
+        </p>
+      </Card>
+    </div>
   )
 }
