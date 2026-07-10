@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { FiArrowLeft, FiCpu, FiMessageSquare, FiZap } from 'react-icons/fi'
 import { cn } from '@/utils/format'
-import { AI_IS_LIVE } from '@/config/ai'
 
 const NAV = [
   { path: '/ai-hub', label: 'Overview', icon: FiCpu, end: true },
@@ -20,13 +19,8 @@ export default function AiHubLayout({ title, subtitle, children, actions }) {
           <FiArrowLeft className="h-4 w-4" />
           Dashboard
         </NavLink>
-        <span
-          className={cn(
-            'rounded-full px-2.5 py-0.5 text-xs font-semibold',
-            AI_IS_LIVE ? 'bg-success/10 text-success' : 'bg-amber-50 text-amber-700',
-          )}
-        >
-          {AI_IS_LIVE ? 'Live AI' : 'Local AI mode'}
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+          Nexus AI
         </span>
       </div>
 

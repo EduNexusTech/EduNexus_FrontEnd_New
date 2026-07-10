@@ -1,4 +1,4 @@
-import { AUTH_STORAGE_KEY, AUTH_REVISION_KEY, TENANT_STORAGE_KEY } from '@/config/constants'
+import { AUTH_LOGOUT_KEY, AUTH_STORAGE_KEY, TENANT_STORAGE_KEY } from '@/config/constants'
 
 export function getStorage(rememberMe) {
   return rememberMe ? localStorage : sessionStorage
@@ -37,13 +37,18 @@ export function saveAuth(auth, rememberMe) {
   } else {
     localStorage.removeItem(AUTH_STORAGE_KEY)
   }
+  try {
+    localStorage.removeItem(AUTH_LOGOUT_KEY)
+  } catch {
+    // ignore
+  }
 }
 
 export function clearAuth() {
   localStorage.removeItem(AUTH_STORAGE_KEY)
   sessionStorage.removeItem(AUTH_STORAGE_KEY)
   try {
-    localStorage.removeItem(AUTH_REVISION_KEY)
+    localStorage.setItem(AUTH_LOGOUT_KEY, String(Date.now()))
   } catch {
     // ignore
   }

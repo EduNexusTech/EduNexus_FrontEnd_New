@@ -32,6 +32,7 @@ export const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT || 30000)
 export const DEFAULT_PAGE_SIZE = 20
 export const AUTH_STORAGE_KEY = 'edunexus-auth'
 export const AUTH_REVISION_KEY = 'edunexus-auth-rev'
+export const AUTH_LOGOUT_KEY = 'edunexus-auth-logout'
 export const TENANT_STORAGE_KEY = 'edunexus-tenant'
 
 export const ROLE_TYPES = [

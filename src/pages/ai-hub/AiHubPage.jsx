@@ -4,7 +4,7 @@ import AiHubLayout from '@/layouts/AiHubLayout'
 import HubFeatureCard from '@/components/ai/HubFeatureCard'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { AI_IS_LIVE, AI_QUICK_PROMPTS } from '@/config/ai'
+import { AI_QUICK_PROMPTS } from '@/config/ai'
 import { listAutomations } from '@/utils/automationStorage'
 import { formatDateTime } from '@/utils/format'
 
@@ -43,7 +43,7 @@ export default function AiHubPage() {
           to="/ai-hub/assistant"
           icon={FiCpu}
           title="AI Studio"
-          description={AI_IS_LIVE ? 'Connected to live AI model via API key.' : 'Local AI mode — add VITE_AI_API_KEY for GPT.'}
+          description="Get LMS guidance, tips, and workflow help."
           accent="primary"
         />
       </div>

@@ -62,7 +62,7 @@ Best regards,
 EduNexus Team`
   }
 
-  return `I'm **Nexus AI** (local mode — add \`VITE_AI_API_KEY\` in \`.env\` for live GPT responses).
+  return `I'm **Nexus AI**, your EduNexus assistant.
 
 I can help with organizations, schools, users, roles, permissions, masters, audit logs, EduNexus Post, and automations.
 

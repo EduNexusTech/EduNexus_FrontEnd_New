@@ -5,7 +5,7 @@ import { FiSend, FiTrash2, FiUser } from 'react-icons/fi'
 import AiHubLayout from '@/layouts/AiHubLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { AI_IS_LIVE, AI_QUICK_PROMPTS } from '@/config/ai'
+import { AI_QUICK_PROMPTS } from '@/config/ai'
 import { chatWithNexusAi } from '@/services/nexusAiService'
 import { cn } from '@/utils/format'
 
@@ -63,7 +63,7 @@ export default function AiAssistantPage() {
   return (
     <AiHubLayout
       title="Nexus AI Assistant"
-      subtitle={AI_IS_LIVE ? 'Powered by your configured AI API key.' : 'Running in local LMS-aware mode — add VITE_AI_API_KEY for live GPT.'}
+      subtitle="Your intelligent assistant for EduNexus LMS."
       actions={
         <Button variant="secondary" size="sm" onClick={() => { setMessages([]); localStorage.removeItem(STORAGE_KEY) }}>
           <FiTrash2 className="h-4 w-4" /> Clear chat

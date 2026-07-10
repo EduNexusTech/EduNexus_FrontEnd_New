@@ -95,12 +95,16 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     return subscribeAuthSync(({ event }) => {
       if (event === AuthSyncEvent.LOGOUT) {
-        applyAuthFromStorage({ silent: false })
+        if (!stateRef.current.isAuthenticated) return
+        clearAuth()
+        setState(buildAuthState(null))
+        queryClient.clear()
+        toast('Signed out — session ended in another tab.')
         return
       }
       applyAuthFromStorage({ silent: false })
     })
-  }, [applyAuthFromStorage])
+  }, [applyAuthFromStorage, queryClient])
 
   const logout = useCallback(async () => {
     try {

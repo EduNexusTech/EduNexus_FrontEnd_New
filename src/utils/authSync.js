@@ -1,4 +1,4 @@
-import { AUTH_STORAGE_KEY, AUTH_REVISION_KEY } from '@/config/constants'
+import { AUTH_LOGOUT_KEY, AUTH_REVISION_KEY, AUTH_STORAGE_KEY } from '@/config/constants'
 
 export const AUTH_SYNC_CHANNEL = 'edunexus-auth-sync'
 
@@ -45,6 +45,16 @@ export function subscribeAuthSync(onSync) {
   }
 
   const handleStorage = (event) => {
+    if (event.key === AUTH_LOGOUT_KEY) {
+      onSync({ event: AuthSyncEvent.LOGOUT, fromStorage: true })
+      return
+    }
+
+    if (event.key === AUTH_STORAGE_KEY && event.newValue == null) {
+      onSync({ event: AuthSyncEvent.LOGOUT, fromStorage: true })
+      return
+    }
+
     if (event.key === AUTH_REVISION_KEY || event.key === AUTH_STORAGE_KEY) {
       onSync({ event: AuthSyncEvent.UPDATED, fromStorage: true })
     }
