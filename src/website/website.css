@@ -1,0 +1,271 @@
+/* EduNexus LMS landing — full-width visual system */
+.landing-page {
+  --lp-bg: #f8faff;
+  --lp-surface: #ffffff;
+  --lp-text: #0a0f1c;
+  --lp-muted: #5c6b8a;
+  --lp-border: rgba(148, 163, 184, 0.2);
+  --lp-sky: #0ea5e9;
+  --lp-indigo: #6366f1;
+  --lp-violet: #8b5cf6;
+  --lp-mint: #10b981;
+  --lp-amber: #f59e0b;
+  width: 100%;
+  max-width: 100vw;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  background: var(--lp-bg);
+  color: var(--lp-text);
+  overflow-x: hidden;
+}
+
+.landing-wrap {
+  width: 100%;
+  padding-left: clamp(1.25rem, 5vw, 4rem);
+  padding-right: clamp(1.25rem, 5vw, 4rem);
+}
+
+.landing-section-full {
+  width: 100%;
+}
+
+.landing-mesh {
+  background-color: #f8faff;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.14) 0, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.12) 0, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0, transparent 55%),
+    radial-gradient(at 90% 40%, rgba(16, 185, 129, 0.07) 0, transparent 45%);
+}
+
+.landing-hero-bleed {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 5rem);
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(99, 102, 241, 0.12), transparent),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(14, 165, 233, 0.1), transparent);
+}
+
+.landing-hero-bleed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.3), transparent);
+}
+
+.landing-band-dark {
+  width: 100%;
+  background: linear-gradient(135deg, #0c1222 0%, #1e1b4b 40%, #0f172a 100%);
+}
+
+.landing-band-light {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.55);
+  border-top: 1px solid var(--lp-border);
+  border-bottom: 1px solid var(--lp-border);
+  backdrop-filter: blur(12px);
+}
+
+.landing-grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.landing-glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(148, 163, 184, 0.06),
+    0 4px 24px rgba(15, 23, 42, 0.04),
+    0 24px 48px rgba(99, 102, 241, 0.07);
+}
+
+.landing-glass-dark {
+  background: rgba(12, 18, 34, 0.88);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.landing-gradient-text {
+  background: linear-gradient(135deg, #0284c7 0%, #4f46e5 42%, #7c3aed 78%, #c026d3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-gradient-text-light {
+  background: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 50%, #e879f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-btn-primary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 28px rgba(99, 102, 241, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 8px rgba(15, 23, 42, 0.08),
+    0 20px 44px rgba(99, 102, 241, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.landing-btn-outline {
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.landing-btn-outline:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.landing-card {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 32px rgba(15, 23, 42, 0.04);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.landing-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgba(15, 23, 42, 0.04),
+    0 24px 56px rgba(99, 102, 241, 0.12);
+}
+
+.landing-stat-divider {
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.35), transparent);
+}
+
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes landing-float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.5deg); }
+}
+
+@keyframes landing-shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.landing-float { animation: landing-float 5s ease-in-out infinite; }
+.landing-float-slow { animation: landing-float-slow 7s ease-in-out infinite; }
+.landing-float-delay { animation-delay: 1.5s; }
+
+.landing-shine {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: landing-shine 3s ease-in-out infinite;
+}
+
+.landing-marquee {
+  display: flex;
+  width: max-content;
+  animation: landing-marquee 45s linear infinite;
+}
+
+@keyframes landing-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.landing-timeline-line {
+  background: linear-gradient(180deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+}
+
+.landing-course-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.9) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 1rem;
+}
+
+.landing-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.landing-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+}
+
+.landing-flip-scene {
+  perspective: 900px;
+}
+
+.landing-flip-card {
+  transform-style: preserve-3d;
+}
+
+.landing-flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* 5D infinity logo scene */
+.landing-infinity-5d-scene {
+  perspective: 1600px;
+  perspective-origin: 50% 42%;
+}
+
+.landing-infinity-5d-rig {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.landing-infinity-5d-stage {
+  position: relative;
+  transform-style: preserve-3d;
+  width: 100%;
+}
+
+.landing-infinity-5d-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+}
+
+.landing-infinity-5d-layer:nth-child(3) {
+  position: relative;
+  pointer-events: auto;
+}

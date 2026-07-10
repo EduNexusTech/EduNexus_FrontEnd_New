@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import ProtectedRoute, { PublicRoute } from './ProtectedRoute'
-import HomeRedirect from './HomeRedirect'
+import LandingPage from '@/website/LandingPage'
 import DashboardLayout from '@/layouts/DashboardLayout'
 import NotFoundPage from '@/pages/NotFoundPage'
 
@@ -57,7 +57,7 @@ import AutomationsPage from '@/pages/ai-hub/AutomationsPage'
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomeRedirect />} />
+      <Route path="/" element={<LandingPage />} />
 
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<LoginPage />} />

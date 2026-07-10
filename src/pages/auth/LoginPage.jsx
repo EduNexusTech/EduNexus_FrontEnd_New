@@ -51,7 +51,10 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-text">Sign in</h2>
+            <Link to="/" className="text-sm font-semibold text-sky-600 hover:text-sky-700 hover:underline">
+              ← Back to home
+            </Link>
+            <h2 className="mt-4 text-3xl font-bold text-text">Sign in</h2>
             <p className="mt-2 text-muted">Enter your credentials to access your account</p>
           </div>
 
