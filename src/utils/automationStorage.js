@@ -2,13 +2,25 @@ import { AUTOMATION_TEMPLATES } from '@/config/automationTemplates'
 
 const STORAGE_KEY = 'edunexus-automations'
 const SESSION_KEY = 'edunexus-automation-session'
+const DISABLED_AUTO_TIP_KEY = 'edunexus-automations-no-default-tip'
+
+function disableDefaultDashboardTip(automations) {
+  if (localStorage.getItem(DISABLED_AUTO_TIP_KEY)) return automations
+  localStorage.setItem(DISABLED_AUTO_TIP_KEY, '1')
+  const next = automations.map((a) =>
+    a.templateId === 'ai_dashboard_tip' ? { ...a, enabled: false } : a,
+  )
+  writeStore({ automations: next })
+  return next
+}
 
 function readStore() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { automations: seedDefaults() }
     const parsed = JSON.parse(raw)
-    return { automations: Array.isArray(parsed.automations) ? parsed.automations : seedDefaults() }
+    const automations = Array.isArray(parsed.automations) ? parsed.automations : seedDefaults()
+    return { automations: disableDefaultDashboardTip(automations) }
   } catch {
     return { automations: seedDefaults() }
   }
@@ -19,12 +31,12 @@ function writeStore(data) {
 }
 
 function seedDefaults() {
-  return AUTOMATION_TEMPLATES.map((tpl, index) => ({
+  return AUTOMATION_TEMPLATES.map((tpl) => ({
     id: `auto-${tpl.id}`,
     templateId: tpl.id,
     name: tpl.name,
     description: tpl.description,
-    enabled: index === 3,
+    enabled: false,
     trigger: tpl.trigger,
     actions: tpl.actions,
     lastRun: null,

@@ -38,7 +38,7 @@ export const AuthInput = forwardRef(function AuthInput(
     <div className={cn('flex flex-col gap-1.5', className)}>
       <div
         className={cn(
-          'auth-input-glow relative flex h-14 items-center rounded-2xl border bg-[#F8FAFC] shadow-sm transition-all duration-200',
+          'auth-input-glow relative flex h-12 items-center rounded-2xl border bg-[#F8FAFC] shadow-sm transition-all duration-200',
           error
             ? 'border-red-400 bg-red-50/30'
             : focused
@@ -108,7 +108,7 @@ export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
     <div className={cn('flex flex-col gap-1.5', className)}>
       <div
         className={cn(
-          'auth-input-glow relative flex h-14 items-center rounded-2xl border bg-[#F8FAFC] shadow-sm transition-all duration-200',
+          'auth-input-glow relative flex h-12 items-center rounded-2xl border bg-[#F8FAFC] shadow-sm transition-all duration-200',
           error
             ? 'border-red-400 bg-red-50/30'
             : focused

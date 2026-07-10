@@ -29,14 +29,27 @@ export function getStoredUser() {
   return loadAuth()?.user || null
 }
 
+export function getStoredRememberMe() {
+  return Boolean(loadAuth()?.rememberMe)
+}
+
+/**
+ * Persist auth for cross-tab sync:
+ * - rememberMe: localStorage only (survives browser restart)
+ * - session: sessionStorage + localStorage mirror (syncs tabs in same browser)
+ */
 export function saveAuth(auth, rememberMe) {
-  const storage = getStorage(rememberMe)
-  storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth))
+  const payload = { ...auth, rememberMe: Boolean(rememberMe) }
+  const json = JSON.stringify(payload)
+
   if (rememberMe) {
+    localStorage.setItem(AUTH_STORAGE_KEY, json)
     sessionStorage.removeItem(AUTH_STORAGE_KEY)
   } else {
-    localStorage.removeItem(AUTH_STORAGE_KEY)
+    sessionStorage.setItem(AUTH_STORAGE_KEY, json)
+    localStorage.setItem(AUTH_STORAGE_KEY, json)
   }
+
   try {
     localStorage.removeItem(AUTH_LOGOUT_KEY)
   } catch {

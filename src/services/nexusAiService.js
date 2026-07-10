@@ -62,11 +62,16 @@ Best regards,
 EduNexus Team`
   }
 
-  return `I'm **Nexus AI**, your EduNexus assistant.
+  return 'Ask about organizations, schools, roles, permissions, masters, audit logs, or automations.'
+}
 
-I can help with organizations, schools, users, roles, permissions, masters, audit logs, EduNexus Post, and automations.
-
-Try: "How do I onboard a new organization?" or use a quick prompt below.`
+function mockAiTip(context) {
+  const tips = {
+    dashboard: 'Review recent organizations and audit logs from the sidebar to stay on top of platform changes.',
+    audit: 'Check audit logs weekly for permission and role changes across your schools.',
+    onboarding: 'Use Management → Organizations → Add New to onboard a tenant and optional school in one flow.',
+  }
+  return tips[context] || tips.dashboard
 }
 
 export async function chatWithNexusAi(messages) {
@@ -106,6 +111,11 @@ export async function chatWithNexusAi(messages) {
 }
 
 export async function generateAiTip(context = 'dashboard') {
+  if (!AI_IS_LIVE) {
+    await new Promise((r) => setTimeout(r, 400))
+    return { role: 'assistant', content: mockAiTip(context), mode: 'local' }
+  }
+
   const prompts = {
     dashboard: 'Give one short actionable tip for an EduNexus LMS super admin reviewing their dashboard today.',
     audit: 'Give one sentence about why reviewing audit logs matters in a school ERP.',

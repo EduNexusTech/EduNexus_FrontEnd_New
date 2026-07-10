@@ -36,7 +36,7 @@ export default function AuthBackground() {
       ))}
 
       <svg
-        className="auth-animate-wave absolute bottom-0 left-0 w-[110%] text-cyan-400/20"
+        className="auth-animate-wave absolute bottom-0 left-0 w-full text-cyan-400/20"
         viewBox="0 0 1440 200"
         preserveAspectRatio="none"
         fill="currentColor"
@@ -45,7 +45,7 @@ export default function AuthBackground() {
       </svg>
 
       <svg
-        className="auth-animate-wave absolute bottom-8 left-0 w-[110%] text-blue-400/15"
+        className="auth-animate-wave absolute bottom-8 left-0 w-full text-blue-400/15"
         viewBox="0 0 1440 160"
         preserveAspectRatio="none"
         fill="currentColor"
@@ -60,7 +60,7 @@ export default function AuthBackground() {
 export function AuthBackgroundFade({ children }) {
   return (
     <motion.div
-      className="relative min-h-screen auth-page-gradient overflow-x-hidden font-sans"
+      className="auth-login-root auth-page-gradient font-sans"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}

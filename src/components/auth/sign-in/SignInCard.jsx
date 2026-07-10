@@ -24,15 +24,16 @@ export default function SignInCard({
 }) {
   return (
     <AuthCard>
-      <header className="mb-8 text-center">
+      <header className="auth-login-card-header mb-5 text-center">
         <motion.div
-          className="mx-auto mb-5 flex justify-center"
+          className="auth-login-logo mx-auto mb-4 flex justify-center"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
         >
-          <BrandLogo variant="full" size="lg" />
-        </motion.div>        <motion.h2
+          <BrandLogo variant="full" size="md" />
+        </motion.div>
+        <motion.h2
           className="text-2xl font-bold text-[#111827]"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -50,7 +51,7 @@ export default function SignInCard({
         </motion.p>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="visible">
           <AuthInput
             id="signin-email"
@@ -105,7 +106,7 @@ export default function SignInCard({
         </motion.div>
 
         <motion.div custom={3} variants={fieldVariants} initial="hidden" animate="visible">
-          <AuthButton type="submit" loading={isSubmitting}>
+          <AuthButton type="submit" loading={isSubmitting} className="!h-12">
             Sign in
           </AuthButton>
         </motion.div>

@@ -4,7 +4,7 @@ const CHART_BARS = ['auth-chart-bar--1', 'auth-chart-bar--2', 'auth-chart-bar--3
 
 export default function LmsIllustration() {
   return (
-    <div className="relative mx-auto w-full max-w-xl" aria-hidden>
+    <div className="relative mx-auto w-full max-w-xl max-h-[220px] scale-[0.88] origin-top" aria-hidden>
       <motion.div
         className="relative z-10 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-2xl shadow-blue-500/10"
         initial={{ opacity: 0, y: 24 }}
@@ -44,22 +44,6 @@ export default function LmsIllustration() {
           </div>
         </div>
       </motion.div>
-
-      <motion.div
-        className="auth-animate-icon-float absolute -left-4 top-8 z-20 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-xl"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">📚</span>
-          <div>
-            <p className="text-xs font-bold text-[#111827]">Digital Learning</p>
-            <p className="text-[10px] text-[#6B7280]">12 active courses</p>
-          </div>
-        </div>
-      </motion.div>
-
       <motion.div
         className="auth-animate-icon-float auth-float-delay-1 absolute -right-2 top-16 z-20 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 shadow-xl"
         initial={{ opacity: 0, x: 20 }}
@@ -76,7 +60,7 @@ export default function LmsIllustration() {
       </motion.div>
 
       <motion.div
-        className="auth-animate-icon-float auth-float-delay-2 absolute -bottom-4 -right-4 z-20 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-xl"
+        className="auth-animate-icon-float auth-float-delay-2 absolute -bottom-4 -right-2 z-20 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8 }}

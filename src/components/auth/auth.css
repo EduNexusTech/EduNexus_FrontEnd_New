@@ -112,3 +112,74 @@
 .auth-progress-fill {
   width: 78%;
 }
+
+.auth-page-gradient {
+  background: linear-gradient(160deg, #ffffff 0%, #f8fafc 40%, #eff6ff 100%);
+}
+
+/* Login page — fit exactly one viewport, no page scroll at 100% zoom */
+.auth-login-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.auth-login-inner {
+  display: flex;
+  height: 100%;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.auth-login-hero {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.auth-login-form-panel {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-login-card-wrap {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+}
+
+@media (max-height: 900px) {
+  .auth-login-card-wrap .auth-login-card {
+    padding: 1.25rem 1.5rem !important;
+  }
+
+  .auth-login-card-wrap .auth-login-card-header {
+    margin-bottom: 1rem !important;
+  }
+
+  .auth-login-card-wrap .auth-login-logo {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .auth-login-hero-illustration {
+    display: none !important;
+  }
+
+  .auth-login-hero-content {
+    gap: 1.25rem !important;
+  }
+
+  .auth-login-hero-content h1 {
+    font-size: 1.75rem !important;
+  }
+}

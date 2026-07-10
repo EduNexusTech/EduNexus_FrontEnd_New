@@ -9,7 +9,7 @@ const LINKS = [
 
 export default function AuthFooter() {
   return (
-    <footer className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[#E5E7EB] pt-6">
+    <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-[#E5E7EB] pt-4">
       {LINKS.map((link) => (
         <Link
           key={link.label}

@@ -2,9 +2,12 @@ import { AUTH_LOGOUT_KEY, AUTH_REVISION_KEY, AUTH_STORAGE_KEY } from '@/config/c
 
 export const AUTH_SYNC_CHANNEL = 'edunexus-auth-sync'
 
+/** Cross-tab auth events (BroadcastChannel + localStorage fallback). */
 export const AuthSyncEvent = {
+  LOGIN: 'userLoggedIn',
+  LOGOUT: 'userLoggedOut',
+  /** Token refresh or profile update */
   UPDATED: 'auth-updated',
-  LOGOUT: 'auth-logout',
 }
 
 const TAB_ID =
@@ -22,12 +25,15 @@ try {
   channel = null
 }
 
-/** Notify other browser tabs that auth storage changed. */
+/** Notify other browser tabs that auth state changed. */
 export function notifyAuthSync(event = AuthSyncEvent.UPDATED) {
-  try {
-    localStorage.setItem(AUTH_REVISION_KEY, String(Date.now()))
-  } catch {
-    // ignore quota / private mode
+  // Skip revision bump on logout — storage + channel already signal logout; avoids extra UPDATED noise.
+  if (event !== AuthSyncEvent.LOGOUT) {
+    try {
+      localStorage.setItem(AUTH_REVISION_KEY, String(Date.now()))
+    } catch {
+      // ignore quota / private mode
+    }
   }
 
   try {
@@ -45,17 +51,23 @@ export function subscribeAuthSync(onSync) {
   }
 
   const handleStorage = (event) => {
-    if (event.key === AUTH_LOGOUT_KEY) {
+    // Logout flag is SET on sign-out; clearing it on login must not be treated as logout.
+    if (event.key === AUTH_LOGOUT_KEY && event.newValue) {
       onSync({ event: AuthSyncEvent.LOGOUT, fromStorage: true })
       return
     }
 
-    if (event.key === AUTH_STORAGE_KEY && event.newValue == null) {
+    if (event.key === AUTH_STORAGE_KEY && event.newValue == null && event.oldValue) {
       onSync({ event: AuthSyncEvent.LOGOUT, fromStorage: true })
       return
     }
 
-    if (event.key === AUTH_REVISION_KEY || event.key === AUTH_STORAGE_KEY) {
+    if (event.key === AUTH_STORAGE_KEY && event.newValue) {
+      onSync({ event: AuthSyncEvent.LOGIN, fromStorage: true })
+      return
+    }
+
+    if (event.key === AUTH_REVISION_KEY && event.newValue) {
       onSync({ event: AuthSyncEvent.UPDATED, fromStorage: true })
     }
   }

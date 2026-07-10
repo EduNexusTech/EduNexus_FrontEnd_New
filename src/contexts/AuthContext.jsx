@@ -5,9 +5,24 @@ import { setAuthHandlers } from '@/api/axios'
 import { authService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { AuthSyncEvent, notifyAuthSync, subscribeAuthSync } from '@/utils/authSync'
-import { loadAuth, saveAuth, clearAuth, getStoredAccessToken, getStoredRefreshToken, getStoredUser } from '@/utils/storage'
+import {
+  bootstrapStoredSession,
+  persistAuthSession,
+  readAuthSession,
+  validateStoredSession,
+} from '@/utils/authSession'
+import {
+  clearAuth,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  getStoredUser,
+  loadAuth,
+} from '@/utils/storage'
+import { isTokenExpired } from '@/utils/jwt'
 
 const AuthContext = createContext(null)
+
+const TOKEN_CHECK_MS = 30_000
 
 function buildAuthState(saved) {
   if (!saved?.accessToken) {
@@ -40,31 +55,65 @@ function resolveUserId(user) {
 
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient()
-  const [state, setState] = useState(() => buildAuthState(loadAuth()))
+  const [state, setState] = useState(() => buildAuthState(bootstrapStoredSession()))
   const stateRef = useRef(state)
+  const remoteLogoutHandledAtRef = useRef(0)
   stateRef.current = state
 
-  useEffect(() => {
-    setState((prev) => ({ ...prev, isHydrated: true }))
+  const isLoggedOut = useCallback(() => {
+    return !stateRef.current.isAuthenticated && !loadAuth()?.accessToken
   }, [])
 
-  const persist = useCallback((next, rememberMe) => {
-    saveAuth(
-      {
-        user: next.user,
-        accessToken: next.accessToken,
-        refreshToken: next.refreshToken,
-        rememberMe,
-      },
-      rememberMe,
-    )
-  }, [])
+  const handleRemoteLogout = useCallback(() => {
+    if (isLoggedOut()) return
+
+    const now = Date.now()
+    if (now - remoteLogoutHandledAtRef.current < 750) return
+    remoteLogoutHandledAtRef.current = now
+
+    clearAuth()
+    setState(buildAuthState(null))
+    queryClient.clear()
+    toast('Signed out — session ended in another tab.')
+  }, [queryClient, isLoggedOut])
+
+  const forceLogoutLocal = useCallback(
+    (options = {}) => {
+      const { broadcast = false, notifyRemote = false, message = null } = options
+
+      if (isLoggedOut()) {
+        return
+      }
+
+      clearAuth()
+      setState(buildAuthState(null))
+      queryClient.clear()
+
+      if (broadcast) {
+        notifyAuthSync(AuthSyncEvent.LOGOUT)
+      }
+
+      if (notifyRemote) {
+        toast(message || 'Signed out — session ended in another tab.')
+      } else if (message) {
+        toast(message)
+      }
+    },
+    [queryClient, isLoggedOut],
+  )
 
   const applyAuthFromStorage = useCallback(
     (options = {}) => {
       const { silent = false } = options
-      const saved = loadAuth()
-      const nextState = buildAuthState(saved)
+      const raw = loadAuth()
+      const valid = validateStoredSession(raw)
+
+      if (raw && !valid) {
+        forceLogoutLocal({ broadcast: true, message: 'Your session has expired. Please sign in again.' })
+        return 'logout'
+      }
+
+      const nextState = buildAuthState(valid)
       const prevUserId = resolveUserId(stateRef.current.user)
       const nextUserId = resolveUserId(nextState.user)
 
@@ -89,22 +138,24 @@ export function AuthProvider({ children }) {
 
       return 'updated'
     },
-    [queryClient],
+    [queryClient, forceLogoutLocal],
   )
 
   useEffect(() => {
     return subscribeAuthSync(({ event }) => {
       if (event === AuthSyncEvent.LOGOUT) {
-        if (!stateRef.current.isAuthenticated) return
-        clearAuth()
-        setState(buildAuthState(null))
-        queryClient.clear()
-        toast('Signed out — session ended in another tab.')
+        handleRemoteLogout()
         return
       }
+
+      if (event === AuthSyncEvent.LOGIN) {
+        applyAuthFromStorage({ silent: true })
+        return
+      }
+
       applyAuthFromStorage({ silent: false })
     })
-  }, [applyAuthFromStorage, queryClient])
+  }, [applyAuthFromStorage, handleRemoteLogout])
 
   const logout = useCallback(async () => {
     try {
@@ -115,22 +166,29 @@ export function AuthProvider({ children }) {
     } catch {
       // ignore logout errors
     }
-    clearAuth()
-    setState(buildAuthState(null))
-    queryClient.clear()
-    notifyAuthSync(AuthSyncEvent.LOGOUT)
-  }, [queryClient])
+    forceLogoutLocal({ broadcast: true })
+  }, [forceLogoutLocal])
 
   const updateTokens = useCallback(
     ({ accessToken, refreshToken }) => {
+      if (accessToken && isTokenExpired(accessToken)) {
+        forceLogoutLocal({ broadcast: true, message: 'Your session has expired. Please sign in again.' })
+        return
+      }
+
       setState((prev) => {
-        const next = { ...prev, accessToken, refreshToken, isAuthenticated: Boolean(accessToken) }
-        persist(next, prev.rememberMe)
+        const next = {
+          ...prev,
+          accessToken,
+          refreshToken,
+          isAuthenticated: Boolean(accessToken),
+        }
+        persistAuthSession(next, prev.rememberMe)
         return next
       })
       notifyAuthSync(AuthSyncEvent.UPDATED)
     },
-    [persist],
+    [forceLogoutLocal],
   )
 
   const login = useCallback(
@@ -147,6 +205,10 @@ export function AuthProvider({ children }) {
           throw new Error('Login succeeded but no access token was returned.')
         }
 
+        if (isTokenExpired(accessToken)) {
+          throw new Error('Login returned an expired access token.')
+        }
+
         const next = {
           user,
           accessToken,
@@ -157,10 +219,10 @@ export function AuthProvider({ children }) {
           isHydrated: true,
         }
 
-        persist(next, rememberMe)
+        persistAuthSession(next, rememberMe)
         setState(next)
         queryClient.clear()
-        notifyAuthSync(AuthSyncEvent.UPDATED)
+        notifyAuthSync(AuthSyncEvent.LOGIN)
 
         setAuthHandlers({
           getAccessToken: () => accessToken,
@@ -168,7 +230,7 @@ export function AuthProvider({ children }) {
           getUser: () => user,
           isSuperAdmin: () => Boolean(user?.is_super_admin),
           onTokensUpdated: updateTokens,
-          onUnauthorized: logout,
+          onUnauthorized: () => forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
         })
 
         return next
@@ -177,7 +239,7 @@ export function AuthProvider({ children }) {
         throw error
       }
     },
-    [persist, updateTokens, logout, queryClient],
+    [updateTokens, forceLogoutLocal, queryClient],
   )
 
   const refreshProfile = useCallback(async () => {
@@ -186,11 +248,11 @@ export function AuthProvider({ children }) {
     const user = payload?.user || payload
     setState((prev) => {
       const next = { ...prev, user }
-      persist(next, prev.rememberMe)
+      persistAuthSession(next, prev.rememberMe)
       return next
     })
     notifyAuthSync(AuthSyncEvent.UPDATED)
-  }, [persist])
+  }, [])
 
   useEffect(() => {
     setAuthHandlers({
@@ -199,9 +261,49 @@ export function AuthProvider({ children }) {
       getUser: () => state.user || getStoredUser(),
       isSuperAdmin: () => Boolean(state.user?.is_super_admin),
       onTokensUpdated: updateTokens,
-      onUnauthorized: logout,
+      onUnauthorized: () =>
+        forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
     })
-  }, [state.accessToken, state.refreshToken, state.user, updateTokens, logout])
+  }, [state.accessToken, state.refreshToken, state.user, updateTokens, forceLogoutLocal])
+
+  useEffect(() => {
+    if (!state.isAuthenticated) return undefined
+
+    const checkExpiry = () => {
+      const token = stateRef.current.accessToken || getStoredAccessToken()
+      if (token && isTokenExpired(token)) {
+        forceLogoutLocal({
+          broadcast: true,
+          message: 'Your session has expired. Please sign in again.',
+        })
+      }
+    }
+
+    checkExpiry()
+    const intervalId = window.setInterval(checkExpiry, TOKEN_CHECK_MS)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkExpiry()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [state.isAuthenticated, forceLogoutLocal])
+
+  useEffect(() => {
+    const onFocus = () => {
+      if (!stateRef.current.isAuthenticated) {
+        const restored = readAuthSession()
+        if (restored) applyAuthFromStorage({ silent: true })
+        return
+      }
+      applyAuthFromStorage({ silent: true })
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [applyAuthFromStorage])
 
   const value = useMemo(
     () => ({
