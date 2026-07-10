@@ -13,6 +13,8 @@ import {
   FiChevronLeft,
   FiLayers,
   FiBook,
+  FiClipboard,
+  FiUserCheck,
   FiMail,
   FiCpu,
   FiMessageSquare,
@@ -125,11 +127,19 @@ const schoolAdminNav = [
     label: 'School',
     children: [
       { label: 'School Profile', path: '/school-profile', icon: FiBook },
+      { label: 'School Settings', path: '/school-settings', icon: FiSettings },
+      { label: 'School Masters', path: '/school-masters', icon: FiDatabase },
     ],
   },
   {
     label: 'Management',
     children: [
+      { label: 'Admissions', path: '/admissions', icon: FiClipboard },
+      { label: 'Students', path: '/students', icon: FiUsers },
+      { label: 'Teachers', path: '/teachers', icon: FiUserCheck },
+      { label: 'Parents', path: '/parents', icon: FiUsers },
+      { label: 'Staff', path: '/staff', icon: FiUserCheck },
+      { label: 'Communications', path: '/communications', icon: FiMail },
       { label: 'School Users', path: '/school-users', icon: FiUsers },
     ],
   },
@@ -161,6 +171,9 @@ function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/school-profile') {
     return pathname === '/school-profile' || /^\/schools\/[^/]+\/profile/.test(pathname)
   }
+  if (itemPath === '/school-settings') {
+    return pathname === '/school-settings' || pathname.startsWith('/school-settings/')
+  }
   if (itemPath === '/schools') {
     return pathname.startsWith('/schools') && !/^\/schools\/[^/]+\/profile/.test(pathname)
   }
@@ -169,6 +182,27 @@ function isNavItemActive(pathname, itemPath) {
   }
   if (itemPath === '/school-users') {
     return pathname === '/school-users' || pathname.startsWith('/school-users/')
+  }
+  if (itemPath === '/admissions') {
+    return pathname === '/admissions' || pathname.startsWith('/admissions/')
+  }
+  if (itemPath === '/students') {
+    return pathname === '/students' || pathname.startsWith('/students/')
+  }
+  if (itemPath === '/teachers') {
+    return pathname === '/teachers' || pathname.startsWith('/teachers/')
+  }
+  if (itemPath === '/parents') {
+    return pathname === '/parents' || pathname.startsWith('/parents/')
+  }
+  if (itemPath === '/staff') {
+    return pathname === '/staff' || pathname.startsWith('/staff/')
+  }
+  if (itemPath === '/school-masters') {
+    return pathname === '/school-masters' || pathname.startsWith('/school-masters/')
+  }
+  if (itemPath === '/communications') {
+    return pathname === '/communications' || pathname.startsWith('/communications/')
   }
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`)
 }
