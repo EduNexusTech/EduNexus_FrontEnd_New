@@ -11,14 +11,14 @@ export default function CtaSection({ isAuthenticated }) {
         viewport={{ once: true }}
         className="landing-band-dark relative w-full overflow-hidden px-6 py-20 text-center sm:px-12 sm:py-28 lg:px-16"
       >
-        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-sky-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#74c69d]/25 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[#52b788]/20 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#40916c]/12 blur-3xl" />
 
         <div className="relative mx-auto max-w-4xl">
-          <div className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/10 bg-white/5 px-5 py-2">
+          <div className="landing-glass-dark mx-auto flex w-fit items-center gap-1 rounded-full px-5 py-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <FiStar key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <FiStar key={i} className="h-3.5 w-3.5 fill-[#95d5b2] text-[#95d5b2]" />
             ))}
             <span className="ml-2 text-xs font-bold text-white/85">Trusted by forward-thinking institutions</span>
           </div>
@@ -26,7 +26,7 @@ export default function CtaSection({ isAuthenticated }) {
           <h2 className="mx-auto mt-8 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl xl:text-6xl">
             Ready to deliver an extraordinary learning experience with EduNexus?
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base font-semibold text-slate-400 lg:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base font-semibold text-white/70 lg:text-lg">
             Sign in to explore the full LMS — courses, live classes, assessments, progress tracking, AI tutor, and institutional admin.
           </p>
 
@@ -40,7 +40,7 @@ export default function CtaSection({ isAuthenticated }) {
             </Link>
             <a
               href="#features"
-              className="inline-flex items-center gap-2 rounded-2xl border-2 border-white/15 px-10 py-4 text-base font-extrabold text-white transition hover:border-white/30 hover:bg-white/5"
+              className="inline-flex items-center gap-2 rounded-2xl border-2 border-white/20 bg-white/5 px-10 py-4 text-base font-extrabold text-white backdrop-blur-sm transition hover:border-white/35 hover:bg-white/10"
             >
               Explore features
             </a>

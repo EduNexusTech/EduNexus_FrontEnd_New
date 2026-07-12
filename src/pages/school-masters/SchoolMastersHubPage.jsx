@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom'
 import {
   FiHeart, FiUsers, FiTruck, FiHome, FiAward, FiActivity, FiGlobe, FiTag,
 } from 'react-icons/fi'
-import { PageHeader, Card } from '@/components/ui/Card'
+import { PageHeader } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { SCHOOL_MASTER_DEFINITIONS, SCHOOL_MASTER_GROUPS } from '@/config/schoolMasterDefinitions'
+import { HubPageShell, HubSectionTitle, HubTileCard } from '@/components/hub/HubWidgets'
 
 const ICONS = {
   religion: FiHeart,
@@ -31,7 +32,7 @@ const ICONS = {
 
 export default function SchoolMastersHubPage() {
   return (
-    <div className="w-full">
+    <HubPageShell>
       <Breadcrumb items={[{ label: 'School Masters' }]} />
       <PageHeader
         title="School Master Management"
@@ -41,26 +42,19 @@ export default function SchoolMastersHubPage() {
       <div className="space-y-8">
         {SCHOOL_MASTER_GROUPS.map((group) => (
           <div key={group.title}>
-            <h2 className="text-lg font-semibold mb-4">{group.title}</h2>
+            <HubSectionTitle title={group.title} />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {group.keys.map((key) => {
                 const def = SCHOOL_MASTER_DEFINITIONS[key]
                 const Icon = ICONS[key] || FiTag
                 return (
-                  <Link key={key} to={`/school-masters/${key}`}>
-                    <Card hover className="flex items-center gap-4">
-                      <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <span className="font-semibold">{def.labelPlural}</span>
-                    </Card>
-                  </Link>
+                  <HubTileCard key={key} to={`/school-masters/${key}`} icon={Icon} label={def.labelPlural} />
                 )
               })}
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </HubPageShell>
   )
 }

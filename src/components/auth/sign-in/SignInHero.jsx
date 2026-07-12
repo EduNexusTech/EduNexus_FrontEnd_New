@@ -22,10 +22,10 @@ export default function SignInHero() {
         transition={{ duration: 0.6 }}
         className="shrink-0"
       >
-        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#111827] xl:text-4xl">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[var(--clay-primary)] xl:text-4xl">
           Empowering Smarter Learning
         </h1>
-        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#6B7280] xl:text-base">
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[var(--clay-primary-soft)] xl:text-base">
           Access your courses, assignments, attendance, exams, reports and more from one secure
           platform.
         </p>

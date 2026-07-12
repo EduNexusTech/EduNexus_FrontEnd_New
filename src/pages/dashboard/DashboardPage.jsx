@@ -1,59 +1,30 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useAuth } from '@/contexts/AuthContext'
+import { dashboardService } from '@/api/services'
+import { unwrapData, getErrorMessage } from '@/api/client'
+import { PageLoader, ErrorState } from '@/components/ui/Feedback'
+import { formatNumber } from '@/utils/format'
+import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
 import {
+  ClayInsightBanner,
+  ClayStatGrid,
+  ClayBarChartPanel,
+  ClayDonutPanel,
+  ClayLineChartPanel,
+  ClayRecentList,
+  ClayAnalyticsSection,
+  formatStatValue,
+  mapGrowthChart,
+  mapDistribution,
   FiBriefcase,
   FiBook,
   FiUsers,
-  FiActivity,
-  FiPlus,
-} from 'react-icons/fi'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from 'recharts'
-import { dashboardService } from '@/api/services'
-import { unwrapData, getErrorMessage } from '@/api/client'
-import { useAuth } from '@/contexts/AuthContext'
-import { PageHeader, StatCard, Card } from '@/components/ui/Card'
-import Breadcrumb from '@/components/layout/Breadcrumb'
-import { PageLoader, ErrorState } from '@/components/ui/Feedback'
-import Button from '@/components/ui/Button'
-import { formatNumber, formatDateTime } from '@/utils/format'
-import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
-
-function mapChartData(charts) {
-  const registrations = charts?.monthly_registrations || []
-  if (registrations.length) {
-    return registrations.map((row) => ({
-      month: row.month,
-      users: row.users ?? 0,
-      schools: row.schools ?? 0,
-      organizations: row.organizations ?? 0,
-    }))
-  }
-
-  const userGrowth = charts?.user_growth || []
-  const schoolGrowth = charts?.schools_growth || []
-  if (userGrowth.length) {
-    return userGrowth.map((row, i) => ({
-      month: row.month,
-      users: row.count ?? 0,
-      schools: schoolGrowth[i]?.count ?? 0,
-    }))
-  }
-
-  return []
-}
+  FiFileText,
+} from '@/components/dashboard/clay/ClayWidgets'
+import '@/styles/dashboard-clay.css'
 
 function SuperAdminDashboardView() {
+  const { user } = useAuth()
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['dashboard', 'super-admin'],
     queryFn: () => dashboardService.superAdmin({ limit: 10, months: 6 }),
@@ -66,126 +37,108 @@ function SuperAdminDashboardView() {
   const dashboard = unwrapData(data) || {}
   const statistics = dashboard.statistics || {}
   const charts = dashboard.charts || {}
-
-  const kpis = [
-    { title: 'Organizations', value: formatNumber(statistics.total_organizations ?? 0), icon: FiBriefcase, color: 'primary' },
-    { title: 'Schools', value: formatNumber(statistics.total_schools ?? 0), icon: FiBook, color: 'accent' },
-    { title: 'Users', value: formatNumber(statistics.total_users ?? 0), icon: FiUsers, color: 'success' },
-    { title: 'Active Users', value: formatNumber(statistics.active_users ?? 0), icon: FiActivity, color: 'warning' },
-  ]
-
-  const chartData = mapChartData(charts)
   const recentActivity = dashboard.live_activities || dashboard.recent_activity || []
   const recentOrgs = dashboard.recent_organizations || []
 
+  const userName =
+    user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
+
+  const stats = [
+    {
+      title: 'Organizations',
+      value: formatNumber(statistics.total_organizations ?? 0),
+      icon: FiBriefcase,
+      trend: '+8% growth',
+    },
+    {
+      title: 'Schools',
+      value: formatNumber(statistics.total_schools ?? 0),
+      icon: FiBook,
+      trend: '+5% active',
+    },
+    {
+      title: 'Users',
+      value: formatNumber(statistics.total_users ?? 0),
+      icon: FiUsers,
+      trend: `+${statistics.active_users ?? 0} active`,
+    },
+    {
+      title: 'Pending',
+      value: formatStatValue(statistics.pending_approval_count ?? 0),
+      icon: FiFileText,
+    },
+  ]
+
+  const recentItems = [
+    ...recentOrgs.slice(0, 4).map((org) => ({
+      id: org.organization_id || org.id,
+      title: org.organization_name || org.name,
+      subtitle: org.organization_code || org.code,
+      path: `/organizations/${org.organization_id || org.id}`,
+    })),
+    ...recentActivity.slice(0, 4).map((item) => ({
+      id: item.id,
+      title: item.title || item.action,
+      subtitle: item.description,
+      path: null,
+    })),
+  ]
+
+  const growthData = mapGrowthChart(charts)
+  const donutData = mapDistribution(charts)
+  const distributionFallback = donutData.length
+    ? donutData
+    : [
+        { label: 'Users', value: statistics.total_users ?? 1 },
+        { label: 'Schools', value: statistics.total_schools ?? 1 },
+      ]
+
+  const platformBarData = [
+    { label: 'Orgs', value: statistics.total_organizations ?? 0 },
+    { label: 'Schools', value: statistics.total_schools ?? 0 },
+    { label: 'Users', value: statistics.total_users ?? 0 },
+    { label: 'Active', value: statistics.active_users ?? 0 },
+  ].filter((d) => d.value > 0)
+
   return (
-    <div className="w-full">
-      <Breadcrumb items={[{ label: 'Dashboard' }]} />
-      <PageHeader
-        title="Dashboard"
-        subtitle="Platform overview and key metrics"
-        actions={
-          <>
-            <Button variant="secondary" onClick={() => refetch()}>Refresh</Button>
-            <Link to="/organizations/new"><Button><FiPlus /> New Organization</Button></Link>
-          </>
-        }
+    <div className="clay-app w-full pb-4">
+      <ClayInsightBanner
+        userName={userName}
+        message="Platform growth, distribution, and live activity"
       />
 
-      <div className="mb-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((kpi, i) => (
-          <motion.div key={kpi.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-            <StatCard {...kpi} />
-          </motion.div>
-        ))}
-      </div>
+      <ClayStatGrid stats={stats} />
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        <Card>
-          <h3 className="mb-4 text-lg font-semibold">Growth Overview</h3>
-          {chartData.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted">No chart data yet</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="users" fill="#2563eb" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="schools" fill="#06b6d4" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
+      <ClayAnalyticsSection title="Analytics">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <ClayBarChartPanel
+            title="Platform Snapshot"
+            data={platformBarData.length ? platformBarData : growthData}
+          />
+          <ClayDonutPanel title="User Distribution" data={distributionFallback} />
+          <ClayLineChartPanel title="Growth Trend" data={growthData} />
+        </div>
+      </ClayAnalyticsSection>
 
-        <Card>
-          <h3 className="mb-4 text-lg font-semibold">User Trend</h3>
-          {chartData.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted">No chart data yet</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
-                <Tooltip />
-                <Line type="monotone" dataKey="users" stroke="#4f46e5" strokeWidth={3} dot={{ fill: '#4f46e5' }} />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <h3 className="mb-4 text-lg font-semibold">Recent Organizations</h3>
-          {recentOrgs.length === 0 ? (
-            <p className="text-sm text-muted">No recent organizations</p>
-          ) : (
-            <div className="space-y-3">
-              {recentOrgs.slice(0, 5).map((org) => (
-                <div key={org.organization_id || org.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                  <div>
-                    <p className="text-sm font-medium">{org.organization_name || org.name}</p>
-                    <p className="text-xs text-muted">{org.organization_code || org.code}</p>
-                  </div>
-                  <StatusBadge active={org.is_active} />
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <Card>
-          <h3 className="mb-4 text-lg font-semibold">Recent Activity</h3>
-          {recentActivity.length === 0 ? (
-            <p className="text-sm text-muted">No recent activity</p>
-          ) : (
-            <div className="space-y-3">
-              {recentActivity.slice(0, 5).map((item) => (
-                <div key={item.id} className="flex gap-3 rounded-xl border border-border p-3">
-                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                  <div>
-                    <p className="text-sm font-medium">{item.title || item.action || item.description}</p>
-                    <p className="text-xs text-muted">{item.description || item.title}</p>
-                    <p className="mt-1 text-xs text-muted">{formatDateTime(item.timestamp || item.created_at)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
+      <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No recent platform activity" />
     </div>
   )
 }
 
-function StatusBadge({ active }) {
+function DefaultDashboardView() {
+  const { user } = useAuth()
+  const userName =
+    user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
+
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${active !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-muted'}`}>
-      {active !== false ? 'Active' : 'Inactive'}
-    </span>
+    <div className="clay-app w-full pb-4">
+      <ClayInsightBanner userName={userName} message="Welcome to EduNexus." />
+      <div className="clay-card clay-card-white p-8 text-center">
+        <p className="text-[var(--clay-primary-soft)]">
+          Your account does not have a dashboard for this role yet. Use the sidebar to open modules available to you.
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -200,15 +153,5 @@ export default function DashboardPage() {
     return <SchoolDashboardView />
   }
 
-  return (
-    <div className="w-full">
-      <Breadcrumb items={[{ label: 'Dashboard' }]} />
-      <PageHeader title="Dashboard" subtitle="Welcome to EduNexus" />
-      <Card>
-        <p className="text-muted">
-          Your account does not have a dashboard for this role yet. Use the sidebar to open modules available to you.
-        </p>
-      </Card>
-    </div>
-  )
+  return <DefaultDashboardView />
 }

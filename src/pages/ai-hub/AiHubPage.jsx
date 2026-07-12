@@ -23,21 +23,21 @@ export default function AiHubPage() {
           icon={FiMessageSquare}
           title="Nexus AI Assistant"
           description="Ask questions about organizations, schools, roles, and get LMS guidance instantly."
-          accent="violet"
+          accent="sage"
         />
         <HubFeatureCard
           to="/ai-hub/automations"
           icon={FiZap}
           title="Automations"
           description={`${enabledCount} active workflow${enabledCount === 1 ? '' : 's'} — onboarding, reminders, and AI tips.`}
-          accent="amber"
+          accent="forest"
         />
         <HubFeatureCard
           to="/edu-nexus-post"
           icon={FiMail}
           title="EduNexus Post"
           description="Send mail from the browser with Gmail-style compose and sent history."
-          accent="cyan"
+          accent="mint"
         />
         <HubFeatureCard
           to="/ai-hub/assistant"
@@ -57,7 +57,7 @@ export default function AiHubPage() {
                 key={prompt}
                 to="/ai-hub/assistant"
                 state={{ initialPrompt: prompt }}
-                className="rounded-full border border-border bg-slate-50 px-3 py-1.5 text-xs font-medium text-text hover:border-primary/30 hover:bg-primary/5"
+                className="rounded-full border border-[var(--clay-border)] bg-[var(--clay-mint-light)] px-3 py-1.5 text-xs font-medium text-[var(--clay-primary)] hover:border-[var(--clay-accent)] hover:bg-white"
               >
                 {prompt}
               </Link>
@@ -74,7 +74,7 @@ export default function AiHubPage() {
           </div>
           <div className="space-y-3">
             {automations.slice(0, 4).map((auto) => (
-              <div key={auto.id} className="flex items-start justify-between gap-3 rounded-xl border border-border p-3">
+              <div key={auto.id} className="clay-list-item clay-list-item-3d flex items-start justify-between gap-3 p-3">
                 <div>
                   <p className="text-sm font-medium">{auto.name}</p>
                   <p className="text-xs text-muted mt-0.5">{auto.description}</p>

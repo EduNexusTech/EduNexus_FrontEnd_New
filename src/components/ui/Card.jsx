@@ -4,9 +4,9 @@ export default function Card({ children, className, padding = true, hover = fals
   return (
     <div
       className={cn(
-        'rounded-2xl bg-white border border-border card-shadow',
+        'clay-card clay-card-white clay-card-3d border-0',
         padding && 'p-6',
-        hover && 'transition hover:shadow-lg hover:-translate-y-0.5',
+        hover && 'cursor-pointer',
         className,
       )}
     >
@@ -19,22 +19,22 @@ export { Card }
 
 export function StatCard({ title, value, change, icon: Icon, color = 'primary' }) {
   const colors = {
-    primary: 'from-primary/10 to-secondary/10 text-primary',
-    success: 'from-green-50 to-emerald-50 text-success',
-    warning: 'from-amber-50 to-orange-50 text-warning',
-    accent: 'from-cyan-50 to-sky-50 text-accent',
+    primary: 'clay-card-mint text-[var(--clay-primary)]',
+    success: 'clay-card-green text-[var(--clay-primary)]',
+    warning: 'clay-card-pale text-[var(--clay-primary)]',
+    accent: 'clay-card-accent text-[var(--clay-primary)]',
   }
 
   return (
-    <Card hover className="relative overflow-hidden">
+    <Card hover className={cn('relative overflow-hidden', colors[color])}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-muted">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-text">{value}</p>
-          {change && <p className="mt-1 text-xs text-muted">{change}</p>}
+          <p className="text-sm font-semibold text-[var(--clay-primary-soft)]">{title}</p>
+          <p className="mt-2 text-2xl font-semibold text-[var(--clay-primary)]">{value}</p>
+          {change && <p className="mt-1 text-xs text-[var(--clay-primary-soft)]">{change}</p>}
         </div>
         {Icon && (
-          <div className={cn('rounded-xl p-3 bg-gradient-to-br', colors[color])}>
+          <div className="clay-icon-3d flex h-12 w-12 items-center justify-center text-[var(--clay-primary)]">
             <Icon className="h-6 w-6" />
           </div>
         )}
@@ -43,14 +43,18 @@ export function StatCard({ title, value, change, icon: Icon, color = 'primary' }
   )
 }
 
-export function PageHeader({ title, subtitle, actions }) {
+/** Page title is shown in the top Header — this renders subtitle and actions only. */
+export function PageHeader({ title: _title, subtitle, actions }) {
+  if (!subtitle && !actions) return null
+
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-text">{title}</h1>
-        {subtitle && <p className="mt-1 text-muted">{subtitle}</p>}
-      </div>
-      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {subtitle ? (
+        <p className="text-sm font-medium text-[var(--clay-primary-soft)]">{subtitle}</p>
+      ) : (
+        <span />
+      )}
+      {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
     </div>
   )
 }

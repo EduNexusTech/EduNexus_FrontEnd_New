@@ -34,7 +34,7 @@ export default function SignInCard({
           <BrandLogo variant="full" size="md" />
         </motion.div>
         <motion.h2
-          className="text-2xl font-bold text-[#111827]"
+          className="text-2xl font-bold text-[var(--clay-primary)]"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
@@ -42,7 +42,7 @@ export default function SignInCard({
           Welcome Back
         </motion.h2>
         <motion.p
-          className="mt-2 text-sm text-[#6B7280]"
+          className="mt-2 text-sm text-[var(--clay-primary-soft)]"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -89,17 +89,17 @@ export default function SignInCard({
           initial="hidden"
           animate="visible"
         >
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-[#374151] transition hover:text-[#2563EB]">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-[var(--clay-primary-soft)] transition hover:text-[var(--clay-teal)]">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-[#E5E7EB] text-[#2563EB] focus:ring-[#2563EB]/20"
+              className="h-4 w-4 rounded border-[var(--clay-border)] text-[var(--clay-teal)] focus:ring-[var(--clay-accent)]/20"
               {...register('rememberMe')}
             />
             Remember me
           </label>
           <Link
             to="/forgot-password"
-            className="text-sm font-semibold text-[#2563EB] transition hover:text-[#1d4ed8] hover:underline"
+            className="text-sm font-semibold text-[var(--clay-teal)] transition hover:text-[var(--clay-sidebar-deep)] hover:underline"
           >
             Forgot password?
           </Link>

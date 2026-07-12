@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { cn } from '@/utils/format'
 
+const fieldWrap = 'lms-field space-y-1.5'
+const inputClass =
+  'lms-input disabled:cursor-not-allowed disabled:bg-[var(--clay-mint-light,#f4f8f6)] disabled:text-muted'
+const errorClass = 'lms-input--error'
+
 export function PasswordInput({
   label,
   error,
@@ -16,9 +21,9 @@ export function PasswordInput({
   const [visible, setVisible] = useState(false)
 
   return (
-    <div className={cn('space-y-1.5', containerClassName)}>
+    <div className={cn(fieldWrap, containerClassName)}>
       {label && (
-        <label className="block text-sm font-medium text-text">
+        <label className="block text-sm font-medium">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
@@ -28,17 +33,13 @@ export function PasswordInput({
           type={visible ? 'text' : 'password'}
           value={value}
           onChange={onChange}
-          className={cn(
-            'w-full rounded-xl border border-border bg-white px-4 py-2.5 pr-11 text-sm text-text placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20',
-            error && 'border-danger focus:border-danger focus:ring-danger/20',
-            className,
-          )}
+          className={cn(inputClass, 'pr-11', error && errorClass, className)}
           {...props}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-muted transition hover:bg-slate-100 hover:text-text"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition hover:bg-[var(--clay-mint-light,#f4f8f6)] hover:text-text"
           title={visible ? 'Hide password' : 'Show password'}
           tabIndex={-1}
         >
@@ -61,21 +62,14 @@ export default function Input({
   ...props
 }) {
   return (
-    <div className={cn('space-y-1.5', containerClassName)}>
+    <div className={cn(fieldWrap, containerClassName)}>
       {label && (
-        <label className="block text-sm font-medium text-text">
+        <label className="block text-sm font-medium">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
-      <input
-        className={cn(
-          'w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20',
-          error && 'border-danger focus:border-danger focus:ring-danger/20',
-          className,
-        )}
-        {...props}
-      />
+      <input className={cn(inputClass, error && errorClass, className)} {...props} />
       {error && <p className="text-xs text-danger">{error}</p>}
       {hint && !error && <p className="text-xs text-muted">{hint}</p>}
     </div>
@@ -84,21 +78,14 @@ export default function Input({
 
 export function Textarea({ label, error, className, required, ...props }) {
   return (
-    <div className="space-y-1.5">
+    <div className={fieldWrap}>
       {label && (
-        <label className="block text-sm font-medium text-text">
+        <label className="block text-sm font-medium">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
-      <textarea
-        className={cn(
-          'w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 min-h-[100px]',
-          error && 'border-danger',
-          className,
-        )}
-        {...props}
-      />
+      <textarea className={cn('lms-textarea', error && errorClass, className)} {...props} />
       {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   )
@@ -106,21 +93,14 @@ export function Textarea({ label, error, className, required, ...props }) {
 
 export function SelectField({ label, error, options = [], required, className, placeholder = 'Select...', ...props }) {
   return (
-    <div className="space-y-1.5">
+    <div className={fieldWrap}>
       {label && (
-        <label className="block text-sm font-medium text-text">
+        <label className="block text-sm font-medium">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
-      <select
-        className={cn(
-          'w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-muted',
-          error && 'border-danger',
-          className,
-        )}
-        {...props}
-      >
+      <select className={cn('lms-select', error && errorClass, className)} {...props}>
         <option value="">{placeholder}</option>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -138,7 +118,7 @@ export function CheckboxField({ label, error, ...props }) {
     <label className="flex items-center gap-2 cursor-pointer">
       <input
         type="checkbox"
-        className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+        className="h-4 w-4 rounded border-[var(--clay-border,#e2ebe6)] text-[var(--clay-sidebar,#8fb5a0)] focus:ring-[var(--clay-sidebar,#8fb5a0)]/20"
         {...props}
       />
       <span className="text-sm text-text">{label}</span>

@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { FiClipboard, FiUserPlus, FiUsers } from 'react-icons/fi'
 import Breadcrumb from '@/components/layout/Breadcrumb'
-import { PageHeader, Card } from '@/components/ui/Card'
+import { PageHeader } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { PageLoader } from '@/components/ui/Feedback'
 import { admissionService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { ADMISSION_STATUS_OPTIONS } from '@/config/constants'
+import { HubPageShell, HubStatGrid, HubLinkCard } from '@/components/hub/HubWidgets'
 
 const QUICK_LINKS = [
   { label: 'Admission Leads', path: '/admissions/leads', icon: FiUserPlus, desc: 'Enquiries & lead management' },
@@ -24,8 +25,16 @@ export default function AdmissionsHubPage() {
   const stats = unwrapData(statsQuery.data)
   const byStatus = stats?.by_status || {}
 
+  const statItems = [
+    { label: 'Total', value: stats?.total ?? 0, className: 'col-span-2 lg:col-span-1' },
+    ...ADMISSION_STATUS_OPTIONS.slice(0, 5).map((s) => ({
+      label: s.label,
+      value: byStatus[s.value] ?? 0,
+    })),
+  ]
+
   return (
-    <div className="w-full">
+    <HubPageShell>
       <Breadcrumb items={[{ label: 'Admissions' }]} />
       <PageHeader
         title="Admissions"
@@ -38,45 +47,17 @@ export default function AdmissionsHubPage() {
         }
       />
 
-      {statsQuery.isLoading ? <PageLoader /> : (
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-          <Card className="col-span-2 lg:col-span-1">
-            <p className="text-xs font-medium uppercase text-muted">Total</p>
-            <p className="mt-1 text-2xl font-bold text-text">{stats?.total ?? 0}</p>
-          </Card>
-          {ADMISSION_STATUS_OPTIONS.slice(0, 5).map((s) => (
-            <Card key={s.value}>
-              <p className="text-xs font-medium text-muted truncate">{s.label}</p>
-              <p className="mt-1 text-xl font-semibold text-text">{byStatus[s.value] ?? 0}</p>
-            </Card>
-          ))}
-        </div>
-      )}
+      {statsQuery.isLoading ? <PageLoader /> : <HubStatGrid stats={statItems} />}
 
       {statsQuery.error && (
         <p className="mb-6 text-sm text-danger">{getErrorMessage(statsQuery.error)}</p>
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
-        {QUICK_LINKS.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link key={item.path} to={item.path}>
-              <Card className="h-full transition hover:border-primary/30 hover:shadow-md">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-text">{item.label}</p>
-                    <p className="mt-1 text-sm text-muted">{item.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          )
-        })}
+        {QUICK_LINKS.map((item) => (
+          <HubLinkCard key={item.path} to={item.path} icon={item.icon} label={item.label} description={item.desc} />
+        ))}
       </div>
-    </div>
+    </HubPageShell>
   )
 }

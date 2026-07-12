@@ -1,15 +1,20 @@
-/* EduNexus LMS landing — full-width visual system */
+/* EduNexus landing — sage green glass (matches LMS dashboard) */
+
 .landing-page {
-  --lp-bg: #f8faff;
-  --lp-surface: #ffffff;
-  --lp-text: #0a0f1c;
-  --lp-muted: #5c6b8a;
-  --lp-border: rgba(148, 163, 184, 0.2);
-  --lp-sky: #0ea5e9;
-  --lp-indigo: #6366f1;
-  --lp-violet: #8b5cf6;
-  --lp-mint: #10b981;
-  --lp-amber: #f59e0b;
+  --lp-bg: #e2efe8;
+  --lp-surface: rgba(255, 255, 255, 0.78);
+  --lp-text: #1a3d32;
+  --lp-muted: #5c7a6e;
+  --lp-border: rgba(61, 139, 110, 0.22);
+  --lp-glass-border: rgba(255, 255, 255, 0.58);
+  --lp-primary: #40916c;
+  --lp-accent: #52b788;
+  --lp-teal: #74c69d;
+  --lp-forest: #2d6a4f;
+  --lp-deep: #1e4d3a;
+  --lp-mint: rgba(240, 252, 245, 0.75);
+  --lp-shadow: rgba(30, 77, 58, 0.12);
+  --lp-glow: rgba(82, 183, 136, 0.22);
   width: 100%;
   max-width: 100vw;
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
@@ -29,12 +34,12 @@
 }
 
 .landing-mesh {
-  background-color: #f8faff;
+  background-color: var(--lp-bg);
   background-image:
-    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.14) 0, transparent 55%),
-    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.12) 0, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0, transparent 55%),
-    radial-gradient(at 90% 40%, rgba(16, 185, 129, 0.07) 0, transparent 45%);
+    radial-gradient(at 0% 0%, rgba(82, 183, 136, 0.28) 0, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(64, 145, 108, 0.22) 0, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(149, 213, 178, 0.2) 0, transparent 55%),
+    radial-gradient(at 90% 40%, rgba(45, 106, 79, 0.12) 0, transparent 45%);
 }
 
 .landing-hero-bleed {
@@ -42,8 +47,8 @@
   width: 100%;
   min-height: calc(100vh - 5rem);
   background:
-    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(99, 102, 241, 0.12), transparent),
-    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(14, 165, 233, 0.1), transparent);
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(82, 183, 136, 0.18), transparent),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(116, 198, 157, 0.14), transparent);
 }
 
 .landing-hero-bleed::after {
@@ -53,12 +58,21 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, var(--lp-border), transparent);
 }
 
 .landing-band-dark {
   width: 100%;
-  background: linear-gradient(135deg, #0c1222 0%, #1e1b4b 40%, #0f172a 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(30, 77, 58, 0.92) 0%,
+    rgba(45, 106, 79, 0.88) 40%,
+    rgba(30, 77, 58, 0.94) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .landing-band-light {
@@ -66,7 +80,8 @@
   background: rgba(255, 255, 255, 0.55);
   border-top: 1px solid var(--lp-border);
   border-bottom: 1px solid var(--lp-border);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 
 .landing-grain::before {
@@ -75,92 +90,170 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.022;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
 }
 
 .landing-glass {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  border: 1px solid var(--lp-glass-border);
   box-shadow:
-    0 0 0 1px rgba(148, 163, 184, 0.06),
-    0 4px 24px rgba(15, 23, 42, 0.04),
-    0 24px 48px rgba(99, 102, 241, 0.07);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 28px var(--lp-shadow),
+    0 0 0 1px rgba(82, 183, 136, 0.06);
 }
 
 .landing-glass-dark {
-  background: rgba(12, 18, 34, 0.88);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 77, 58, 0.75);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .landing-gradient-text {
-  background: linear-gradient(135deg, #0284c7 0%, #4f46e5 42%, #7c3aed 78%, #c026d3 100%);
+  background: linear-gradient(135deg, #74c69d 0%, #52b788 42%, #40916c 78%, #2d6a4f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .landing-gradient-text-light {
-  background: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 50%, #e879f9 100%);
+  background: linear-gradient(135deg, #b8d4c4 0%, #95d5b2 50%, #74c69d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .landing-btn-primary {
-  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #74c69d 0%, #52b788 50%, #40916c 100%);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 8px 28px rgba(99, 102, 241, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 1px 2px rgba(30, 77, 58, 0.08),
+    0 8px 28px var(--lp-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .landing-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 4px 8px rgba(15, 23, 42, 0.08),
-    0 20px 44px rgba(99, 102, 241, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 4px 8px rgba(30, 77, 58, 0.1),
+    0 20px 44px var(--lp-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .landing-btn-outline {
-  border: 2px solid rgba(148, 163, 184, 0.35);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
+  border: 2px solid var(--lp-border);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--lp-text);
   transition: border-color 0.2s, background 0.2s, transform 0.2s;
 }
 
 .landing-btn-outline:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-  background: #fff;
+  border-color: rgba(82, 183, 136, 0.45);
+  background: rgba(255, 255, 255, 0.92);
   transform: translateY(-1px);
 }
 
 .landing-card {
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--lp-glass-border);
   border-radius: 1.25rem;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 8px 32px rgba(15, 23, 42, 0.04);
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 6px 20px var(--lp-shadow);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
 }
 
 .landing-card:hover {
   transform: translateY(-4px);
   box-shadow:
-    0 4px 8px rgba(15, 23, 42, 0.04),
-    0 24px 56px rgba(99, 102, 241, 0.12);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 40px var(--lp-shadow),
+    0 0 0 1px rgba(82, 183, 136, 0.1);
+}
+
+.landing-icon-box {
+  display: inline-flex;
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #ffffff 0%, #e8f5ee 100%);
+  border: 1px solid var(--lp-glass-border);
+  box-shadow:
+    0 4px 0 rgba(30, 77, 58, 0.06),
+    0 6px 14px var(--lp-shadow),
+    inset 0 2px 0 rgba(255, 255, 255, 0.95);
+  color: var(--lp-primary);
+}
+
+.landing-icon-box-filled {
+  display: inline-flex;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--lp-accent) 0%, var(--lp-primary) 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 20px var(--lp-glow);
+}
+
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--lp-border);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--lp-forest);
+}
+
+.landing-tag {
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--lp-mint);
+  border: 1px solid var(--lp-border);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--lp-forest);
+}
+
+.landing-pill {
+  border-radius: 0.75rem;
+  border: 1px solid var(--lp-border);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--lp-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.landing-pill:hover {
+  border-color: rgba(82, 183, 136, 0.4);
+  box-shadow: 0 4px 12px var(--lp-shadow);
 }
 
 .landing-stat-divider {
   width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.35), transparent);
+  background: linear-gradient(180deg, transparent, var(--lp-border), transparent);
 }
+
+.landing-text-primary { color: var(--lp-text); }
+.landing-text-muted { color: var(--lp-muted); }
+.landing-text-accent { color: var(--lp-primary); }
 
 @keyframes landing-float {
   0%, 100% { transform: translateY(0); }
@@ -182,12 +275,7 @@
 .landing-float-delay { animation-delay: 1.5s; }
 
 .landing-shine {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.45) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: landing-shine 3s ease-in-out infinite;
 }
@@ -204,42 +292,56 @@
 }
 
 .landing-timeline-line {
-  background: linear-gradient(180deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+  background: linear-gradient(180deg, #74c69d 0%, #52b788 50%, #40916c 100%);
 }
 
 .landing-course-card {
-  background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.9) 100%);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 252, 245, 0.85) 100%);
+  border: 1px solid var(--lp-border);
   border-radius: 1rem;
 }
 
 .landing-progress-bar {
   height: 6px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(61, 139, 110, 0.15);
   overflow: hidden;
 }
 
 .landing-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+  background: linear-gradient(90deg, #74c69d, #40916c);
 }
 
-.landing-flip-scene {
-  perspective: 900px;
+.landing-audience-card {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 0.25s, background 0.25s;
 }
 
-.landing-flip-card {
-  transform-style: preserve-3d;
+.landing-audience-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
 }
 
+.landing-footer {
+  border-top: 1px solid var(--lp-border);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.landing-flip-scene { perspective: 900px; }
+.landing-flip-card { transform-style: preserve-3d; }
 .landing-flip-face {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* 5D infinity logo scene */
 .landing-infinity-5d-scene {
   perspective: 1600px;
   perspective-origin: 50% 42%;

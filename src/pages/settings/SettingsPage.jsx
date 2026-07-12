@@ -11,7 +11,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import Input, { CheckboxField } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
-import { cn } from '@/utils/format'
+import { HubPageShell, SettingsNav } from '@/components/hub/HubWidgets'
 
 export default function SettingsPage() {
   const { section = 'general' } = useParams()
@@ -44,30 +44,20 @@ export default function SettingsPage() {
   const settings = unwrapData(data) || {}
 
   return (
-    <div className="w-full">
+    <HubPageShell>
       <Breadcrumb items={[{ label: 'Settings' }, { label: currentSection.label }]} />
       <PageHeader title="System Settings" subtitle="Configure platform settings (Super Admin only)" />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        <Card padding className="p-3 lg:col-span-3 xl:col-span-2">
-          <nav className="space-y-1">
-            {SETTINGS_SECTIONS.map((s) => (
-              <Link
-                key={s.key}
-                to={`/settings/${s.key}`}
-                className={cn(
-                  'block rounded-xl px-4 py-2.5 text-sm font-medium transition',
-                  section === s.key ? 'gradient-primary text-white' : 'text-muted hover:bg-slate-100 hover:text-text',
-                )}
-              >
-                {s.label}
-              </Link>
-            ))}
-          </nav>
+        <Card padding className="lms-form-card p-3 lg:col-span-3 xl:col-span-2">
+          <SettingsNav
+            items={SETTINGS_SECTIONS.map((s) => ({ key: s.key, label: s.label, href: `/settings/${s.key}` }))}
+            activeKey={section}
+          />
         </Card>
 
-        <Card className="lg:col-span-9 xl:col-span-10">
-          <h3 className="text-lg font-semibold mb-4">{currentSection.label} Settings</h3>
+        <Card className="lms-form-card lg:col-span-9 xl:col-span-10">
+          <h3 className="text-lg font-semibold mb-4 text-[var(--clay-primary)]">{currentSection.label} Settings</h3>
           <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Object.keys(settings).map((key) => {
               const val = settings[key]
@@ -83,12 +73,12 @@ export default function SettingsPage() {
                 />
               )
             })}
-            <div className="sm:col-span-2 lg:col-span-3 flex gap-3 pt-2">
+            <div className="sm:col-span-2 lg:col-span-3 flex gap-3 pt-2 border-t border-[var(--clay-border)]">
               <Button type="submit" loading={mutation.isPending}>Save Settings</Button>
             </div>
           </form>
         </Card>
       </div>
-    </div>
+    </HubPageShell>
   )
 }

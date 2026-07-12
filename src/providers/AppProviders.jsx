@@ -28,9 +28,9 @@ export default function AppProviders({ children }) {
                 duration: 4000,
                 style: {
                   borderRadius: '12px',
-                  background: '#fff',
-                  color: '#0f172a',
-                  border: '1px solid #e2e8f0',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  color: '#1a3d32',
+                  border: '1px solid #c5d9cc',
                 },
               }}
             />

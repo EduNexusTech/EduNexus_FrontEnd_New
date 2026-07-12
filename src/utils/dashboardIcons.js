@@ -1,0 +1,56 @@
+import {
+  FiUserPlus,
+  FiUsers,
+  FiClipboard,
+  FiDollarSign,
+  FiPercent,
+  FiTruck,
+  FiHome,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiBell,
+  FiCalendar,
+  FiBriefcase,
+  FiBook,
+  FiLayers,
+  FiFileText,
+  FiSettings,
+  FiGrid,
+} from 'react-icons/fi'
+
+export const DASHBOARD_ACTION_ICONS = {
+  staff: FiUsers,
+  student: FiUserPlus,
+  students: FiUsers,
+  teacher: FiUsers,
+  attendance: FiClipboard,
+  fees: FiDollarSign,
+  discount: FiPercent,
+  transport: FiTruck,
+  boarding: FiHome,
+  income: FiTrendingUp,
+  expense: FiTrendingDown,
+  notice: FiBell,
+  admissions: FiFileText,
+  organization: FiBriefcase,
+  school: FiBook,
+  user: FiUsers,
+  audit: FiFileText,
+  masters: FiLayers,
+  settings: FiSettings,
+  org: FiBriefcase,
+  orgs: FiBriefcase,
+  schools: FiBook,
+  roles: FiSettings,
+  academics: FiBook,
+  'ai-hub': FiGrid,
+  post: FiBell,
+  parents: FiUsers,
+  communications: FiBell,
+  default: FiCalendar,
+}
+
+export function resolveActionIcon(action) {
+  const key = action?.icon || action?.key || 'default'
+  return DASHBOARD_ACTION_ICONS[key] || DASHBOARD_ACTION_ICONS.default
+}

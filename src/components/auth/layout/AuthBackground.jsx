@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 
 const BLOBS = [
-  { className: 'auth-animate-blob -left-24 -top-24 h-80 w-80 bg-blue-400/15' },
-  { className: 'auth-animate-blob-delayed -right-20 top-1/4 h-72 w-72 bg-cyan-400/12' },
-  { className: 'auth-animate-blob bottom-0 left-1/3 h-96 w-96 bg-teal-400/10' },
+  { className: 'auth-animate-blob -left-24 -top-24 h-80 w-80 bg-[#52b788]/20' },
+  { className: 'auth-animate-blob-delayed -right-20 top-1/4 h-72 w-72 bg-[#74c69d]/18' },
+  { className: 'auth-animate-blob bottom-0 left-1/3 h-96 w-96 bg-[#40916c]/14' },
 ]
 
 const CIRCLES = [
@@ -24,7 +24,7 @@ export default function AuthBackground() {
       {CIRCLES.map((c, i) => (
         <div
           key={i}
-          className="auth-animate-circle absolute rounded-full bg-blue-400/25 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+          className="auth-animate-circle absolute rounded-full bg-[#74c69d]/30 shadow-[0_0_20px_rgba(82,183,136,0.25)]"
           style={{
             top: c.top,
             left: c.left,
@@ -36,7 +36,7 @@ export default function AuthBackground() {
       ))}
 
       <svg
-        className="auth-animate-wave absolute bottom-0 left-0 w-full text-cyan-400/20"
+        className="auth-animate-wave absolute bottom-0 left-0 w-full text-[#74c69d]/25"
         viewBox="0 0 1440 200"
         preserveAspectRatio="none"
         fill="currentColor"
@@ -45,7 +45,7 @@ export default function AuthBackground() {
       </svg>
 
       <svg
-        className="auth-animate-wave absolute bottom-8 left-0 w-full text-blue-400/15"
+        className="auth-animate-wave absolute bottom-8 left-0 w-full text-[#52b788]/18"
         viewBox="0 0 1440 160"
         preserveAspectRatio="none"
         fill="currentColor"
@@ -60,7 +60,7 @@ export default function AuthBackground() {
 export function AuthBackgroundFade({ children }) {
   return (
     <motion.div
-      className="auth-login-root auth-page-gradient font-sans"
+      className="auth-login-root clay-app auth-page-gradient font-sans"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}

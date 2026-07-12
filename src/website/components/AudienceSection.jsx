@@ -18,14 +18,14 @@ export default function AudienceSection() {
           viewport={{ once: true }}
           className="mx-auto max-w-4xl text-center"
         >
-          <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-sky-400">
+          <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#95d5b2]">
             Built for every role
           </span>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl">
             One LMS.{' '}
             <span className="landing-gradient-text-light">Learners, educators & admins.</span>
           </h2>
-          <p className="mt-5 text-lg font-semibold text-slate-400">
+          <p className="mt-5 text-lg font-semibold text-white/70">
             Tailored experiences for how each person interacts with your institution.
           </p>
         </motion.div>
@@ -40,14 +40,14 @@ export default function AudienceSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/8"
+                className="landing-audience-card group relative overflow-hidden p-8"
               >
                 <div className={`inline-flex rounded-2xl bg-gradient-to-br ${item.gradient} p-4 text-white shadow-xl`}>
                   <Icon className="h-7 w-7" />
                 </div>
-                <p className="mt-6 text-xs font-extrabold uppercase tracking-wider text-slate-400">{item.subtitle}</p>
+                <p className="mt-6 text-xs font-extrabold uppercase tracking-wider text-white/55">{item.subtitle}</p>
                 <h3 className="mt-2 text-2xl font-extrabold text-white">{item.title}</h3>
-                <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-400">{item.description}</p>
+                <p className="mt-4 text-sm font-semibold leading-relaxed text-white/65">{item.description}</p>
                 <div className={`pointer-events-none absolute -bottom-12 -right-12 h-40 w-40 rounded-full bg-gradient-to-br ${item.gradient} opacity-10 blur-2xl transition group-hover:opacity-20`} />
               </motion.article>
             )

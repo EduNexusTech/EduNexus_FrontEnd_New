@@ -9,12 +9,12 @@ const LINKS = [
 
 export default function AuthFooter() {
   return (
-    <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-[#E5E7EB] pt-4">
+    <footer className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-[var(--clay-border)] pt-4">
       {LINKS.map((link) => (
         <Link
           key={link.label}
           to={link.href}
-          className="text-xs font-medium text-[#6B7280] transition hover:text-[#2563EB] hover:underline"
+          className="text-xs font-medium text-[var(--clay-primary-soft)] transition hover:text-[var(--clay-teal)] hover:underline"
         >
           {link.label}
         </Link>

@@ -37,8 +37,9 @@ export default function AuthButton({
       disabled={disabled || loading}
       onClick={handleClick}
       className={cn(
-        'auth-btn-gradient relative flex h-[60px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl text-base font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200',
-        'hover:shadow-xl hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60',
+        'auth-btn-gradient relative flex h-[60px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl text-base font-semibold text-white shadow-lg transition-all duration-200',
+        'hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60',
+        'shadow-[0_8px_24px_rgba(64,145,108,0.28)] hover:shadow-[0_10px_28px_rgba(64,145,108,0.35)]',
         className,
       )}
       whileHover={!loading && !disabled ? { scale: 1.01 } : undefined}

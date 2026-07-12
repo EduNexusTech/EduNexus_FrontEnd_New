@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
@@ -8,8 +8,12 @@ import { Drawer } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Feedback'
 import { formatDateTime, fromNow } from '@/utils/format'
 import toast from 'react-hot-toast'
+import { resolvePageTitle } from '@/utils/pageTitle'
+import '@/styles/dashboard-clay.css'
 
 export default function Header({ onMenuClick }) {
+  const location = useLocation()
+  const pageTitle = resolvePageTitle(location.pathname)
   const { user, logout, isSchoolAdmin } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -49,31 +53,36 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-white/80 glass px-4 lg:px-6">
-        <div className="flex items-center gap-3">
+      <header className="clay-app clay-header-bar sticky top-0 z-30 flex h-12 shrink-0 items-center justify-between gap-3 px-4 lg:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
           <button
+            type="button"
             onClick={onMenuClick}
-            className="lg:hidden rounded-xl p-2 text-muted hover:bg-slate-100 hover:text-text"
+            className="clay-icon-btn p-2 lg:hidden"
           >
-            <FiMenu className="h-5 w-5" />
+            <FiMenu className="h-4 w-4" />
           </button>
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 w-72">
-            <FiSearch className="h-4 w-4 text-muted" />
+          <h1 className="truncate text-base font-semibold text-[var(--clay-primary)] md:text-lg">{pageTitle}</h1>
+        </div>
+
+        <div className="hidden max-w-sm flex-1 md:flex">
+          <div className="clay-search flex w-full items-center gap-2 px-3 py-2">
+            <FiSearch className="h-3.5 w-3.5 shrink-0 text-[var(--clay-primary-soft)]" />
             <input
               type="search"
-              placeholder="Search..."
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
+              placeholder="Search modules, users, schools..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--clay-primary-soft)]"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {!isSchoolAdmin ? (
             <>
               <Link
                 to="/ai-hub"
                 title="AI Hub"
-                className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+                className="clay-icon-btn p-2.5 transition"
               >
                 <FiZap className="h-5 w-5" />
               </Link>
@@ -81,7 +90,7 @@ export default function Header({ onMenuClick }) {
               <Link
                 to="/edu-nexus-post"
                 title="EduNexus Mailer"
-                className="rounded-xl p-2.5 text-muted transition hover:bg-slate-100 hover:text-primary"
+                className="clay-icon-btn p-2.5 transition"
               >
                 <FiMail className="h-5 w-5" />
               </Link>
@@ -89,8 +98,9 @@ export default function Header({ onMenuClick }) {
           ) : null}
 
           <button
+            type="button"
             onClick={() => setNotifOpen(true)}
-            className="relative rounded-xl p-2.5 text-muted hover:bg-slate-100 hover:text-text transition"
+            className="clay-icon-btn relative p-2.5"
             title="Notifications"
           >
             <FiBell className="h-5 w-5" />
@@ -103,8 +113,9 @@ export default function Header({ onMenuClick }) {
 
           <div className="relative">
             <button
+              type="button"
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 rounded-xl p-1.5 pr-3 hover:bg-slate-100 transition"
+              className="clay-icon-btn flex items-center gap-2 p-1.5 pr-3"
             >
               <Avatar name={displayName} src={user?.profile_image} size="sm" />
               <span className="hidden sm:block text-sm font-medium text-text max-w-[120px] truncate">
@@ -116,15 +127,15 @@ export default function Header({ onMenuClick }) {
             {profileOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-border bg-white card-shadow py-2">
-                  <div className="px-4 py-2 border-b border-border">
-                    <p className="text-sm font-semibold truncate">{displayName}</p>
-                    <p className="text-xs text-muted truncate">{user?.email}</p>
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-[var(--clay-border)] bg-white/95 backdrop-blur-md py-2 card-shadow">
+                  <div className="px-4 py-2 border-b border-[var(--clay-border)]">
+                    <p className="text-sm font-semibold truncate text-[var(--clay-primary)]">{displayName}</p>
+                    <p className="text-xs text-[var(--clay-primary-soft)] truncate">{user?.email}</p>
                   </div>
                   <Link
                     to="/profile"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-slate-50"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
                   >
                     <FiUser className="h-4 w-4" /> Profile
                   </Link>
@@ -132,7 +143,7 @@ export default function Header({ onMenuClick }) {
                     <Link
                       to="/school-profile"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-slate-50"
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
                     >
                       <FiBook className="h-4 w-4" /> School Profile
                     </Link>
@@ -140,7 +151,7 @@ export default function Header({ onMenuClick }) {
                   <Link
                     to="/change-password"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-slate-50"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
                   >
                     <FiKey className="h-4 w-4" /> Change Password
                   </Link>
@@ -163,7 +174,7 @@ export default function Header({ onMenuClick }) {
           {unreadCount > 0 && (
             <button
               onClick={() => markAllMutation.mutate()}
-              className="text-sm text-primary font-medium hover:underline"
+              className="text-sm text-[var(--clay-teal)] font-medium hover:underline"
             >
               Mark all read
             </button>
@@ -176,7 +187,7 @@ export default function Header({ onMenuClick }) {
             notifications.map((n) => (
               <div
                 key={n.id}
-                className={`rounded-xl border p-4 ${n.is_read ? 'border-border bg-white' : 'border-primary/20 bg-primary/5'}`}
+                className={`rounded-xl border p-4 ${n.is_read ? 'border-[var(--clay-border)] bg-white' : 'border-[var(--clay-accent)]/30 bg-[var(--clay-mint-light)]'}`}
               >
                 <p className="font-medium text-sm">{n.title}</p>
                 <p className="text-sm text-muted mt-1">{n.message}</p>

@@ -1,0 +1,81 @@
+/** Resolve human-readable page title from the current route. */
+const ROUTE_TITLES = [
+  { pattern: /^\/dashboard$/, title: 'Dashboard' },
+  { pattern: /^\/profile$/, title: 'Profile' },
+  { pattern: /^\/change-password$/, title: 'Change Password' },
+  { pattern: /^\/school-profile$/, title: 'School Profile' },
+  { pattern: /^\/school-settings/, title: 'School Settings' },
+  { pattern: /^\/school-masters/, title: 'School Masters' },
+  { pattern: /^\/organizations\/new$/, title: 'New Organization' },
+  { pattern: /^\/organizations\/[^/]+\/edit$/, title: 'Edit Organization' },
+  { pattern: /^\/organizations\/[^/]+$/, title: 'Organization Details' },
+  { pattern: /^\/organizations$/, title: 'Organizations' },
+  { pattern: /^\/schools\/new$/, title: 'New School' },
+  { pattern: /^\/schools\/[^/]+\/profile$/, title: 'School Profile' },
+  { pattern: /^\/schools\/[^/]+\/edit$/, title: 'Edit School' },
+  { pattern: /^\/schools\/[^/]+$/, title: 'School Details' },
+  { pattern: /^\/schools$/, title: 'Schools' },
+  { pattern: /^\/students\/new$/, title: 'New Student' },
+  { pattern: /^\/students\/[^/]+\/edit$/, title: 'Edit Student' },
+  { pattern: /^\/students\/[^/]+$/, title: 'Student Details' },
+  { pattern: /^\/students$/, title: 'Students' },
+  { pattern: /^\/teachers\/new$/, title: 'New Teacher' },
+  { pattern: /^\/teachers\/[^/]+\/edit$/, title: 'Edit Teacher' },
+  { pattern: /^\/teachers\/[^/]+$/, title: 'Teacher Details' },
+  { pattern: /^\/teachers$/, title: 'Teachers' },
+  { pattern: /^\/parents\/new$/, title: 'New Parent' },
+  { pattern: /^\/parents\/[^/]+\/edit$/, title: 'Edit Parent' },
+  { pattern: /^\/parents\/[^/]+$/, title: 'Parent Details' },
+  { pattern: /^\/parents$/, title: 'Parents' },
+  { pattern: /^\/staff\/new$/, title: 'New Staff' },
+  { pattern: /^\/staff\/[^/]+\/edit$/, title: 'Edit Staff' },
+  { pattern: /^\/staff\/[^/]+$/, title: 'Staff Details' },
+  { pattern: /^\/staff$/, title: 'Staff' },
+  { pattern: /^\/admissions/, title: 'Admissions' },
+  { pattern: /^\/communications/, title: 'Communications' },
+  { pattern: /^\/users\/new$/, title: 'New User' },
+  { pattern: /^\/users\/[^/]+\/edit$/, title: 'Edit User' },
+  { pattern: /^\/users\/[^/]+$/, title: 'User Details' },
+  { pattern: /^\/users$/, title: 'Users' },
+  { pattern: /^\/roles\/new$/, title: 'New Role' },
+  { pattern: /^\/roles\/[^/]+\/permissions$/, title: 'Role Permissions' },
+  { pattern: /^\/roles\/[^/]+\/edit$/, title: 'Edit Role' },
+  { pattern: /^\/roles$/, title: 'Roles' },
+  { pattern: /^\/permissions\/matrix$/, title: 'Permission Matrix' },
+  { pattern: /^\/permissions\/new$/, title: 'New Permission' },
+  { pattern: /^\/permissions\/[^/]+\/edit$/, title: 'Edit Permission' },
+  { pattern: /^\/permissions$/, title: 'Permissions' },
+  { pattern: /^\/menus/, title: 'Menus' },
+  { pattern: /^\/modules/, title: 'Modules' },
+  { pattern: /^\/memberships/, title: 'Memberships' },
+  { pattern: /^\/user-roles/, title: 'User Roles' },
+  { pattern: /^\/masters/, title: 'Masters Hub' },
+  { pattern: /^\/academics/, title: 'Academic Structure' },
+  { pattern: /^\/audit-logs\/[^/]+$/, title: 'Audit Log Details' },
+  { pattern: /^\/audit-logs$/, title: 'Audit Logs' },
+  { pattern: /^\/notifications$/, title: 'Notifications' },
+  { pattern: /^\/settings/, title: 'Settings' },
+  { pattern: /^\/school-users/, title: 'School Users' },
+  { pattern: /^\/edu-nexus-post$/, title: 'EduNexus Post' },
+  { pattern: /^\/ai-hub\/assistant$/, title: 'Nexus AI Assistant' },
+  { pattern: /^\/ai-hub\/automations$/, title: 'Automations' },
+  { pattern: /^\/ai-hub$/, title: 'AI Hub' },
+]
+
+function formatSegment(segment) {
+  if (!segment) return 'Dashboard'
+  return segment
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+export function resolvePageTitle(pathname = '') {
+  const path = (pathname || '/dashboard').replace(/\/$/, '') || '/dashboard'
+
+  for (const { pattern, title } of ROUTE_TITLES) {
+    if (pattern.test(path)) return title
+  }
+
+  const segment = path.split('/').filter(Boolean)[0]
+  return formatSegment(segment)
+}

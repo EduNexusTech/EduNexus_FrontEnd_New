@@ -104,19 +104,19 @@ export default function ResourceListPage({
                 <button
                   type="button"
                   onClick={() => onView(item, id)}
-                  className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary"
+                  className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]"
                   title="View details"
                 >
                   <FiEye className="h-4 w-4" />
                 </button>
               ) : (
-                <Link to={`${basePath}/${id}`} className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary" title="View details">
+                <Link to={`${basePath}/${id}`} className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]" title="View details">
                   <FiEye className="h-4 w-4" />
                 </Link>
               )}
               {basePath.includes('/audit-logs') || basePath.includes('/notifications') ? null : (
                 <>
-                  <Link to={`${basePath}/${id}/edit`} className="rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-primary">
+                  <Link to={`${basePath}/${id}/edit`} className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]">
                     <FiEdit2 className="h-4 w-4" />
                   </Link>
                   {deleteFn && (
@@ -163,7 +163,7 @@ export default function ResourceListPage({
   if (error) return <ErrorState message={getErrorMessage(error, 'Failed to load data')} onRetry={refetch} />
 
   return (
-    <div className="w-full">
+    <div className="lms-page w-full">
       <Breadcrumb items={breadcrumb || [{ label: title }]} />
       <PageHeader
         title={title}
@@ -186,10 +186,10 @@ export default function ResourceListPage({
         }
       />
 
-      <Card padding={false} className="relative p-4">
+      <Card padding={false} className="relative p-4 lms-form-card">
         {isFetching && !isLoading && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-t-xl bg-slate-100">
-            <div className="h-full w-1/3 animate-pulse bg-primary/70" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-t-xl bg-[var(--clay-mint-light)]">
+            <div className="h-full w-1/3 animate-pulse bg-[var(--clay-accent)]" />
           </div>
         )}
         <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">

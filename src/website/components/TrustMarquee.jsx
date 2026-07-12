@@ -4,20 +4,20 @@ export default function TrustMarquee() {
   const items = [...TRUST_ITEMS, ...TRUST_ITEMS]
 
   return (
-    <section className="w-full overflow-hidden bg-white py-10">
-      <p className="landing-wrap mb-8 text-center text-xs font-extrabold uppercase tracking-[0.22em] text-slate-400">
+    <section className="w-full overflow-hidden bg-white/50 py-10 backdrop-blur-sm">
+      <p className="landing-wrap mb-8 text-center text-xs font-extrabold uppercase tracking-[0.22em] landing-text-muted">
         Full LMS + institutional platform
       </p>
       <div className="relative w-full">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent sm:w-32" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent sm:w-32" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--lp-bg)] to-transparent sm:w-32" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--lp-bg)] to-transparent sm:w-32" />
         <div className="landing-marquee gap-6">
           {items.map((item, i) => (
             <span
               key={`${item}-${i}`}
-              className="mx-2 inline-flex items-center gap-2.5 whitespace-nowrap rounded-full border border-slate-200/90 bg-slate-50 px-7 py-3 text-sm font-extrabold text-slate-700 shadow-sm"
+              className="landing-pill mx-2 inline-flex items-center gap-2.5 whitespace-nowrap px-7 py-3 shadow-sm"
             >
-              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-sky-500 to-violet-500" />
+              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-[#74c69d] to-[#40916c]" />
               {item}
             </span>
           ))}

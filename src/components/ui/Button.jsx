@@ -1,11 +1,11 @@
 import { cn } from '@/utils/format'
 
 const variants = {
-  primary: 'gradient-primary text-white hover:opacity-95 shadow-md shadow-primary/20',
-  secondary: 'bg-white text-text border border-border hover:bg-slate-50',
+  primary: 'lms-btn-primary shadow-sm hover:opacity-95',
+  secondary: 'lms-btn-secondary',
   danger: 'bg-danger text-white hover:bg-red-600',
-  ghost: 'bg-transparent text-muted hover:bg-slate-100 hover:text-text',
-  outline: 'border-2 border-primary text-primary hover:bg-primary/5',
+  ghost: 'bg-transparent text-[var(--clay-primary-soft)] hover:bg-[var(--clay-mint-light)] hover:text-[var(--clay-primary)]',
+  outline: 'border border-[var(--clay-sidebar,#8fb5a0)] text-[var(--clay-primary,#3f5249)] hover:bg-[var(--clay-mint-light,#f4f8f6)]',
 }
 
 const sizes = {
@@ -29,7 +29,7 @@ export default function Button({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         className,

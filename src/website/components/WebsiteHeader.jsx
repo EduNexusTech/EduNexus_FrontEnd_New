@@ -26,16 +26,16 @@ export default function WebsiteHeader({ isAuthenticated }) {
       <div className={`landing-wrap transition-all duration-300 ${scrolled ? 'py-2' : 'py-4'}`}>
         <div
           className={`flex h-14 w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:h-16 sm:px-6 lg:px-8 ${
-            scrolled ? 'landing-glass shadow-xl' : 'bg-white/40 backdrop-blur-md'
+            scrolled ? 'landing-glass shadow-xl' : 'bg-white/45 backdrop-blur-md border border-[var(--lp-glass-border)]'
           }`}
         >
           <Link to="/" className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-indigo-500/20 sm:h-11 sm:w-11">
+            <div className="landing-icon-box relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden sm:h-11 sm:w-11">
               <img src="/edunexus-infinity-logo.png" alt="" className="h-full w-full object-cover object-top scale-150" />
             </div>
             <div>
-              <span className="block text-lg font-extrabold tracking-tight text-slate-900">{WEBSITE.name}</span>
-              <span className="hidden text-[10px] font-bold uppercase tracking-wider text-indigo-600 sm:block">Learning Platform</span>
+              <span className="block text-lg font-extrabold tracking-tight landing-text-primary">{WEBSITE.name}</span>
+              <span className="hidden text-[10px] font-bold uppercase tracking-wider landing-text-accent sm:block">Learning Platform</span>
             </div>
           </Link>
 
@@ -44,7 +44,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-white/70 hover:text-slate-900"
+                className="rounded-xl px-4 py-2.5 text-sm font-bold landing-text-muted transition hover:bg-white/70 hover:landing-text-primary"
               >
                 {item.label}
               </a>
@@ -64,7 +64,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-xl p-2.5 text-slate-700 lg:hidden"
+            className="rounded-xl p-2.5 landing-text-primary lg:hidden"
             aria-label="Menu"
           >
             {mobileOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
@@ -82,7 +82,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-xl px-4 py-3.5 text-sm font-bold text-slate-700"
+                className="block rounded-xl px-4 py-3.5 text-sm font-bold landing-text-primary"
               >
                 {item.label}
               </a>

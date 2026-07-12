@@ -1,8 +1,13 @@
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import AuthLayout from '@/components/auth/layout/AuthLayout'
+import AuthCard from '@/components/auth/ui/AuthCard'
+import AuthButton from '@/components/auth/ui/AuthButton'
+import { AuthInput } from '@/components/auth/ui/AuthInput'
+import BrandLogo from '@/components/auth/ui/BrandLogo'
+import { FiMail } from 'react-icons/fi'
+import '@/components/auth/auth.css'
 
 export default function ForgotPasswordPage() {
   const { register, handleSubmit, formState: { isSubmitting } } = useForm()
@@ -12,16 +17,34 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-8">
-      <div className="w-full max-w-md rounded-2xl bg-white border border-border card-shadow p-8">
-        <h2 className="text-2xl font-bold text-text">Forgot password</h2>
-        <p className="mt-2 text-muted text-sm">Enter your email and we'll send reset instructions.</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <Input label="Email" type="email" required {...register('email', { required: true })} />
-          <Button type="submit" loading={isSubmitting} className="w-full">Send reset link</Button>
-          <Link to="/login" className="block text-center text-sm text-primary hover:underline">Back to login</Link>
+    <AuthLayout>
+      <AuthCard>
+        <div className="mb-5 text-center">
+          <BrandLogo variant="full" size="md" className="mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-[var(--clay-primary)]">Forgot password</h2>
+          <p className="mt-2 text-sm text-[var(--clay-primary-soft)]">
+            Enter your email and we&apos;ll send reset instructions.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <AuthInput
+            id="forgot-email"
+            label="Email address"
+            type="email"
+            icon={FiMail}
+            {...register('email', { required: true })}
+          />
+          <AuthButton type="submit" loading={isSubmitting}>
+            Send reset link
+          </AuthButton>
+          <Link
+            to="/login"
+            className="block text-center text-sm font-semibold text-[var(--clay-teal)] hover:underline"
+          >
+            Back to login
+          </Link>
         </form>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   )
 }

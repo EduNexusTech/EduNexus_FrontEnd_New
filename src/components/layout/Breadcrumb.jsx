@@ -2,22 +2,22 @@ import { Link, useLocation } from 'react-router-dom'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
 
 export default function Breadcrumb({ items = [] }) {
-  const location = useLocation()
-
   return (
-    <nav className="flex items-center gap-1 text-sm text-muted mb-6">
-      <Link to="/dashboard" className="flex items-center hover:text-primary transition">
-        <FiHome className="h-4 w-4" />
+    <nav className="clay-breadcrumb clay-app mb-5 flex items-center gap-1 text-sm">
+      <Link to="/dashboard" className="clay-icon-3d flex h-8 w-8 items-center justify-center transition hover:scale-105">
+        <FiHome className="h-4 w-4 text-[var(--clay-primary)]" />
       </Link>
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1">
-          <FiChevronRight className="h-3 w-3" />
+          <FiChevronRight className="h-3 w-3 text-[var(--clay-primary-soft)]" />
           {item.href && i < items.length - 1 ? (
-            <Link to={item.href} className="hover:text-primary transition">
+            <Link to={item.href} className="font-medium transition hover:text-[var(--clay-primary)]">
               {item.label}
             </Link>
           ) : (
-            <span className={i === items.length - 1 ? 'text-text font-medium' : ''}>{item.label}</span>
+            <span className={i === items.length - 1 ? 'font-semibold text-[var(--clay-primary)]' : ''}>
+              {item.label}
+            </span>
           )}
         </span>
       ))}

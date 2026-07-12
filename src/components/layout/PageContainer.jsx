@@ -6,7 +6,7 @@ import { cn } from '@/utils/format'
  */
 export default function PageContainer({ children, className }) {
   return (
-    <div className={cn('w-full min-h-full', className)}>
+    <div className={cn('clay-app lms-page w-full min-h-full', className)}>
       {children}
     </div>
   )

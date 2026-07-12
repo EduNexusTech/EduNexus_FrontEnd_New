@@ -30,7 +30,7 @@ export default function DataTable({
                 type="checkbox"
                 checked={t.getIsAllPageRowsSelected()}
                 onChange={t.getToggleAllPageRowsSelectedHandler()}
-                className="rounded border-border"
+                className="rounded border-[var(--clay-border)] text-[var(--clay-teal)] focus:ring-[var(--clay-accent)]/25"
               />
             ),
             cell: ({ row }) => (
@@ -38,7 +38,7 @@ export default function DataTable({
                 type="checkbox"
                 checked={row.getIsSelected()}
                 onChange={row.getToggleSelectedHandler()}
-                className="rounded border-border"
+                className="rounded border-[var(--clay-border)] text-[var(--clay-teal)] focus:ring-[var(--clay-accent)]/25"
               />
             ),
             size: 40,
@@ -59,15 +59,15 @@ export default function DataTable({
   if (!data.length) return <EmptyState title="No records found" description="Try adjusting your search or filters." />
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
-      <table className="w-full min-w-[640px] text-sm">
-        <thead className={cn('bg-slate-50', stickyHeader && 'sticky top-0 z-10')}>
+    <div className="lms-table-wrap">
+      <table>
+        <thead className={cn(stickyHeader && 'sticky top-0 z-10')}>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
               {hg.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted border-b border-border"
+                  className="text-left"
                   style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                 >
                   {header.isPlaceholder ? null : (
@@ -98,11 +98,11 @@ export default function DataTable({
             </tr>
           ))}
         </thead>
-        <tbody className="divide-y divide-border bg-white">
+        <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-slate-50/80 transition">
+            <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 text-text">
+                <td key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -126,7 +126,7 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded-lg border border-border px-2 py-1.5 text-sm"
+          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] bg-white px-2 py-1.5 text-sm text-[var(--clay-primary,#3f5249)]"
         >
           {[10, 20, 50, 100].map((n) => (
             <option key={n} value={n}>
@@ -137,14 +137,14 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
         <button
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-40 hover:bg-slate-50"
+          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] px-3 py-1.5 text-sm text-[var(--clay-primary,#3f5249)] disabled:opacity-40 hover:bg-[var(--clay-mint-light,#f4f8f6)]"
         >
           Previous
         </button>
         <button
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-40 hover:bg-slate-50"
+          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] px-3 py-1.5 text-sm text-[var(--clay-primary,#3f5249)] disabled:opacity-40 hover:bg-[var(--clay-mint-light,#f4f8f6)]"
         >
           Next
         </button>
@@ -160,7 +160,7 @@ export function SearchBox({ value, onChange, placeholder = 'Search...' }) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full sm:w-72 rounded-xl border border-border bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+      className="lms-search w-full sm:w-72"
     />
   )
 }

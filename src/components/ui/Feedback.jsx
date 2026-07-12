@@ -35,11 +35,11 @@ export function TableSkeleton({ rows = 5, cols = 5 }) {
 export function EmptyState({ title = 'No data found', description, action, icon: Icon = FiInbox }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="rounded-2xl bg-slate-100 p-4 mb-4">
-        <Icon className="h-8 w-8 text-muted" />
+      <div className="clay-icon-3d mb-4 flex h-14 w-14 items-center justify-center">
+        <Icon className="h-7 w-7 text-[var(--clay-teal)]" />
       </div>
-      <h3 className="text-lg font-semibold text-text">{title}</h3>
-      {description && <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>}
+      <h3 className="text-lg font-semibold text-[var(--clay-primary)]">{title}</h3>
+      {description && <p className="mt-1 max-w-sm text-sm text-[var(--clay-primary-soft)]">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   )
@@ -67,7 +67,9 @@ export function StatusBadge({ active, label }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-muted'
+        isActive
+          ? 'bg-[var(--clay-mint-light,rgba(240,252,245,0.75))] text-[var(--clay-teal,#40916c)] border border-[var(--clay-border)]'
+          : 'bg-white/70 text-[var(--clay-primary-soft)] border border-[var(--clay-border)]'
       }`}
     >
       {label || (isActive ? 'Active' : 'Inactive')}

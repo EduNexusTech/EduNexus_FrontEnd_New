@@ -10,7 +10,6 @@ import {
   FiSettings,
   FiFileText,
   FiBell,
-  FiChevronLeft,
   FiLayers,
   FiBook,
   FiClipboard,
@@ -20,9 +19,10 @@ import {
   FiMessageSquare,
   FiZap,
 } from 'react-icons/fi'
-import { APP_NAME } from '@/config/constants'
 import { useAuth } from '@/contexts/AuthContext'
+import { Avatar } from '@/components/ui/Feedback'
 import { cn } from '@/utils/format'
+import '@/styles/dashboard-clay.css'
 
 const iconMap = {
   dashboard: FiGrid,
@@ -207,83 +207,70 @@ function isNavItemActive(pathname, itemPath) {
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`)
 }
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
+function NavItem({ item, onMobileClose, active }) {
+  const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
+
+  return (
+    <NavLink
+      to={item.path}
+      onClick={onMobileClose}
+      className={cn(
+        'clay-nav-item mb-1 flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium',
+        active && 'active',
+      )}
+    >
+      <Icon className="h-[20px] w-[20px] shrink-0" strokeWidth={1.85} />
+      <span className="truncate">{item.label}</span>
+    </NavLink>
+  )
+}
+
+function SidebarProfile() {
+  const { user } = useAuth()
+  const displayName =
+    user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email || 'User'
+  const firstName = displayName.split(' ')[0]
+
+  return (
+    <div className="clay-sidebar-profile flex items-center gap-3 px-5 py-5">
+      <div className="clay-sidebar-avatar-ring shrink-0 rounded-full">
+        <Avatar name={displayName} src={user?.profile_image} size="md" />
+      </div>
+      <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
+        Hi, {firstName}! <span aria-hidden>👋</span>
+      </p>
+    </div>
+  )
+}
+
+export default function Sidebar({ mobileOpen, onMobileClose }) {
   const location = useLocation()
   const { isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
   const navItems = resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin })
 
   const content = (
-    <aside
-      className={cn(
-        'flex h-full flex-col border-r border-border bg-white transition-all duration-300',
-        collapsed ? 'w-[72px]' : 'w-64',
-      )}
-    >
-      <div className="flex h-16 items-center justify-between border-b border-border px-4">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center text-white font-bold text-sm">
-              EN
-            </div>
-            <span className="font-bold text-text truncate">{APP_NAME}</span>
-          </div>
-        )}
-        <button
-          onClick={onToggle}
-          className="hidden lg:flex rounded-lg p-2 text-muted hover:bg-slate-100 hover:text-text transition"
-        >
-          <FiChevronLeft className={cn('h-5 w-5 transition', collapsed && 'rotate-180')} />
-        </button>
-      </div>
+    <aside className="clay-app clay-sidebar flex h-full w-[260px] flex-col">
+      <SidebarProfile />
 
-      <nav className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-1">
+      <nav className="clay-sidebar-nav flex-1 overflow-y-auto px-3 pb-4">
         {navItems.map((group, gi) => (
-          <div key={gi} className="mb-4">
+          <div key={gi}>
+            {gi > 0 ? <div className="clay-sidebar-divider" /> : null}
             {group.children ? (
-              <>
-                {!collapsed && (
-                  <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                    {group.label}
-                  </p>
-                )}
-                {group.children.map((item) => {
-                  const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
-                  const active = isNavItemActive(location.pathname, item.path)
-                  return (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={onMobileClose}
-                      className={cn(
-                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition mb-0.5',
-                        active
-                          ? 'gradient-primary text-white shadow-md shadow-primary/20'
-                          : 'text-muted hover:bg-slate-100 hover:text-text',
-                      )}
-                      title={collapsed ? item.label : undefined}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" />
-                      {!collapsed && <span>{item.label}</span>}
-                    </NavLink>
-                  )
-                })}
-              </>
+              group.children.map((item) => (
+                <NavItem
+                  key={item.path}
+                  item={item}
+                  onMobileClose={onMobileClose}
+                  active={isNavItemActive(location.pathname, item.path)}
+                />
+              ))
             ) : (
-              <NavLink
-                to={group.path}
-                onClick={onMobileClose}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
-                    isActive
-                      ? 'gradient-primary text-white shadow-md shadow-primary/20'
-                      : 'text-muted hover:bg-slate-100 hover:text-text',
-                  )
-                }
-              >
-                <group.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>{group.label}</span>}
-              </NavLink>
+              <NavItem
+                item={group}
+                onMobileClose={onMobileClose}
+                active={isNavItemActive(location.pathname, group.path)}
+              />
             )}
           </div>
         ))}
@@ -293,7 +280,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
   return (
     <>
-      <div className="hidden lg:block h-full shrink-0">{content}</div>
+      <div className="hidden h-full shrink-0 lg:block">{content}</div>
       {mobileOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -305,7 +292,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
           <motion.div
             initial={{ x: -280 }}
             animate={{ x: 0 }}
-            className="absolute left-0 top-0 h-full w-64"
+            className="absolute left-3 top-3 h-[calc(100%-1.5rem)] w-[260px]"
           >
             {content}
           </motion.div>

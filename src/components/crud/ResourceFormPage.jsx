@@ -129,18 +129,18 @@ export default function ResourceFormPage({
   if (isEdit && error) return <ErrorState message={getErrorMessage(error)} />
 
   return (
-    <div className="w-full">
+    <div className="lms-page w-full">
       <Breadcrumb items={breadcrumb || [{ label: title, href: basePath }, { label: isEdit ? 'Edit' : 'New' }]} />
       <PageHeader title={isEdit ? `Edit ${title}` : `New ${title}`} />
 
-      <Card className="w-full">
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <Card className="w-full lms-form-card clay-card-3d">
+        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-1">
           {fields.map((field) => (
             <div key={field.name} className={field.fullWidth ? 'sm:col-span-2 lg:col-span-3' : ''}>
               {renderField(field)}
             </div>
           ))}
-          <div className="sm:col-span-2 lg:col-span-3 flex flex-wrap gap-3 pt-4 border-t border-border">
+          <div className="sm:col-span-2 lg:col-span-3 flex flex-wrap gap-3 pt-4 border-t border-[var(--clay-border)]">
             <Button type="submit" loading={mutation.isPending}>
               {isEdit ? 'Update' : 'Create'}
             </Button>
@@ -179,7 +179,7 @@ export function ResourceDetailPage({
   const item = unwrapData(data)
 
   return (
-    <div className="w-full">
+    <div className="lms-page w-full">
       <Breadcrumb items={breadcrumb || [{ label: title, href: basePath }, { label: 'Details' }]} />
       <PageHeader
         title={`${title} Details`}
@@ -194,8 +194,8 @@ export function ResourceDetailPage({
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {fields.map((f) => (
             <div key={f.key}>
-              <dt className="text-xs font-medium uppercase tracking-wider text-muted">{f.label}</dt>
-              <dd className="mt-1 text-sm font-medium">
+              <dt className="text-xs font-medium uppercase tracking-wider text-[var(--clay-primary-soft)]">{f.label}</dt>
+              <dd className="mt-1 text-sm font-medium text-[var(--clay-primary)]">
                 {f.render ? f.render(item) : item[f.key] ?? '—'}
               </dd>
             </div>

@@ -54,9 +54,9 @@ export default function BrandLogo({
       {logo}
       {!isFull && (
         <div>
-          <span className="block text-lg font-bold text-[#111827]">{APP_NAME}</span>
+          <span className="block text-lg font-bold text-[var(--clay-primary)]">{APP_NAME}</span>
           {subtitle && (
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#2563EB]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--clay-teal)]">
               {subtitle}
             </span>
           )}
