@@ -9,9 +9,20 @@ import UserPasswordModal from '@/components/users/UserPasswordModal'
 import Button from '@/components/ui/Button'
 import { userService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
+import { ROLE_TYPES } from '@/config/constants'
 import { downloadBlob } from '@/utils/format'
 import { resolveRecordId } from '@/utils/record'
 import { confirmDialog } from '@/utils/confirm'
+
+const ROLE_LABELS = Object.fromEntries(ROLE_TYPES.map((role) => [role.value, role.label]))
+
+function formatRoleType(item) {
+  if (item.role_type) return ROLE_LABELS[item.role_type] || item.role_type
+  if (item.is_super_admin) return 'Super Admin'
+  if (item.is_org_admin) return 'Organization Admin'
+  if (item.is_school_admin) return 'School Admin'
+  return 'User'
+}
 
 function getUserDisplayName(user) {
   return (
@@ -64,9 +75,10 @@ const DETAIL_FIELDS = [
   { key: 'mobile_number', label: 'Mobile' },
   { key: 'organization_name', label: 'Organization' },
   { key: 'school_name', label: 'School' },
-  { key: 'is_super_admin', label: 'Super Admin', render: (item) => (item.is_super_admin ? 'Yes' : 'No') },
-  { key: 'is_org_admin', label: 'Org Admin', render: (item) => (item.is_org_admin ? 'Yes' : 'No') },
-  { key: 'is_school_admin', label: 'School Admin', render: (item) => (item.is_school_admin ? 'Yes' : 'No') },
+  { key: 'role_type', label: 'Role Type', render: (item) => formatRoleType(item) },
+  { key: 'is_super_admin', label: 'Super Admin', render: (item) => (item.is_super_admin || item.role_type === 'super_admin' ? 'Yes' : 'No') },
+  { key: 'is_org_admin', label: 'Org Admin', render: (item) => (item.is_org_admin || item.role_type === 'org_admin' ? 'Yes' : 'No') },
+  { key: 'is_school_admin', label: 'School Admin', render: (item) => (item.is_school_admin || item.role_type === 'school_admin' ? 'Yes' : 'No') },
   { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
 ]
 

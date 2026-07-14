@@ -8,8 +8,11 @@ import UserPasswordModal from '@/components/users/UserPasswordModal'
 import { userService } from '@/api/services'
 import Button from '@/components/ui/Button'
 import { getErrorMessage } from '@/api/client'
+import { ROLE_TYPES } from '@/config/constants'
 import { StatusBadge } from '@/components/ui/Feedback'
 import { confirmDialog } from '@/utils/confirm'
+
+const ROLE_LABELS = Object.fromEntries(ROLE_TYPES.map((role) => [role.value, role.label]))
 
 export default function UserDetail() {
   const { id } = useParams()
@@ -60,6 +63,16 @@ export default function UserDetail() {
           { key: 'mobile_number', label: 'Mobile' },
           { key: 'organization_name', label: 'Organization' },
           { key: 'school_name', label: 'School' },
+          {
+            key: 'role_type',
+            label: 'Role Type',
+            render: (item) => ROLE_LABELS[item.role_type] || item.role_type || 'User',
+          },
+          {
+            key: 'is_school_admin',
+            label: 'School Admin',
+            render: (item) => (item.is_school_admin || item.role_type === 'school_admin' ? 'Yes' : 'No'),
+          },
           { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
         ]}
         actions={(item) => (
