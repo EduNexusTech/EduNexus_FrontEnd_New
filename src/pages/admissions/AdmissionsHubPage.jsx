@@ -41,8 +41,8 @@ export default function AdmissionsHubPage() {
         subtitle="Enterprise admission workflow — enquiry to enrollment"
         actions={
           <>
-            <Link to="/admissions/leads/new"><Button variant="secondary"><FiUserPlus /> New Lead</Button></Link>
-            <Link to="/admissions/applications/new"><Button><FiClipboard /> New Application</Button></Link>
+            <Link to="/admissions/leads/new"><Button variant="create"><FiUserPlus /> New Lead</Button></Link>
+            <Link to="/admissions/applications/new"><Button variant="create"><FiClipboard /> New Application</Button></Link>
           </>
         }
       />

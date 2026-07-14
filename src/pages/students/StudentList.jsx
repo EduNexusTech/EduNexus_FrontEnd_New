@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import Button from '@/components/ui/Button'
+import { StatusBadge } from '@/components/ui/Feedback'
 import Modal from '@/components/ui/Modal'
 import { SelectField } from '@/components/ui/Input'
 import { Avatar } from '@/components/ui/Feedback'
@@ -51,8 +52,8 @@ function BulkImportModal({ open, onClose }) {
       size="lg"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button loading={mutation.isPending} onClick={handleImport}>Import</Button>
+          <Button variant="cancel" onClick={onClose}>Cancel</Button>
+          <Button variant="upload" loading={mutation.isPending} onClick={handleImport}>Import</Button>
         </>
       }
     >
@@ -91,7 +92,7 @@ export default function StudentList() {
     {
       accessorKey: 'status',
       header: 'Status',
-      cell: ({ getValue }) => STATUS_LABELS[getValue()] || getValue(),
+      cell: ({ getValue }) => <StatusBadge status={getValue()} label={STATUS_LABELS[getValue()] || getValue()} />,
     },
     { accessorKey: 'mobile_number', header: 'Mobile' },
   ]
@@ -117,16 +118,16 @@ export default function StudentList() {
         }
         extraActions={
           <>
-            <Button variant="secondary" onClick={() => setBulkOpen(true)}>Bulk Import</Button>
+            <Button variant="upload" onClick={() => setBulkOpen(true)}>Bulk Import</Button>
             <Button
-              variant="secondary"
+              variant="excel"
               onClick={async () => {
                 const blob = await studentService.export({})
                 downloadBlob(blob, 'students-export.csv')
                 toast.success('Export downloaded')
               }}
             >
-              Export CSV
+              Export Excel
             </Button>
           </>
         }

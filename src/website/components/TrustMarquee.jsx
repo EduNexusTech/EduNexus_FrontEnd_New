@@ -4,7 +4,7 @@ export default function TrustMarquee() {
   const items = [...TRUST_ITEMS, ...TRUST_ITEMS]
 
   return (
-    <section className="w-full overflow-hidden bg-white/50 py-10 backdrop-blur-sm">
+    <section className="w-full overflow-hidden border-y border-[var(--lp-border)] bg-white/95 py-10 backdrop-blur-md">
       <p className="landing-wrap mb-8 text-center text-xs font-extrabold uppercase tracking-[0.22em] landing-text-muted">
         Full LMS + institutional platform
       </p>
@@ -17,7 +17,7 @@ export default function TrustMarquee() {
               key={`${item}-${i}`}
               className="landing-pill mx-2 inline-flex items-center gap-2.5 whitespace-nowrap px-7 py-3 shadow-sm"
             >
-              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-[#74c69d] to-[#40916c]" />
+              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-[#3b82f6] to-[#00c2ff]" />
               {item}
             </span>
           ))}

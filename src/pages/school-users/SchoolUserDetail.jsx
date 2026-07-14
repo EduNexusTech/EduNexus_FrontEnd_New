@@ -191,7 +191,7 @@ export default function SchoolUserDetail() {
             <Button variant="outline" onClick={() => setCredentialsOpen(true)}>
               <FiKey className="h-4 w-4" /> Credentials
             </Button>
-            <Link to={`/school-users/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/school-users/${id}/edit`}><Button variant="edit">Edit</Button></Link>
             <Button variant="outline" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>
               Reset Password
             </Button>

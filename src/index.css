@@ -1,19 +1,19 @@
 @import 'tailwindcss';
 
 @theme {
-  /* LMS sage-green palette — matches dashboard-clay theme */
-  --color-primary: #40916c;
-  --color-primary-dark: #2d6a4f;
-  --color-secondary: #52b788;
-  --color-accent: #74c69d;
-  --color-success: #52b788;
+  /* White glass + blue accent theme */
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #7c3aed;
+  --color-accent: #00c2ff;
+  --color-success: #10b981;
   --color-warning: #d4a012;
-  --color-danger: #dc5c5c;
-  --color-background: #e2efe8;
-  --color-surface: #ffffff;
-  --color-text: #1a3d32;
-  --color-muted: #5c7a6e;
-  --color-border: #c5d9cc;
+  --color-danger: #ef4444;
+  --color-background: #ffffff;
+  --color-surface: rgba(255, 255, 255, 0.88);
+  --color-text: #0f172a;
+  --color-muted: #475569;
+  --color-border: #e2e8f0;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -30,29 +30,84 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--color-background);
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(ellipse 75% 55% at 0% 0%, rgba(37, 99, 235, 0.06) 0%, transparent 52%),
+    radial-gradient(ellipse 65% 50% at 100% 0%, rgba(124, 58, 237, 0.04) 0%, transparent 48%),
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgba(0, 194, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 55% 45% at 0% 100%, rgba(59, 130, 246, 0.04) 0%, transparent 48%);
+  background-attachment: fixed;
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
 }
 
 .glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 4px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(32px) saturate(1.5);
+  -webkit-backdrop-filter: blur(32px) saturate(1.5);
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.glass-subtle {
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid #f1f5f9;
+}
+
+.gradient-layout {
+  background: #ffffff;
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #74c69d 0%, #52b788 45%, #40916c 100%);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+.gradient-cyan {
+  background: linear-gradient(135deg, #0891b2, #00c2ff);
+}
+
+.gradient-excel {
+  background: linear-gradient(135deg, #217346, #33a357);
+}
+
+.gradient-pdf {
+  background: linear-gradient(135deg, #c81e1e, #ef4444);
 }
 
 .gradient-hover:hover {
-  background: linear-gradient(135deg, #95d5b2 0%, #40916c 50%, #2d6a4f 100%);
+  filter: brightness(1.06);
 }
 
 .card-shadow {
   box-shadow:
-    0 1px 3px rgba(30, 77, 58, 0.08),
-    0 8px 24px rgba(30, 77, 58, 0.1);
+    0 4px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -61,7 +116,7 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #95d5b2;
+  background: #60a5fa;
   border-radius: 999px;
 }
 
@@ -71,12 +126,11 @@ body {
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #e8f5ee 25%, #d4ebe2 50%, #e8f5ee 75%);
+  background: linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* Shared LMS page shell — list / add / edit / detail pages */
 .lms-page {
-  color: var(--clay-primary, #1a3d32);
+  color: var(--clay-primary, #0f172a);
 }

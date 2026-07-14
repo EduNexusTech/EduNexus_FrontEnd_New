@@ -42,21 +42,21 @@ export const AUDIENCES = [
     subtitle: 'Students & professionals',
     description: 'Personalized learning paths, progress dashboards, certificates, and an AI tutor available whenever you need help.',
     icon: 'learner',
-    gradient: 'from-[#74c69d] to-[#40916c]',
+    gradient: 'from-[#3b82f6] to-[#2563eb]',
   },
   {
     title: 'Educators',
     subtitle: 'Teachers & instructors',
     description: 'Build rich courses, schedule live sessions, grade assignments, and track class performance in real time.',
     icon: 'educator',
-    gradient: 'from-[#52b788] to-[#2d6a4f]',
+    gradient: 'from-[#4c6fff] to-[#6366f1]',
   },
   {
     title: 'Administrators',
     subtitle: 'Schools & organizations',
     description: 'Multi-tenant control, roles, audit trails, master data, and network-wide analytics from one command center.',
     icon: 'admin',
-    gradient: 'from-[#40916c] to-[#1e4d3a]',
+    gradient: 'from-[#00c2ff] to-[#3b82f6]',
   },
 ]
 
@@ -153,17 +153,17 @@ export const ROLE_GUIDE = [
   {
     role: 'Learner',
     access: 'Access enrolled courses, submit assignments, join live classes, track progress, and earn certificates.',
-    color: 'from-[#74c69d] to-[#40916c]',
+    color: 'from-[#3b82f6] to-[#2563eb]',
   },
   {
     role: 'Educator',
     access: 'Create and manage courses, grade work, host sessions, and view class-level analytics.',
-    color: 'from-[#52b788] to-[#2d6a4f]',
+    color: 'from-[#4c6fff] to-[#6366f1]',
   },
   {
     role: 'Administrator',
     access: 'Full LMS and ERP control — tenants, schools, users, masters, compliance, and network dashboards.',
-    color: 'from-[#40916c] to-[#1e4d3a]',
+    color: 'from-[#00c2ff] to-[#3b82f6]',
   },
 ]
 
@@ -181,8 +181,8 @@ export const TESTIMONIALS = [
 ]
 
 export const SAMPLE_COURSES = [
-  { title: 'Advanced Mathematics', progress: 78, students: 142, color: 'from-[#74c69d] to-[#40916c]' },
-  { title: 'English Literature', progress: 92, students: 98, color: 'from-[#52b788] to-[#2d6a4f]' },
-  { title: 'Computer Science 101', progress: 65, students: 210, color: 'from-[#40916c] to-[#1e4d3a]' },
-  { title: 'Physics — Grade 12', progress: 54, students: 87, color: 'from-[#95d5b2] to-[#52b788]' },
+  { title: 'Advanced Mathematics', progress: 78, students: 142, color: 'from-[#3b82f6] to-[#2563eb]' },
+  { title: 'English Literature', progress: 92, students: 98, color: 'from-[#4c6fff] to-[#6366f1]' },
+  { title: 'Computer Science 101', progress: 65, students: 210, color: 'from-[#00c2ff] to-[#3b82f6]' },
+  { title: 'Physics — Grade 12', progress: 54, students: 87, color: 'from-[#60a5fa] to-[#2563eb]' },
 ]

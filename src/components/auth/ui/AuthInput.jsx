@@ -30,9 +30,9 @@ function useFloatingField(props) {
 
 const fieldShell = (error, focused) =>
   cn(
-    'auth-input-glow relative flex h-12 items-center rounded-2xl border bg-[var(--clay-mint-light)] shadow-sm transition-all duration-200',
+    'auth-input-glow relative flex h-12 items-center rounded-2xl border bg-white/90 shadow-sm backdrop-blur-md transition-all duration-200',
     error
-      ? 'border-red-400 bg-red-50/30'
+      ? 'border-red-400 bg-red-50/40'
       : focused
         ? 'border-[var(--clay-teal)] bg-white'
         : 'border-[var(--clay-border)] hover:border-[var(--clay-accent)] hover:bg-white',

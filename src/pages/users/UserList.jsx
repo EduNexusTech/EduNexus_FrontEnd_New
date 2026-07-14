@@ -44,7 +44,7 @@ function buildColumns(onPasswordClick) {
       cell: ({ row }) => (
         <Button
           type="button"
-          variant="outline"
+          variant="view"
           size="sm"
           onClick={() => onPasswordClick(row.original)}
           title="View password"
@@ -121,18 +121,12 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
         const userRecordId = item.id || item.user_id || recordId
         return (
           <>
-            <Button variant="secondary" onClick={close}>Close</Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                onViewPassword?.(item)
-                close()
-              }}
-            >
+            <Button variant="cancel" onClick={close}>Close</Button>
+            <Button variant="view" onClick={() => { onViewPassword?.(item); close() }}>
               <FiKey className="h-4 w-4" /> View Password
             </Button>
             <Link to={`/users/${userRecordId}/edit`} onClick={close}>
-              <Button variant="outline"><FiEdit2 className="h-4 w-4" /> Edit</Button>
+              <Button variant="edit"><FiEdit2 className="h-4 w-4" /> Edit</Button>
             </Link>
             <Button variant="secondary" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>
               Reset Password
@@ -142,7 +136,7 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
                 Deactivate
               </Button>
             ) : (
-              <Button loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
+              <Button variant="success" loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
                 Activate
               </Button>
             )}
@@ -176,14 +170,14 @@ export default function UserList() {
         onView={(item) => openView(item, resolveRecordId(item))}
         extraActions={
           <Button
-            variant="secondary"
+            variant="excel"
             onClick={async () => {
               const blob = await userService.export({})
               downloadBlob(blob, 'users-export.csv')
               toast.success('Export downloaded')
             }}
           >
-            Export CSV
+            Export Excel
           </Button>
         }
       />

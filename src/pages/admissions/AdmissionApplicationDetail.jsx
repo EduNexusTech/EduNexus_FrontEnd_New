@@ -82,8 +82,8 @@ export default function AdmissionApplicationDetail() {
         subtitle={app.admission_number ? `Admission #${app.admission_number}` : app.status_display}
         actions={
           <>
-            <Link to={`/admissions/applications/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
-            <Button variant="outline" onClick={() => refetch()}>Refresh</Button>
+            <Link to={`/admissions/applications/${id}/edit`}><Button variant="edit">Edit</Button></Link>
+            <Button variant="refresh" onClick={() => refetch()}>Refresh</Button>
           </>
         }
       />
@@ -113,13 +113,13 @@ export default function AdmissionApplicationDetail() {
             <Button size="sm" onClick={() => run(admissionService.applications.submitApplication)} loading={actionMutation.isPending}>
               Submit Application
             </Button>
-            <Button size="sm" variant="outline" onClick={() => run(admissionService.applications.submitApproval)}>
+            <Button size="sm" variant="success" onClick={() => run(admissionService.applications.submitApproval)}>
               Submit for Approval
             </Button>
-            <Button size="sm" variant="outline" onClick={() => run(admissionService.applications.approve, { fee_amount: feeAmount || app.fee_amount })}>
+            <Button size="sm" variant="success" onClick={() => run(admissionService.applications.approve, { fee_amount: feeAmount || app.fee_amount })}>
               Approve
             </Button>
-            <Button size="sm" variant="outline" onClick={() => run(admissionService.applications.confirm)}>
+            <Button size="sm" variant="success" onClick={() => run(admissionService.applications.confirm)}>
               Confirm Admission
             </Button>
             <Button size="sm" onClick={() => run(admissionService.applications.enroll)} loading={actionMutation.isPending}>

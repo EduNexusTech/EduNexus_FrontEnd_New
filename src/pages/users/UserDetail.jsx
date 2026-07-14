@@ -64,15 +64,15 @@ export default function UserDetail() {
         ]}
         actions={(item) => (
           <>
-            <Button variant="outline" onClick={() => setPasswordOpen(true)}>
+            <Button variant="view" onClick={() => setPasswordOpen(true)}>
               <FiKey className="h-4 w-4" /> View Password
             </Button>
-            <Link to={`/users/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
-            <Button variant="outline" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>Reset Password</Button>
+            <Link to={`/users/${id}/edit`}><Button variant="edit">Edit</Button></Link>
+            <Button variant="secondary" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>Reset Password</Button>
             {item.is_active ? (
               <Button variant="danger" onClick={() => deactivateMutation.mutate()} loading={deactivateMutation.isPending}>Deactivate</Button>
             ) : (
-              <Button onClick={() => activateMutation.mutate()} loading={activateMutation.isPending}>Activate</Button>
+              <Button variant="success" onClick={() => activateMutation.mutate()} loading={activateMutation.isPending}>Activate</Button>
             )}
           </>
         )}

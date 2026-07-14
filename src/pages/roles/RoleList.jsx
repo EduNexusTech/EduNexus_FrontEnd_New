@@ -51,12 +51,12 @@ export default function RoleList() {
           const roleId = item.role_id || item.id || recordId
           return (
             <>
-              <Button variant="secondary" onClick={close}>Close</Button>
+              <Button variant="cancel" onClick={close}>Close</Button>
               <Link to={`/roles/${roleId}/edit`} onClick={close}>
-                <Button variant="outline"><FiEdit2 className="h-4 w-4" /> Edit</Button>
+                <Button variant="edit"><FiEdit2 className="h-4 w-4" /> Edit</Button>
               </Link>
               <Link to={`/roles/${roleId}/permissions`} onClick={close}>
-                <Button><FiShield className="h-4 w-4" /> Permissions</Button>
+                <Button variant="secondary"><FiShield className="h-4 w-4" /> Permissions</Button>
               </Link>
             </>
           )

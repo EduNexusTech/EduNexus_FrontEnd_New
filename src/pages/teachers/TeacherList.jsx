@@ -56,14 +56,14 @@ export default function TeacherList() {
       }
       extraActions={
         <Button
-          variant="secondary"
+          variant="excel"
           onClick={async () => {
             const blob = await teacherService.export({})
             downloadBlob(blob, 'teachers-export.csv')
             toast.success('Export downloaded')
           }}
         >
-          Export CSV
+          Export Excel
         </Button>
       }
     />

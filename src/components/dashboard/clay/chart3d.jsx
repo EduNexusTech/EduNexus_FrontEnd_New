@@ -1,6 +1,12 @@
-/** 3D chart helpers — extruded bars, gradients, depth shadows */
+/** Dashboard chart shapes — standard LMS color palette */
 
-export const CHART_3D_COLORS = ['#40916c', '#52b788', '#74c69d', '#2d6a4f', '#95d5b2', '#1b4332']
+import {
+  CHART_SERIES_COLORS,
+  CHART_THEME,
+  getChartColor,
+} from '@/utils/chartTheme'
+
+export { CHART_SERIES_COLORS, CHART_SERIES_COLORS as CHART_3D_COLORS } from '@/utils/chartTheme'
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n))
@@ -25,105 +31,63 @@ export function shadeColor(hex, amount) {
   return toHex(r * factor, g * factor, b * factor)
 }
 
-export function Chart3DDefs({ colors = CHART_3D_COLORS }) {
+export function Chart3DDefs({ colors = CHART_SERIES_COLORS }) {
   return (
     <defs>
-      <filter id="chart3d-shadow" x="-20%" y="-20%" width="140%" height="160%">
-        <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="rgba(27, 67, 50, 0.28)" />
-      </filter>
-      <filter id="chart3d-line-glow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="rgba(82, 183, 136, 0.45)" />
-      </filter>
-      <filter id="chart3d-dot-shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(27, 67, 50, 0.35)" />
-      </filter>
       {colors.map((color, i) => (
-        <linearGradient key={color} id={`bar3d-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={shadeColor(color, 0.22)} />
-          <stop offset="45%" stopColor={color} />
-          <stop offset="100%" stopColor={shadeColor(color, -0.28)} />
+        <linearGradient key={`bar-${color}`} id={`bar3d-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={shadeColor(color, 0.18)} />
+          <stop offset="100%" stopColor={color} />
         </linearGradient>
       ))}
       {colors.map((color, i) => (
         <linearGradient key={`pie-${color}`} id={`pie3d-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={shadeColor(color, 0.3)} />
-          <stop offset="55%" stopColor={color} />
-          <stop offset="100%" stopColor={shadeColor(color, -0.32)} />
+          <stop offset="0%" stopColor={shadeColor(color, 0.12)} />
+          <stop offset="100%" stopColor={color} />
         </linearGradient>
       ))}
       <linearGradient id="line3d-area-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="rgba(82, 183, 136, 0.45)" />
-        <stop offset="100%" stopColor="rgba(82, 183, 136, 0.04)" />
+        <stop offset="0%" stopColor={CHART_THEME.areaFillStart} />
+        <stop offset="100%" stopColor={CHART_THEME.areaFillEnd} />
       </linearGradient>
       <linearGradient id="line3d-stroke-grad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stopColor="#40916c" />
-        <stop offset="50%" stopColor="#74c69d" />
-        <stop offset="100%" stopColor="#52b788" />
+        <stop offset="0%" stopColor={CHART_THEME.line} />
+        <stop offset="100%" stopColor={CHART_THEME.lineSecondary} />
       </linearGradient>
     </defs>
   )
 }
 
-/** Extruded 3D bar shape for Recharts */
+/** Flat bar with standard series colors */
 export function Bar3DShape(props) {
-  const { fill, x, y, width, height, index = 0 } = props
+  const { x, y, width, height, index = 0 } = props
   if (height == null || height <= 0 || width == null) return null
 
-  const depth = clamp(width * 0.14, 6, 12)
-  const lift = clamp(depth * 0.55, 4, 7)
-  const frontX = x + 3
-  const frontW = Math.max(width - 6, 6)
-  const gradId = `bar3d-grad-${index % CHART_3D_COLORS.length}`
-  const sideFill = shadeColor(CHART_3D_COLORS[index % CHART_3D_COLORS.length], -0.35)
-  const topFill = shadeColor(CHART_3D_COLORS[index % CHART_3D_COLORS.length], 0.15)
-
-  const right = frontX + frontW
-  const bottom = y + height
+  const frontX = x + 4
+  const frontW = Math.max(width - 8, 8)
+  const gradId = `bar3d-grad-${index % CHART_SERIES_COLORS.length}`
 
   return (
-    <g filter="url(#chart3d-shadow)">
-      {/* depth — right face */}
-      <path
-        d={`M${right} ${y} L${right + depth} ${y - lift} L${right + depth} ${bottom - lift} L${right} ${bottom} Z`}
-        fill={sideFill}
-      />
-      {/* depth — top face */}
-      <path
-        d={`M${frontX} ${y} L${frontX + depth} ${y - lift} L${right + depth} ${y - lift} L${right} ${y} Z`}
-        fill={topFill}
-      />
-      {/* front face */}
+    <g>
+      <rect x={frontX} y={y} width={frontW} height={height} fill={`url(#${gradId})`} rx={8} ry={8} />
       <rect
-        x={frontX}
-        y={y}
-        width={frontW}
-        height={height}
-        fill={`url(#${gradId})`}
-        rx={6}
-        ry={6}
-      />
-      {/* front highlight */}
-      <rect
-        x={frontX + 2}
-        y={y + 2}
-        width={Math.max(frontW * 0.22, 4)}
-        height={Math.max(height - 4, 0)}
-        fill="rgba(255,255,255,0.22)"
-        rx={3}
+        x={frontX + 3}
+        y={y + 3}
+        width={Math.max(frontW * 0.28, 4)}
+        height={Math.max(height - 6, 0)}
+        fill={CHART_THEME.barHighlight}
+        rx={5}
       />
     </g>
   )
 }
 
-/** 3D dot for line chart */
 export function Dot3DShape({ cx, cy, index }) {
   if (cx == null || cy == null) return null
-  const color = CHART_3D_COLORS[index % CHART_3D_COLORS.length]
+  const color = getChartColor(index)
   return (
-    <g filter="url(#chart3d-dot-shadow)">
-      <ellipse cx={cx} cy={cy + 2} rx={5} ry={2} fill="rgba(27, 67, 50, 0.2)" />
-      <circle cx={cx} cy={cy} r={5} fill={shadeColor(color, -0.2)} />
-      <circle cx={cx - 1.5} cy={cy - 1.5} r={2} fill="rgba(255,255,255,0.55)" />
+    <g>
+      <circle cx={cx} cy={cy} r={5} fill={color} stroke="#ffffff" strokeWidth={2} />
     </g>
   )
 }
@@ -131,11 +95,9 @@ export function Dot3DShape({ cx, cy, index }) {
 export function ActiveDot3DShape({ cx, cy }) {
   if (cx == null || cy == null) return null
   return (
-    <g filter="url(#chart3d-dot-shadow)">
-      <ellipse cx={cx} cy={cy + 3} rx={8} ry={3} fill="rgba(27, 67, 50, 0.25)" />
-      <circle cx={cx} cy={cy} r={8} fill="#2d6a4f" />
-      <circle cx={cx} cy={cy} r={5} fill="#74c69d" />
-      <circle cx={cx - 2} cy={cy - 2} r={2.5} fill="rgba(255,255,255,0.7)" />
+    <g>
+      <circle cx={cx} cy={cy} r={8} fill={CHART_THEME.activeDotRing} />
+      <circle cx={cx} cy={cy} r={6} fill={CHART_THEME.activeDot} stroke="#ffffff" strokeWidth={2} />
     </g>
   )
 }

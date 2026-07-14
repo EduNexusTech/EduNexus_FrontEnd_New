@@ -6,7 +6,7 @@ import BrandLogo from '../ui/BrandLogo'
 const LmsIllustration = lazy(() => import('./LmsIllustration'))
 
 function IllustrationFallback() {
-  return <div className="h-48 w-full max-w-xl rounded-3xl bg-white/30" aria-hidden />
+  return <div className="h-48 w-full max-w-xl rounded-3xl border border-[var(--clay-border)] bg-white/80 backdrop-blur-md shadow-sm" aria-hidden />
 }
 
 export default function SignInHero() {
@@ -22,10 +22,10 @@ export default function SignInHero() {
         transition={{ duration: 0.6 }}
         className="shrink-0"
       >
-        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[var(--clay-primary)] xl:text-4xl">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[var(--clay-text-sharp)] xl:text-4xl">
           Empowering Smarter Learning
         </h1>
-        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[var(--clay-primary-soft)] xl:text-base">
+        <p className="mt-2 max-w-lg text-sm font-medium leading-relaxed text-[var(--clay-primary-soft)] xl:text-base">
           Access your courses, assignments, attendance, exams, reports and more from one secure
           platform.
         </p>

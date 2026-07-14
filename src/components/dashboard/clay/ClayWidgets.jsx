@@ -30,26 +30,24 @@ import {
 import { formatNumber } from '@/utils/format'
 import { resolveActionIcon } from '@/utils/dashboardIcons'
 import {
-  CHART_3D_COLORS,
+  CHART_SERIES_COLORS,
   Chart3DDefs,
   Bar3DShape,
   Dot3DShape,
   ActiveDot3DShape,
-  shadeColor,
 } from '@/components/dashboard/clay/chart3d'
+import {
+  CHART_THEME,
+  chartTooltipStyle,
+  chartTickStyle,
+  getChartColor,
+} from '@/utils/chartTheme'
 
-const CHART_COLORS = CHART_3D_COLORS
+const CHART_COLORS = CHART_SERIES_COLORS
 const STAT_BG = ['clay-card-glass-teal', 'clay-card-green', 'clay-card-glass-forest', 'clay-card-white']
 
-const chartTooltipStyle = {
-  borderRadius: 10,
-  border: '1px solid rgba(82, 183, 136, 0.3)',
-  background: 'rgba(255, 255, 255, 0.92)',
-  backdropFilter: 'blur(10px)',
-  boxShadow: '0 6px 20px rgba(30, 77, 58, 0.12)',
-  fontSize: 12,
-  color: '#1a3d32',
-}
+const CHART_TICK = chartTickStyle
+const CHART_GRID = CHART_THEME.grid
 
 export function ClayInsightBanner({ userName, message }) {
   const hour = new Date().getHours()
@@ -64,10 +62,10 @@ export function ClayInsightBanner({ userName, message }) {
   return (
     <div className="clay-app clay-glass-banner clay-banner-3d mb-5 flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="text-xs font-medium text-[var(--clay-primary-soft)]">
+        <p className="text-xs font-semibold text-[var(--clay-primary-soft)]">
           {greeting}, {firstName}
         </p>
-        <p className="mt-0.5 text-sm text-[var(--clay-primary)]">
+        <p className="mt-0.5 text-sm font-semibold text-[var(--clay-text-sharp)]">
           {message || 'Here is your analytics overview for today.'}
         </p>
       </div>
@@ -90,7 +88,7 @@ export function ClayStatGrid({ stats = [] }) {
         return (
           <motion.div
             key={stat.title}
-            className={`clay-card clay-stat-3d ${bg} p-4`}
+            className={`clay-card ${bg} p-4`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
@@ -106,10 +104,10 @@ export function ClayStatGrid({ stats = [] }) {
                 </span>
               ) : null}
             </div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--clay-primary-soft)]">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--clay-primary-soft)]">
               {stat.title}
             </p>
-            <p className="mt-0.5 text-2xl font-semibold text-[var(--clay-primary)]">{stat.value}</p>
+            <p className="mt-0.5 text-2xl font-bold text-[var(--clay-text-sharp)]">{stat.value}</p>
             {stat.hint ? <p className="mt-0.5 text-[11px] text-[var(--clay-primary-soft)]">{stat.hint}</p> : null}
           </motion.div>
         )
@@ -137,7 +135,7 @@ export function ClayQuickGrid({ actions = [] }) {
               <div className="clay-icon-3d flex h-10 w-10 items-center justify-center text-[var(--clay-primary)]">
                 <Icon className="h-4 w-4" strokeWidth={1.75} />
               </div>
-              <span className="text-[11px] font-medium leading-tight text-[var(--clay-primary)]">{action.label}</span>
+              <span className="text-[11px] font-semibold leading-tight text-[var(--clay-text-sharp)]">{action.label}</span>
             </Link>
           </motion.div>
         )
@@ -148,7 +146,7 @@ export function ClayQuickGrid({ actions = [] }) {
 
 export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKey = 'label' }) {
   return (
-    <div className="clay-app clay-card clay-card-white clay-card-3d chart-panel-3d h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -160,10 +158,10 @@ export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKe
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={data} barCategoryGap="22%" margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
               <Chart3DDefs />
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(82, 183, 136, 0.2)" vertical={false} />
-              <XAxis dataKey={labelKey} stroke="#5c8f7a" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#5c8f7a" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={chartTooltipStyle} cursor={{ fill: 'rgba(82, 183, 136, 0.08)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+              <XAxis dataKey={labelKey} tick={CHART_TICK} tickLine={false} axisLine={false} />
+              <YAxis tick={CHART_TICK} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={chartTooltipStyle} cursor={{ fill: CHART_THEME.cursor }} />
               <Bar dataKey={dataKey} shape={(props) => <Bar3DShape {...props} />} />
             </BarChart>
           </ResponsiveContainer>
@@ -175,7 +173,7 @@ export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKe
 
 export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelKey = 'label' }) {
   return (
-    <div className="clay-app clay-card clay-card-white clay-card-3d chart-panel-3d h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -187,9 +185,9 @@ export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelK
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
               <Chart3DDefs />
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(82, 183, 136, 0.2)" vertical={false} />
-              <XAxis dataKey={labelKey} stroke="#5c8f7a" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#5c8f7a" fontSize={11} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+              <XAxis dataKey={labelKey} tick={CHART_TICK} tickLine={false} axisLine={false} />
+              <YAxis tick={CHART_TICK} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={chartTooltipStyle} />
               <Area
                 type="monotone"
@@ -202,10 +200,9 @@ export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelK
                 type="monotone"
                 dataKey={dataKey}
                 stroke="url(#line3d-stroke-grad)"
-                strokeWidth={3}
+                strokeWidth={4}
                 dot={(props) => <Dot3DShape {...props} />}
                 activeDot={(props) => <ActiveDot3DShape {...props} />}
-                filter="url(#chart3d-line-glow)"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -219,7 +216,7 @@ export function ClayDonutPanel({ title, data = [] }) {
   const total = data.reduce((sum, d) => sum + (d.value || 0), 0) || 1
 
   return (
-    <div className="clay-app clay-card clay-card-white clay-card-3d chart-panel-3d h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -228,38 +225,21 @@ export function ClayDonutPanel({ title, data = [] }) {
         <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data yet</p>
       ) : (
         <div className="flex flex-col items-center gap-4 md:flex-row">
-          <div className="chart-3d-stage chart-donut-3d relative w-full">
+          <div className="chart-donut-3d relative w-full">
             <ResponsiveContainer width="100%" height={230}>
               <PieChart>
                 <Chart3DDefs />
-                {/* shadow / depth layer */}
-                <Pie
-                  data={data}
-                  dataKey="value"
-                  cx="50%"
-                  cy="54%"
-                  innerRadius={48}
-                  outerRadius={78}
-                  paddingAngle={2}
-                  stroke="none"
-                  isAnimationActive={false}
-                >
-                  {data.map((_, index) => (
-                    <Cell key={`shadow-${index}`} fill={shadeColor(CHART_COLORS[index % CHART_COLORS.length], -0.45)} />
-                  ))}
-                </Pie>
-                {/* main 3D ring */}
                 <Pie
                   data={data}
                   dataKey="value"
                   nameKey="label"
                   cx="50%"
-                  cy="48%"
+                  cy="50%"
                   innerRadius={52}
                   outerRadius={82}
-                  paddingAngle={4}
-                  stroke="rgba(255,255,255,0.35)"
-                  strokeWidth={1}
+                  paddingAngle={3}
+                  stroke={CHART_THEME.donutStroke}
+                  strokeWidth={CHART_THEME.donutStrokeWidth}
                 >
                   {data.map((_, index) => (
                     <Cell key={index} fill={`url(#pie3d-grad-${index % CHART_COLORS.length})`} />
@@ -269,21 +249,21 @@ export function ClayDonutPanel({ title, data = [] }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="chart-donut-hub pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
-              <span className="text-lg font-bold text-[var(--clay-primary)]">{total > 999 ? `${Math.round(total / 1000)}k` : total}</span>
-              <small className="text-[10px] font-medium uppercase tracking-wide text-[var(--clay-primary-soft)]">Total</small>
+              <span className="text-lg font-bold text-[var(--clay-text-sharp)]">{total > 999 ? `${Math.round(total / 1000)}k` : total}</span>
+              <small className="text-[10px] font-bold uppercase tracking-wide text-[var(--clay-primary-soft)]">Total</small>
             </div>
           </div>
           <div className="w-full space-y-2 md:w-36">
             {data.map((item, i) => (
-              <div key={item.label} className="clay-legend-3d flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-[var(--clay-primary-soft)]">
+              <div key={item.label} className="clay-legend-3d flex items-center justify-between text-xs font-semibold">
+                <span className="flex items-center gap-2 text-[var(--clay-text-sharp)]">
                   <span
                     className="clay-legend-swatch h-3 w-3 rounded-sm"
-                    style={{ background: `linear-gradient(135deg, ${shadeColor(CHART_COLORS[i % CHART_COLORS.length], 0.2)} 0%, ${CHART_COLORS[i % CHART_COLORS.length]} 100%)` }}
+                    style={{ background: getChartColor(i) }}
                   />
                   {item.label}
                 </span>
-                <span className="font-semibold text-[var(--clay-primary)]">
+                <span className="font-bold text-[var(--clay-text-sharp)]">
                   {Math.round((item.value / total) * 100)}%
                 </span>
               </div>
@@ -297,7 +277,7 @@ export function ClayDonutPanel({ title, data = [] }) {
 
 export function ClayRecentList({ title, items = [], emptyMessage }) {
   return (
-    <div className="clay-app clay-card clay-card-white clay-card-3d h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -314,7 +294,7 @@ export function ClayRecentList({ title, items = [], emptyMessage }) {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[var(--clay-primary)]">{item.title}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--clay-text-sharp)]">{item.title}</p>
                   <p className="truncate text-xs text-[var(--clay-primary-soft)]">{item.subtitle}</p>
                 </div>
                 {item.path ? (
@@ -339,9 +319,9 @@ export function ClayAnalyticsSection({ title, children }) {
   return (
     <section className="clay-app clay-analytics-3d mb-5">
       <div className="mb-3 flex items-center gap-2">
-        <FiBarChart2 className="h-4 w-4 text-[var(--clay-teal)]" />
+        <FiBarChart2 className="h-4 w-4 text-[var(--lms-chart-primary)]" />
         <span className="chart-panel-accent" aria-hidden />
-        <h2 className="text-sm font-semibold text-[var(--clay-primary)]">{title}</h2>
+        <h2 className="text-sm font-bold text-[var(--clay-text-sharp)]">{title}</h2>
       </div>
       {children}
     </section>

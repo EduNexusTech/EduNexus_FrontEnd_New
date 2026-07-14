@@ -1,4 +1,5 @@
 import { FiInbox, FiAlertCircle, FiRefreshCw } from 'react-icons/fi'
+import { cn } from '@/utils/format'
 import Button from './Button'
 
 export function LoadingSpinner({ size = 'md', className = '' }) {
@@ -54,7 +55,7 @@ export function ErrorState({ message, onRetry }) {
       <h3 className="text-lg font-semibold text-text">Something went wrong</h3>
       <p className="mt-1 max-w-sm text-sm text-muted">{message}</p>
       {onRetry && (
-        <Button variant="secondary" className="mt-4" onClick={onRetry}>
+        <Button variant="refresh" className="mt-4" onClick={onRetry}>
           <FiRefreshCw className="h-4 w-4" /> Try again
         </Button>
       )}
@@ -62,17 +63,41 @@ export function ErrorState({ message, onRetry }) {
   )
 }
 
-export function StatusBadge({ active, label }) {
-  const isActive = active === true || active === 'active' || active === 'Active'
+const STATUS_CLASS = {
+  active: 'lms-status-active',
+  inactive: 'lms-status-inactive',
+  pending: 'lms-status-pending',
+  approved: 'lms-status-approved',
+  rejected: 'lms-status-rejected',
+  draft: 'lms-status-draft',
+}
+
+const STATUS_LABEL = {
+  active: 'Active',
+  inactive: 'Inactive',
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  draft: 'Draft',
+}
+
+function resolveStatusKey(active, status) {
+  if (status) {
+    const key = String(status).toLowerCase()
+    if (STATUS_CLASS[key]) return key
+  }
+  if (active === true || active === 'active' || active === 'Active') return 'active'
+  if (active === false || active === 'inactive' || active === 'Inactive') return 'inactive'
+  return 'inactive'
+}
+
+export function StatusBadge({ active, status, label }) {
+  const key = resolveStatusKey(active, status)
+  const text = label || STATUS_LABEL[key] || String(status || (active ? 'Active' : 'Inactive'))
+
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        isActive
-          ? 'bg-[var(--clay-mint-light,rgba(240,252,245,0.75))] text-[var(--clay-teal,#40916c)] border border-[var(--clay-border)]'
-          : 'bg-white/70 text-[var(--clay-primary-soft)] border border-[var(--clay-border)]'
-      }`}
-    >
-      {label || (isActive ? 'Active' : 'Inactive')}
+    <span className={cn('lms-status-badge', STATUS_CLASS[key] || STATUS_CLASS.inactive)}>
+      {text}
     </span>
   )
 }
@@ -91,7 +116,7 @@ export function Avatar({ name, src, size = 'md' }) {
   }
 
   return (
-    <div className={`rounded-full gradient-primary flex items-center justify-center text-white font-semibold ${sizes[size]}`}>
+    <div className={`rounded-full lms-btn-primary flex items-center justify-center text-white font-semibold ${sizes[size]}`}>
       {initials || '?'}
     </div>
   )

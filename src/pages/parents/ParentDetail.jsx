@@ -125,7 +125,7 @@ export default function ParentDetail() {
         subtitle={[parent.parent_code, parent.occupation].filter(Boolean).join(' · ')}
         actions={
           <>
-            <Link to={`/parents/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/parents/${id}/edit`}><Button variant="edit">Edit</Button></Link>
             <Button variant="outline" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
               <FiSend className="h-4 w-4" /> Send Credentials
             </Button>

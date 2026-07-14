@@ -7,8 +7,8 @@ import AnimatedInfinityHero from './AnimatedInfinityHero'
 export default function HeroSection({ isAuthenticated }) {
   return (
     <section className="landing-hero-bleed landing-mesh relative w-full pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-40 lg:pb-32">
-      <div className="pointer-events-none absolute left-0 top-20 h-[500px] w-[500px] -translate-x-1/3 rounded-full bg-[#74c69d]/20 blur-[100px]" />
-      <div className="pointer-events-none absolute right-0 top-40 h-[600px] w-[600px] translate-x-1/4 rounded-full bg-[#52b788]/16 blur-[120px]" />
+      <div className="pointer-events-none absolute left-0 top-20 h-[500px] w-[500px] -translate-x-1/3 rounded-full bg-[#3b82f6]/08 blur-[100px]" />
+      <div className="pointer-events-none absolute right-0 top-40 h-[600px] w-[600px] translate-x-1/4 rounded-full bg-[#00c2ff]/06 blur-[120px]" />
 
       <div className="landing-wrap relative">
         <div className="grid w-full items-center gap-12 xl:grid-cols-2 xl:gap-12 2xl:gap-20">
@@ -20,8 +20,8 @@ export default function HeroSection({ isAuthenticated }) {
           >
             <div className="landing-badge shadow-sm">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#74c69d] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#52b788]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3b82f6] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2563eb]" />
               </span>
               {WEBSITE.tagline}
             </div>

@@ -54,7 +54,7 @@ export default function FeaturesSection() {
                   isLarge ? 'xl:col-span-2' : ''
                 }`}
               >
-                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[#74c69d]/20 opacity-60 transition group-hover:scale-125" />
+                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[#3b82f6]/08 opacity-60 transition group-hover:scale-125" />
 
                 <span className="landing-tag">{feature.highlight}</span>
 

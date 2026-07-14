@@ -57,7 +57,7 @@ export default function AiHubPage() {
                 key={prompt}
                 to="/ai-hub/assistant"
                 state={{ initialPrompt: prompt }}
-                className="rounded-full border border-[var(--clay-border)] bg-[var(--clay-mint-light)] px-3 py-1.5 text-xs font-medium text-[var(--clay-primary)] hover:border-[var(--clay-accent)] hover:bg-white"
+                className="rounded-full border border-[var(--clay-glass-edge)] bg-white/90 px-3 py-1.5 text-xs font-semibold text-[var(--clay-text-sharp)] backdrop-blur-md hover:border-[var(--clay-accent)] hover:bg-white"
               >
                 {prompt}
               </Link>

@@ -26,7 +26,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
       <div className={`landing-wrap transition-all duration-300 ${scrolled ? 'py-2' : 'py-4'}`}>
         <div
           className={`flex h-14 w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:h-16 sm:px-6 lg:px-8 ${
-            scrolled ? 'landing-glass shadow-xl' : 'bg-white/45 backdrop-blur-md border border-[var(--lp-glass-border)]'
+            scrolled ? 'landing-glass shadow-xl' : 'bg-white/90 backdrop-blur-md border border-[var(--lp-glass-border)]'
           }`}
         >
           <Link to="/" className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-xl px-4 py-2.5 text-sm font-bold landing-text-muted transition hover:bg-white/70 hover:landing-text-primary"
+                className="rounded-xl px-4 py-2.5 text-sm font-bold landing-text-muted transition hover:bg-slate-100 hover:landing-text-primary"
               >
                 {item.label}
               </a>

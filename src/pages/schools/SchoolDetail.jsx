@@ -27,7 +27,7 @@ export default function SchoolDetail() {
       actions={() => (
         <>
           <Link to={`/schools/${id}/profile`}><Button variant="outline">School Profile</Button></Link>
-          <Link to={`/schools/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+          <Link to={`/schools/${id}/edit`}><Button variant="edit">Edit</Button></Link>
         </>
       )}
     />

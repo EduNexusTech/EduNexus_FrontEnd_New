@@ -42,20 +42,20 @@ export default function MasterBulkActions({ masterKey, service, queryKey }) {
   return (
     <>
       {service.bulkImport && (
-        <Button variant="secondary" onClick={() => setOpen(true)}>
+        <Button variant="upload" onClick={() => setOpen(true)}>
           <FiUpload className="h-4 w-4" /> Bulk Import
         </Button>
       )}
       {service.export && (
         <Button
-          variant="secondary"
+          variant="excel"
           onClick={async () => {
             const blob = await service.export({})
             downloadBlob(blob, `${masterKey}-export.csv`)
             toast.success('Export downloaded')
           }}
         >
-          <FiDownload className="h-4 w-4" /> Export CSV
+          <FiDownload className="h-4 w-4" /> Export Excel
         </Button>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title="Bulk Import" size="lg">
@@ -68,8 +68,8 @@ export default function MasterBulkActions({ masterKey, service, queryKey }) {
           onChange={(e) => setJsonText(e.target.value)}
         />
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button loading={importMut.isPending} onClick={handleImport}>Import</Button>
+          <Button variant="cancel" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="upload" loading={importMut.isPending} onClick={handleImport}>Import</Button>
         </div>
       </Modal>
     </>

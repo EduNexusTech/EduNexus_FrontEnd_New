@@ -215,7 +215,7 @@ function NavItem({ item, onMobileClose, active }) {
       to={item.path}
       onClick={onMobileClose}
       className={cn(
-        'clay-nav-item mb-1 flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium',
+        'clay-nav-item mb-1 flex items-center gap-3 px-4 py-2.5 text-[14px]',
         active && 'active',
       )}
     >
@@ -236,7 +236,7 @@ function SidebarProfile() {
       <div className="clay-sidebar-avatar-ring shrink-0 rounded-full">
         <Avatar name={displayName} src={user?.profile_image} size="md" />
       </div>
-      <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
+      <p className="clay-sidebar-profile-name min-w-0 flex-1 truncate text-sm">
         Hi, {firstName}! <span aria-hidden>👋</span>
       </p>
     </div>

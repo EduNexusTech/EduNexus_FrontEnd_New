@@ -62,7 +62,7 @@ export default function Header({ onMenuClick }) {
           >
             <FiMenu className="h-4 w-4" />
           </button>
-          <h1 className="truncate text-base font-semibold text-[var(--clay-primary)] md:text-lg">{pageTitle}</h1>
+          <h1 className="truncate text-base font-bold tracking-tight text-[var(--clay-text-sharp)] md:text-lg">{pageTitle}</h1>
         </div>
 
         <div className="hidden max-w-sm flex-1 md:flex">
@@ -118,7 +118,7 @@ export default function Header({ onMenuClick }) {
               className="clay-icon-btn flex items-center gap-2 p-1.5 pr-3"
             >
               <Avatar name={displayName} src={user?.profile_image} size="sm" />
-              <span className="hidden sm:block text-sm font-medium text-text max-w-[120px] truncate">
+              <span className="hidden sm:block text-sm font-semibold text-[var(--clay-text-sharp)] max-w-[120px] truncate">
                 {displayName}
               </span>
               <FiChevronDown className="h-4 w-4 text-muted hidden sm:block" />
@@ -127,15 +127,15 @@ export default function Header({ onMenuClick }) {
             {profileOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-[var(--clay-border)] bg-white/95 backdrop-blur-md py-2 card-shadow">
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-[var(--clay-glass-edge)] bg-white/95 backdrop-blur-xl py-2 card-shadow">
                   <div className="px-4 py-2 border-b border-[var(--clay-border)]">
-                    <p className="text-sm font-semibold truncate text-[var(--clay-primary)]">{displayName}</p>
-                    <p className="text-xs text-[var(--clay-primary-soft)] truncate">{user?.email}</p>
+                    <p className="text-sm font-bold truncate text-[var(--clay-text-sharp)]">{displayName}</p>
+                    <p className="text-xs font-medium text-[var(--clay-primary-soft)] truncate">{user?.email}</p>
                   </div>
                   <Link
                     to="/profile"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
                   >
                     <FiUser className="h-4 w-4" /> Profile
                   </Link>
@@ -143,7 +143,7 @@ export default function Header({ onMenuClick }) {
                     <Link
                       to="/school-profile"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
                     >
                       <FiBook className="h-4 w-4" /> School Profile
                     </Link>
@@ -151,7 +151,7 @@ export default function Header({ onMenuClick }) {
                   <Link
                     to="/change-password"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--clay-primary)] hover:bg-[var(--clay-mint-light)]"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
                   >
                     <FiKey className="h-4 w-4" /> Change Password
                   </Link>
@@ -187,7 +187,7 @@ export default function Header({ onMenuClick }) {
             notifications.map((n) => (
               <div
                 key={n.id}
-                className={`rounded-xl border p-4 ${n.is_read ? 'border-[var(--clay-border)] bg-white' : 'border-[var(--clay-accent)]/30 bg-[var(--clay-mint-light)]'}`}
+                className={`rounded-xl border p-4 backdrop-blur-md ${n.is_read ? 'border-[var(--clay-glass-edge)] bg-white/90' : 'border-[var(--clay-accent)]/30 bg-blue-50/60'}`}
               >
                 <p className="font-medium text-sm">{n.title}</p>
                 <p className="text-sm text-muted mt-1">{n.message}</p>

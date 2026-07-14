@@ -126,7 +126,7 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] bg-white px-2 py-1.5 text-sm text-[var(--clay-primary,#3f5249)]"
+          className="rounded-lg border border-[var(--clay-glass-edge)] bg-white/90 backdrop-blur-md px-2 py-1.5 text-sm text-[var(--clay-text-sharp)]"
         >
           {[10, 20, 50, 100].map((n) => (
             <option key={n} value={n}>
@@ -137,14 +137,14 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
         <button
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] px-3 py-1.5 text-sm text-[var(--clay-primary,#3f5249)] disabled:opacity-40 hover:bg-[var(--clay-mint-light,#f4f8f6)]"
+          className="lms-btn-previous rounded-lg px-3 py-1.5 text-sm disabled:opacity-40"
         >
           Previous
         </button>
         <button
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-lg border border-[var(--clay-border,#e2ebe6)] px-3 py-1.5 text-sm text-[var(--clay-primary,#3f5249)] disabled:opacity-40 hover:bg-[var(--clay-mint-light,#f4f8f6)]"
+          className="lms-btn-next rounded-lg px-3 py-1.5 text-sm disabled:opacity-40"
         >
           Next
         </button>

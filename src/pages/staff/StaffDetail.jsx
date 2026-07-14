@@ -174,7 +174,7 @@ export default function StaffDetail() {
         subtitle={[staff.employee_id, staff.designation_name, staff.department_name].filter(Boolean).join(' · ')}
         actions={
           <>
-            <Link to={`/staff/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/staff/${id}/edit`}><Button variant="edit">Edit</Button></Link>
             <Button variant="outline" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
               <FiSend className="h-4 w-4" /> Send Credentials
             </Button>
@@ -304,7 +304,7 @@ export default function StaffDetail() {
                     <td>{l.status}</td>
                     <td>
                       {l.status === 'pending' && (
-                        <Button size="sm" variant="outline" onClick={() => approveLeaveMut.mutate(l.leave_id)} loading={approveLeaveMut.isPending}>Approve</Button>
+                        <Button size="sm" variant="success" onClick={() => approveLeaveMut.mutate(l.leave_id)} loading={approveLeaveMut.isPending}>Approve</Button>
                       )}
                     </td>
                   </tr>

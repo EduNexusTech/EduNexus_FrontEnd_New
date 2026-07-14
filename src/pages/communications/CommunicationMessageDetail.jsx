@@ -109,7 +109,7 @@ export default function CommunicationMessageDetail() {
                 <FiXCircle className="h-4 w-4" /> Cancel
               </Button>
             )}
-            <Link to={`/communications/messages/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/communications/messages/${id}/edit`}><Button variant="edit">Edit</Button></Link>
           </>
         }
       />

@@ -11,11 +11,11 @@ export default function Breadcrumb({ items = [] }) {
         <span key={i} className="flex items-center gap-1">
           <FiChevronRight className="h-3 w-3 text-[var(--clay-primary-soft)]" />
           {item.href && i < items.length - 1 ? (
-            <Link to={item.href} className="font-medium transition hover:text-[var(--clay-primary)]">
+            <Link to={item.href} className="font-semibold text-[var(--clay-primary-soft)] transition hover:text-[var(--clay-text-sharp)]">
               {item.label}
             </Link>
           ) : (
-            <span className={i === items.length - 1 ? 'font-semibold text-[var(--clay-primary)]' : ''}>
+            <span className={i === items.length - 1 ? 'clay-breadcrumb-current font-bold text-[var(--clay-text-sharp)]' : 'font-semibold text-[var(--clay-primary-soft)]'}>
               {item.label}
             </span>
           )}

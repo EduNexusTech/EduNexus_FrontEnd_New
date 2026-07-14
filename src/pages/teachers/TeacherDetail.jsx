@@ -171,7 +171,7 @@ export default function TeacherDetail() {
         subtitle={[teacher.employee_id, teacher.designation, teacher.department].filter(Boolean).join(' · ')}
         actions={
           <>
-            <Link to={`/teachers/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/teachers/${id}/edit`}><Button variant="edit">Edit</Button></Link>
             <Button variant="outline" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
               <FiSend className="h-4 w-4" /> Send Credentials
             </Button>
@@ -330,7 +330,7 @@ export default function TeacherDetail() {
               <li key={l.leave_id} className="flex items-center justify-between rounded-lg border px-3 py-2">
                 <span>{l.leave_type} — {l.start_date} to {l.end_date} ({l.status})</span>
                 {l.status === 'pending' && (
-                  <Button size="sm" variant="outline" loading={approveLeaveMut.isPending} onClick={() => approveLeaveMut.mutate(l.leave_id)}>
+                  <Button size="sm" variant="success" loading={approveLeaveMut.isPending} onClick={() => approveLeaveMut.mutate(l.leave_id)}>
                     Approve
                   </Button>
                 )}

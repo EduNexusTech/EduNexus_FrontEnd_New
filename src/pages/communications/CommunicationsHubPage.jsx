@@ -43,7 +43,7 @@ export default function CommunicationsHubPage() {
         <HubSectionTitle title="Supported Channels" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {CHANNELS.map((ch) => (
-            <Card key={ch.label} className="clay-stat-3d p-4">
+            <Card key={ch.label} className="p-4">
               <p className="font-medium text-[var(--clay-primary)]">{ch.label}</p>
               <p className="mt-1 text-xs text-[var(--clay-primary-soft)]">{ch.desc}</p>
             </Card>

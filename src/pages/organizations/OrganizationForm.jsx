@@ -410,7 +410,7 @@ function PreviewCard({ values, isEdit, logoUrl, createMatchingSchool }) {
     <Card className="overflow-hidden p-0">
       <div className="gradient-primary px-5 py-6 text-white">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/20 text-lg font-bold backdrop-blur-sm">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/90 text-lg font-bold border border-[var(--clay-glass-edge)]">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-full w-full object-cover" />
             ) : (

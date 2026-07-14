@@ -8,7 +8,7 @@ export default function AuthLayout({ hero, children }) {
       <div className="auth-login-inner relative flex flex-col lg:flex-row">
         <Link
           to="/"
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[var(--clay-border)] bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--clay-primary-soft)] shadow-sm backdrop-blur-sm transition hover:border-[var(--clay-accent)] hover:text-[var(--clay-teal)] lg:hidden"
+          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[var(--clay-glass-edge)] bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--clay-primary-soft)] shadow-sm backdrop-blur-md transition hover:border-[var(--clay-accent)] hover:bg-white hover:text-[var(--clay-teal)] lg:hidden"
         >
           <FiArrowLeft className="h-4 w-4" />
           Home

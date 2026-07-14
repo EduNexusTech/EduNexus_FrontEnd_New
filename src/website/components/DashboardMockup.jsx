@@ -25,20 +25,20 @@ export default function DashboardMockup() {
     >
       <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-r from-sky-400/25 via-indigo-400/20 to-violet-400/25 blur-3xl sm:-inset-8" />
 
-      <div className="landing-glass relative w-full overflow-hidden rounded-2xl border border-white/70 shadow-2xl shadow-indigo-500/20 xl:rounded-3xl">
+      <div className="landing-glass relative w-full overflow-hidden rounded-2xl border border-[var(--lp-glass-border)] shadow-2xl shadow-blue-500/10 xl:rounded-3xl">
         <div className="flex items-center gap-2 border-b border-slate-200/60 bg-slate-50/90 px-5 py-3.5">
           <div className="flex gap-1.5">
             <span className="h-3 w-3 rounded-full bg-rose-400/90" />
             <span className="h-3 w-3 rounded-full bg-amber-400/90" />
             <span className="h-3 w-3 rounded-full bg-emerald-400/90" />
           </div>
-          <div className="mx-auto flex h-8 flex-1 max-w-md items-center justify-center rounded-lg bg-white/90 px-4 text-[11px] font-bold text-slate-400">
+          <div className="mx-auto flex h-8 flex-1 max-w-md items-center justify-center rounded-lg border border-slate-200 bg-white/90 px-4 text-[11px] font-bold text-slate-500">
             learn.edunexus.io/courses
           </div>
         </div>
 
-        <div className="flex min-h-[360px] bg-white sm:min-h-[400px]">
-          <div className="hidden w-20 shrink-0 border-r border-slate-100 bg-slate-50/60 p-2.5 sm:block lg:w-24">
+        <div className="flex min-h-[360px] bg-white/95 sm:min-h-[400px]">
+          <div className="hidden w-20 shrink-0 border-r border-slate-200 bg-slate-50/90 p-2.5 sm:block lg:w-24">
             {SIDEBAR.map((item) => {
               const Icon = item.icon
               return (
@@ -118,14 +118,17 @@ export default function DashboardMockup() {
             <div className="mt-4 hidden rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-4 lg:block">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-extrabold text-slate-700">Engagement trend</p>
-                <FiBarChart2 className="h-4 w-4 text-indigo-500" />
+                <FiBarChart2 className="h-4 w-4 text-[#2563eb]" />
               </div>
               <div className="flex h-14 items-end gap-1.5">
                 {[45, 70, 55, 85, 60, 95, 75, 100, 68, 90, 82, 88].map((h, i) => (
                   <div
                     key={i}
-                    className="flex-1 rounded-t-md bg-gradient-to-t from-indigo-600 to-sky-400 opacity-85"
-                    style={{ height: `${h}%` }}
+                    className="flex-1 rounded-t-md opacity-90"
+                    style={{
+                      height: `${h}%`,
+                      background: `linear-gradient(to top, #1d4ed8, ${['#2563eb', '#0ea5e9', '#16a34a', '#0891b2', '#7c3aed', '#0f766e'][i % 6]})`,
+                    }}
                   />
                 ))}
               </div>
@@ -138,7 +141,7 @@ export default function DashboardMockup() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.8 }}
-        className="landing-float landing-float-delay absolute -right-2 top-16 hidden rounded-2xl border border-white/90 bg-white p-4 shadow-2xl shadow-indigo-500/15 sm:block lg:-right-6 xl:-right-10"
+        className="landing-float landing-float-delay absolute -right-2 top-16 hidden rounded-2xl border border-[var(--lp-glass-border)] bg-white/95 p-4 shadow-xl sm:block lg:-right-6 xl:-right-10"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
@@ -155,7 +158,7 @@ export default function DashboardMockup() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1 }}
-        className="landing-float absolute -left-2 bottom-20 hidden rounded-2xl border border-white/90 bg-white p-4 shadow-2xl shadow-emerald-500/15 sm:block lg:-left-6 xl:-left-10"
+        className="landing-float absolute -left-2 bottom-20 hidden rounded-2xl border border-[var(--lp-glass-border)] bg-white/95 p-4 shadow-xl sm:block lg:-left-6 xl:-left-10"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">

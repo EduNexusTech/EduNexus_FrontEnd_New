@@ -43,7 +43,7 @@ function BulkImportAction({ masterKey, service, queryKey }) {
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button variant="upload" onClick={() => setOpen(true)}>
         <FiUpload className="h-4 w-4" /> Bulk Import
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title="Bulk Import" size="lg">
@@ -57,8 +57,8 @@ function BulkImportAction({ masterKey, service, queryKey }) {
           placeholder={'[\n  { "name": "Male", "code": "male", "sequence": 1, "is_active": true }\n]'}
         />
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button loading={mutation.isPending} onClick={handleImport}>Import</Button>
+          <Button variant="cancel" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="upload" loading={mutation.isPending} onClick={handleImport}>Import</Button>
         </div>
       </Modal>
     </>
@@ -91,14 +91,14 @@ export default function SchoolMasterList() {
         <>
           <BulkImportAction masterKey={masterKey} service={service} queryKey={`school-masters-${masterKey}`} />
           <Button
-            variant="secondary"
+            variant="excel"
             onClick={async () => {
               const blob = await service.export({})
               downloadBlob(blob, `school-masters-${masterKey}.csv`)
               toast.success('Export downloaded')
             }}
           >
-            <FiDownload className="h-4 w-4" /> Export CSV
+            <FiDownload className="h-4 w-4" /> Export Excel
           </Button>
         </>
       }

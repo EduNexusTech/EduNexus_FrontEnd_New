@@ -75,14 +75,14 @@ export default function StaffList() {
       }
       extraActions={
         <Button
-          variant="secondary"
+          variant="excel"
           onClick={async () => {
             const blob = await staffService.export({})
             downloadBlob(blob, 'staff-export.csv')
             toast.success('Export downloaded')
           }}
         >
-          Export CSV
+          Export Excel
         </Button>
       }
     />

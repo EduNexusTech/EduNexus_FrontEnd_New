@@ -24,7 +24,7 @@ export default function ProfilePage() {
       <PageHeader title="My Profile" subtitle="View and manage your account information" />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        <div className="rounded-2xl bg-white border border-border card-shadow p-6 text-center lg:col-span-4 xl:col-span-3">
+        <div className="rounded-2xl glass border border-[var(--clay-glass-border)] card-shadow p-6 text-center lg:col-span-4 xl:col-span-3">
           <Avatar name={displayName} src={user?.profile_image} size="lg" />
           <h2 className="mt-4 text-xl font-bold">{displayName}</h2>
           <p className="text-muted text-sm">{user?.email}</p>
@@ -33,7 +33,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="lg:col-span-8 xl:col-span-9 rounded-2xl bg-white border border-border card-shadow p-6">
+        <div className="lg:col-span-8 xl:col-span-9 rounded-2xl glass border border-[var(--clay-glass-border)] card-shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Account Details</h3>
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {fields.map((f) => (

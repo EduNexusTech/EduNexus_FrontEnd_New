@@ -18,7 +18,7 @@ export default function AudienceSection() {
           viewport={{ once: true }}
           className="mx-auto max-w-4xl text-center"
         >
-          <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#95d5b2]">
+          <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#3b82f6]">
             Built for every role
           </span>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl">

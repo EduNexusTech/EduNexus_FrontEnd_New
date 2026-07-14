@@ -61,7 +61,7 @@ function buildColumns(onCredentialsClick) {
       cell: ({ row }) => (
         <Button
           type="button"
-          variant="outline"
+          variant="view"
           size="sm"
           onClick={() => onCredentialsClick(row.original)}
           title="View credentials"
@@ -136,9 +136,9 @@ function SchoolUserDetailModal({ userId, open, onClose, onViewCredentials }) {
         const userRecordId = item.user_id || item.id || recordId
         return (
           <>
-            <Button variant="secondary" onClick={close}>Close</Button>
+            <Button variant="cancel" onClick={close}>Close</Button>
             <Button
-              variant="outline"
+              variant="view"
               onClick={() => {
                 onViewCredentials?.(item)
                 close()
@@ -147,10 +147,10 @@ function SchoolUserDetailModal({ userId, open, onClose, onViewCredentials }) {
               <FiKey className="h-4 w-4" /> Credentials
             </Button>
             <Link to={`/school-users/${userRecordId}/edit`} onClick={close}>
-              <Button variant="outline"><FiEdit2 className="h-4 w-4" /> Edit</Button>
+              <Button variant="edit"><FiEdit2 className="h-4 w-4" /> Edit</Button>
             </Link>
             <Link to={`/school-users/${userRecordId}`} onClick={close}>
-              <Button variant="outline">Full Detail</Button>
+              <Button variant="view">Full Detail</Button>
             </Link>
             <Button variant="secondary" onClick={handleResetPassword} loading={resetPasswordMutation.isPending}>
               Reset Password
@@ -160,7 +160,7 @@ function SchoolUserDetailModal({ userId, open, onClose, onViewCredentials }) {
                 Deactivate
               </Button>
             ) : (
-              <Button loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
+              <Button variant="success" loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
                 Activate
               </Button>
             )}

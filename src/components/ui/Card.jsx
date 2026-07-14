@@ -4,7 +4,7 @@ export default function Card({ children, className, padding = true, hover = fals
   return (
     <div
       className={cn(
-        'clay-card clay-card-white clay-card-3d border-0',
+        'clay-card clay-card-white border-0',
         padding && 'p-6',
         hover && 'cursor-pointer',
         className,
@@ -29,9 +29,9 @@ export function StatCard({ title, value, change, icon: Icon, color = 'primary' }
     <Card hover className={cn('relative overflow-hidden', colors[color])}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-semibold text-[var(--clay-primary-soft)]">{title}</p>
-          <p className="mt-2 text-2xl font-semibold text-[var(--clay-primary)]">{value}</p>
-          {change && <p className="mt-1 text-xs text-[var(--clay-primary-soft)]">{change}</p>}
+          <p className="text-sm font-bold text-[var(--clay-text-sharp)]">{title}</p>
+          <p className="mt-2 text-2xl font-bold text-[var(--clay-text-sharp)]">{value}</p>
+          {change && <p className="mt-1 text-xs font-medium text-[var(--clay-primary-soft)]">{change}</p>}
         </div>
         {Icon && (
           <div className="clay-icon-3d flex h-12 w-12 items-center justify-center text-[var(--clay-primary)]">
@@ -50,7 +50,7 @@ export function PageHeader({ title: _title, subtitle, actions }) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {subtitle ? (
-        <p className="text-sm font-medium text-[var(--clay-primary-soft)]">{subtitle}</p>
+        <p className="text-sm font-semibold text-[var(--clay-primary-soft)]">{subtitle}</p>
       ) : (
         <span />
       )}

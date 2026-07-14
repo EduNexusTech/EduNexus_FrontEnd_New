@@ -56,14 +56,14 @@ export default function ParentList() {
       }
       extraActions={
         <Button
-          variant="secondary"
+          variant="excel"
           onClick={async () => {
             const blob = await parentService.export({})
             downloadBlob(blob, 'parents-export.csv')
             toast.success('Export downloaded')
           }}
         >
-          Export CSV
+          Export Excel
         </Button>
       }
     />

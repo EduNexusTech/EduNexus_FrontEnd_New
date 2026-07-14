@@ -19,14 +19,14 @@ export default function Modal({ open, onClose, title, children, size = 'md', foo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
             onClick={onClose}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className={cn('relative w-full rounded-2xl bg-white card-shadow', sizes[size])}
+            className={cn('relative w-full rounded-2xl glass-strong card-shadow', sizes[size])}
           >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-lg font-semibold text-text">{title}</h2>
@@ -55,7 +55,7 @@ export function Drawer({ open, onClose, title, children, side = 'right' }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
             onClick={onClose}
           />
           <motion.div
@@ -63,7 +63,7 @@ export function Drawer({ open, onClose, title, children, side = 'right' }) {
             animate={{ x: 0 }}
             exit={{ x: side === 'right' ? '100%' : '-100%' }}
             className={cn(
-              'absolute top-0 h-full w-full max-w-md bg-white card-shadow flex flex-col',
+              'absolute top-0 h-full w-full max-w-md glass-strong card-shadow flex flex-col',
               side === 'right' ? 'right-0' : 'left-0',
             )}
           >

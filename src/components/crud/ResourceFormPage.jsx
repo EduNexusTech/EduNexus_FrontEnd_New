@@ -133,7 +133,7 @@ export default function ResourceFormPage({
       <Breadcrumb items={breadcrumb || [{ label: title, href: basePath }, { label: isEdit ? 'Edit' : 'New' }]} />
       <PageHeader title={isEdit ? `Edit ${title}` : `New ${title}`} />
 
-      <Card className="w-full lms-form-card clay-card-3d">
+      <Card className="w-full lms-form-card">
         <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-1">
           {fields.map((field) => (
             <div key={field.name} className={field.fullWidth ? 'sm:col-span-2 lg:col-span-3' : ''}>
@@ -141,10 +141,10 @@ export default function ResourceFormPage({
             </div>
           ))}
           <div className="sm:col-span-2 lg:col-span-3 flex flex-wrap gap-3 pt-4 border-t border-[var(--clay-border)]">
-            <Button type="submit" loading={mutation.isPending}>
+            <Button type="submit" variant="primary" loading={mutation.isPending}>
               {isEdit ? 'Update' : 'Create'}
             </Button>
-            <Button type="button" variant="secondary" onClick={() => navigate(basePath)}>
+            <Button type="button" variant="cancel" onClick={() => navigate(basePath)}>
               Cancel
             </Button>
             <Button type="button" variant="ghost" onClick={() => reset()}>
@@ -186,7 +186,7 @@ export function ResourceDetailPage({
         actions={
           <>
             {actions?.(item)}
-            <Button variant="secondary" onClick={() => window.history.back()}>Back</Button>
+            <Button variant="back" onClick={() => window.history.back()}>Back</Button>
           </>
         }
       />

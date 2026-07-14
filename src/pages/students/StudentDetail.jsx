@@ -123,7 +123,7 @@ export default function StudentDetail() {
         subtitle={[student.admission_number, student.roll_number, student.class_name].filter(Boolean).join(' · ')}
         actions={
           <>
-            <Link to={`/students/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Link to={`/students/${id}/edit`}><Button variant="edit">Edit</Button></Link>
             <Button variant="outline" onClick={() => qrMutation.mutate()} loading={qrMutation.isPending}>
               <FiRefreshCw className="h-4 w-4" /> QR
             </Button>
@@ -356,7 +356,7 @@ export default function StudentDetail() {
             </div>
           </div>
           <div className="mt-4 flex justify-center gap-2">
-            <Button variant="outline" onClick={() => window.print()}><FiDownload /> Print</Button>
+            <Button variant="print" onClick={() => window.print()}><FiDownload /> Print PDF</Button>
           </div>
         </Card>
       )}

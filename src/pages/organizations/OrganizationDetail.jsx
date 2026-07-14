@@ -49,7 +49,7 @@ export default function OrganizationDetail() {
       ]}
       actions={(item) => (
         <>
-          <Link to={`/organizations/${id}/edit`}><Button variant="secondary">Edit</Button></Link>
+          <Link to={`/organizations/${id}/edit`}><Button variant="edit">Edit</Button></Link>
           {item.is_active ? (
             <Button variant="danger" loading={deactivateMutation.isPending} onClick={() => deactivateMutation.mutate()}>Deactivate</Button>
           ) : (

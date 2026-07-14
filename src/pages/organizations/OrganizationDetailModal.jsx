@@ -70,9 +70,9 @@ export default function OrganizationDetailModal({ organizationId, open, onClose 
         const orgId = item.organization_id || item.id || recordId
         return (
           <>
-            <Button variant="secondary" onClick={close}>Close</Button>
+            <Button variant="cancel" onClick={close}>Close</Button>
             <Link to={`/organizations/${orgId}/edit`} onClick={close}>
-              <Button variant="outline">
+              <Button variant="edit">
                 <FiEdit2 className="h-4 w-4" />
                 Edit
               </Button>
@@ -82,7 +82,7 @@ export default function OrganizationDetailModal({ organizationId, open, onClose 
                 Deactivate
               </Button>
             ) : (
-              <Button loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
+              <Button variant="success" loading={activateMutation.isPending} onClick={() => activateMutation.mutate()}>
                 Activate
               </Button>
             )}

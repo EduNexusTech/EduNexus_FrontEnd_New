@@ -7,6 +7,7 @@ import DataTable, { Pagination, SearchBox } from '@/components/data/DataTable'
 import { PageHeader, Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
+import IconActionButton from '@/components/ui/IconActionButton'
 import { ErrorState } from '@/components/ui/Feedback'
 import { StatusBadge } from '@/components/ui/Feedback'
 import { usePagination, useDebounce } from '@/hooks/usePagination'
@@ -101,33 +102,33 @@ export default function ResourceListPage({
           return (
             <div className="flex items-center gap-1">
               {onView ? (
-                <button
-                  type="button"
+                <IconActionButton
+                  variant="view"
                   onClick={() => onView(item, id)}
-                  className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]"
                   title="View details"
                 >
                   <FiEye className="h-4 w-4" />
-                </button>
+                </IconActionButton>
               ) : (
-                <Link to={`${basePath}/${id}`} className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]" title="View details">
+                <IconActionButton variant="view" href={`${basePath}/${id}`} title="View details">
                   <FiEye className="h-4 w-4" />
-                </Link>
+                </IconActionButton>
               )}
               {basePath.includes('/audit-logs') || basePath.includes('/notifications') ? null : (
                 <>
-                  <Link to={`${basePath}/${id}/edit`} className="clay-action-btn rounded-lg p-2 text-[var(--clay-primary-soft)] hover:text-[var(--clay-teal)]">
+                  <IconActionButton variant="edit" href={`${basePath}/${id}/edit`} title="Edit">
                     <FiEdit2 className="h-4 w-4" />
-                  </Link>
+                  </IconActionButton>
                   {deleteFn && (
-                    <button
+                    <IconActionButton
+                      variant="delete"
+                      title="Delete"
                       onClick={async () => {
                         if (await confirmDelete()) deleteMutation.mutate(id)
                       }}
-                      className="rounded-lg p-2 text-muted hover:bg-red-50 hover:text-danger"
                     >
                       <FiTrash2 className="h-4 w-4" />
-                    </button>
+                    </IconActionButton>
                   )}
                 </>
               )}
@@ -170,16 +171,16 @@ export default function ResourceListPage({
         subtitle={subtitle}
         actions={
           <>
-            <Button variant="secondary" onClick={() => refetch()} loading={isFetching}>
+            <Button variant="refresh" onClick={() => refetch()} loading={isFetching}>
               <FiRefreshCw /> Refresh
             </Button>
-            <Button variant="secondary" onClick={handleExport}>
-              <FiDownload /> Export
+            <Button variant="excel" onClick={handleExport}>
+              <FiDownload /> Export Excel
             </Button>
             {extraActions}
             {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
               <Link to={`${basePath}/new`}>
-                <Button><FiPlus /> Add New</Button>
+                <Button variant="create"><FiPlus /> Add New</Button>
               </Link>
             )}
           </>

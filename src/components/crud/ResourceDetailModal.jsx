@@ -53,16 +53,16 @@ export default function ResourceDetailModal({
 
   const defaultFooter = item && editPath ? (
     <>
-      <Button variant="secondary" onClick={onClose}>Close</Button>
+      <Button variant="cancel" onClick={onClose}>Close</Button>
       <Link to={editPath(item, recordId)} onClick={onClose}>
-        <Button variant="outline">
+        <Button variant="edit">
           <FiEdit2 className="h-4 w-4" />
           Edit
         </Button>
       </Link>
     </>
   ) : (
-    <Button variant="secondary" onClick={onClose}>Close</Button>
+    <Button variant="cancel" onClick={onClose}>Close</Button>
   )
 
   return (

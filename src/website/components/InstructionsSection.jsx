@@ -61,7 +61,7 @@ export default function InstructionsSection() {
                 {ROLE_GUIDE.map((item) => (
                   <div
                     key={item.role}
-                    className="overflow-hidden rounded-2xl border border-[var(--lp-border)] bg-white/80 backdrop-blur-sm"
+                    className="overflow-hidden rounded-2xl border border-[var(--lp-glass-border)] bg-white/90 backdrop-blur-md"
                   >
                     <div className={`bg-gradient-to-r ${item.color} px-5 py-3`}>
                       <p className="text-sm font-extrabold text-white">{item.role}</p>
