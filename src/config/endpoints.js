@@ -17,6 +17,8 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/api/v1/organizations/${id}/`,
     ACTIVATE: (id) => `/api/v1/organizations/${id}/activate/`,
     DEACTIVATE: (id) => `/api/v1/organizations/${id}/deactivate/`,
+    UPLOAD_DOCUMENTS: (id) => `/api/v1/organizations/${id}/upload-documents/`,
+    DELETE_DOCUMENT: (id, documentId) => `/api/v1/organizations/${id}/documents/${documentId}/`,
   },
   MEMBERSHIPS: {
     LIST: '/api/v1/memberships/',
@@ -27,6 +29,8 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/api/v1/schools/${id}/`,
     PROFILE: (id) => `/api/v1/schools/${id}/profile/`,
     PROFILE_REGENERATE_QR: (id) => `/api/v1/schools/${id}/profile/regenerate-qr/`,
+    UPLOAD_DOCUMENTS: (id) => `/api/v1/schools/${id}/upload-documents/`,
+    DELETE_DOCUMENT: (id, documentId) => `/api/v1/schools/${id}/documents/${documentId}/`,
   },
   SCHOOL_PROFILE: '/api/v1/school-profile/',
   ACADEMIC_YEARS: {

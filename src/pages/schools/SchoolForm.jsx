@@ -1,11 +1,18 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { Link, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { FiFileText } from 'react-icons/fi'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { organizationService, schoolService } from '@/api/services'
-import { getErrorMessage, unwrapList } from '@/api/client'
+import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import Button from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import {
+  SchoolDocumentsList,
+  SchoolDocumentsUploader,
+  useSchoolDocumentDelete,
+} from './SchoolDocumentsModal'
 
 const SCHOOL_FIELDS = [
   { name: 'school_name', label: 'School Name', type: 'text', required: true },
@@ -45,7 +52,64 @@ function transformSchoolLoad(item) {
   }
 }
 
+function SchoolDocumentsEditSection({ schoolId }) {
+  const queryClient = useQueryClient()
+  const { data } = useQuery({
+    queryKey: ['schools', schoolId],
+    queryFn: () => schoolService.get(schoolId),
+    enabled: Boolean(schoolId),
+  })
+  const school = unwrapData(data)
+  const documents = school?.documents || []
+  const { deleteDocument, deletingId } = useSchoolDocumentDelete(schoolId, [
+    'schools',
+    ['schools', schoolId],
+  ])
+
+  return (
+    <Card className="w-full p-6">
+      <div className="mb-5 flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <FiFileText className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-text">Documents</h2>
+          <p className="text-sm text-muted">Upload multiple files or remove existing ones</p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <SchoolDocumentsUploader
+          schoolId={schoolId}
+          onUploaded={() => {
+            queryClient.invalidateQueries({ queryKey: ['schools'] })
+            queryClient.invalidateQueries({ queryKey: ['schools', schoolId] })
+          }}
+        />
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text">Uploaded documents</h3>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-muted">
+              {documents.length}
+            </span>
+          </div>
+          <SchoolDocumentsList
+            documents={documents}
+            allowDownload
+            allowDelete
+            onDelete={deleteDocument}
+            deletingId={deletingId}
+          />
+        </div>
+      </div>
+    </Card>
+  )
+}
+
 export default function SchoolForm() {
+  const { id } = useParams()
+  const isEdit = Boolean(id)
+
   const {
     data: orgData,
     isLoading: orgsLoading,
@@ -100,15 +164,18 @@ export default function SchoolForm() {
   }
 
   return (
-    <ResourceFormPage
-      title="School"
-      queryKey="schools"
-      getFn={schoolService.get}
-      createFn={schoolService.create}
-      updateFn={schoolService.update}
-      basePath="/schools"
-      fields={fields}
-      transformLoad={transformSchoolLoad}
-    />
+    <div className="space-y-6">
+      <ResourceFormPage
+        title="School"
+        queryKey="schools"
+        getFn={schoolService.get}
+        createFn={schoolService.create}
+        updateFn={schoolService.update}
+        basePath="/schools"
+        fields={fields}
+        transformLoad={transformSchoolLoad}
+      />
+      {isEdit && <SchoolDocumentsEditSection schoolId={id} />}
+    </div>
   )
 }

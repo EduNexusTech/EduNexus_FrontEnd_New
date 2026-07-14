@@ -18,6 +18,7 @@ import {
   FiSave,
   FiUpload,
   FiX,
+  FiFileText,
 } from 'react-icons/fi'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
@@ -27,6 +28,11 @@ import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { organizationService, schoolService } from '@/api/services'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { cn, getInitials, resolveMediaUrl } from '@/utils/format'
+import {
+  OrganizationDocumentsList,
+  OrganizationDocumentsUploader,
+  useOrganizationDocumentDelete,
+} from './OrganizationDocumentsModal'
 
 const LOGO_MAX_BYTES = 2 * 1024 * 1024
 const LOGO_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif'
@@ -523,6 +529,13 @@ export default function OrganizationForm() {
     enabled: isEdit && Boolean(id) && Boolean(organizationCode),
   })
 
+  const organization = unwrapData(data)
+  const documents = organization?.documents || []
+  const { deleteDocument, deletingId } = useOrganizationDocumentDelete(id, [
+    'organizations',
+    ['organizations', id],
+  ])
+
   useEffect(() => {
     if (data && isEdit) {
       const item = unwrapData(data)
@@ -791,6 +804,37 @@ export default function OrganizationForm() {
           isEdit
           hasExistingSchool={Boolean(matchingSchool)}
         />
+      </SectionCard>
+
+      <SectionCard
+        title="Documents"
+        subtitle="Upload multiple files or remove existing ones"
+        icon={FiFileText}
+      >
+        <div className="space-y-6">
+          <OrganizationDocumentsUploader
+            organizationId={id}
+            onUploaded={() => {
+              queryClient.invalidateQueries({ queryKey: ['organizations'] })
+              queryClient.invalidateQueries({ queryKey: ['organizations', id] })
+            }}
+          />
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-text">Uploaded documents</h3>
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-muted">
+                {documents.length}
+              </span>
+            </div>
+            <OrganizationDocumentsList
+              documents={documents}
+              allowDownload
+              allowDelete
+              onDelete={deleteDocument}
+              deletingId={deletingId}
+            />
+          </div>
+        </div>
       </SectionCard>
     </div>
   ) : (

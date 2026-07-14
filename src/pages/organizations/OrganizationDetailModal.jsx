@@ -8,6 +8,7 @@ import ResourceDetailModal from '@/components/crud/ResourceDetailModal'
 import { organizationService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
 import { formatDateTime, resolveMediaUrl } from '@/utils/format'
+import { OrganizationDocumentsList } from './OrganizationDocumentsModal'
 
 const DETAIL_FIELDS = [
   { key: 'organization_name', label: 'Name' },
@@ -15,13 +16,25 @@ const DETAIL_FIELDS = [
   { key: 'email', label: 'Email' },
   { key: 'phone', label: 'Phone' },
   { key: 'website', label: 'Website' },
-  { key: 'address', label: 'Address' },
+  { key: 'address', label: 'Address', fullWidth: true },
   { key: 'city', label: 'City' },
   { key: 'state', label: 'State' },
   { key: 'country', label: 'Country' },
   { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
   { key: 'created_at', label: 'Created', render: (item) => formatDateTime(item.created_at) },
   { key: 'updated_at', label: 'Updated', render: (item) => formatDateTime(item.updated_at) },
+  {
+    key: 'documents',
+    label: 'Documents',
+    fullWidth: true,
+    render: (item) => (
+      <OrganizationDocumentsList
+        documents={item.documents || []}
+        allowDownload
+        emptyMessage="No documents uploaded for this organization."
+      />
+    ),
+  },
 ]
 
 export default function OrganizationDetailModal({ organizationId, open, onClose }) {

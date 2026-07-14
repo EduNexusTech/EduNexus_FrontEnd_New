@@ -31,6 +31,8 @@ export const organizationService = {
   delete: (id) => apiDelete(API_ENDPOINTS.ORGANIZATIONS.DETAIL(id)),
   activate: (id) => apiPost(API_ENDPOINTS.ORGANIZATIONS.ACTIVATE(id)),
   deactivate: (id) => apiPost(API_ENDPOINTS.ORGANIZATIONS.DEACTIVATE(id)),
+  uploadDocuments: (id, formData) => apiPostForm(API_ENDPOINTS.ORGANIZATIONS.UPLOAD_DOCUMENTS(id), formData),
+  deleteDocument: (id, documentId) => apiDelete(API_ENDPOINTS.ORGANIZATIONS.DELETE_DOCUMENT(id, documentId)),
 }
 
 export const schoolService = {
@@ -46,6 +48,8 @@ export const schoolService = {
     return isForm ? apiPatchForm(url, data) : apiPatch(url, data)
   },
   regenerateQr: (id) => apiPost(API_ENDPOINTS.SCHOOLS.PROFILE_REGENERATE_QR(id)),
+  uploadDocuments: (id, formData) => apiPostForm(API_ENDPOINTS.SCHOOLS.UPLOAD_DOCUMENTS(id), formData),
+  deleteDocument: (id, documentId) => apiDelete(API_ENDPOINTS.SCHOOLS.DELETE_DOCUMENT(id, documentId)),
 }
 
 export const userService = {
