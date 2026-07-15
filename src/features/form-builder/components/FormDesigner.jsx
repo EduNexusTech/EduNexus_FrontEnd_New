@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiEye, FiSave, FiSend, FiArrowLeft, FiEdit3, FiCpu, FiLayers, FiSliders } from 'react-icons/fi'
+import { FiEye, FiSave, FiSend, FiArrowLeft, FiEdit3, FiCpu, FiLayers, FiSliders, FiSettings } from 'react-icons/fi'
 import FieldPalette from '../components/FieldPalette'
 import FormCanvas from '../components/FormCanvas'
 import FieldPropertiesPanel from '../components/FieldPropertiesPanel'
 import AiFormBuilderPanel from '../components/AiFormBuilderPanel'
 import PublishSuccessPanel from '../components/PublishSuccessPanel'
+import FormSettingsPanel from '../components/FormSettingsPanel'
 import { createFieldFromPalette } from '../utils/fieldFactory'
 import { publishForm, saveForm } from '../services/formStorage'
 import { Drawer } from '@/components/ui/Modal'
@@ -22,6 +23,7 @@ export default function FormDesigner({ form: initialForm }) {
   const [saving, setSaving] = useState(false)
   const [mobilePaletteOpen, setMobilePaletteOpen] = useState(false)
   const [mobilePropsOpen, setMobilePropsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const selectedField = form.fields.find((f) => f.id === selectedId) ?? null
 
@@ -150,6 +152,13 @@ export default function FormDesigner({ form: initialForm }) {
 
           <button
             type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+          >
+            <FiSettings className="h-4 w-4" /> Settings
+          </button>
+          <button
+            type="button"
             onClick={handlePreview}
             className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
           >
@@ -276,6 +285,14 @@ export default function FormDesigner({ form: initialForm }) {
             }}
           />
         </div>
+      </Drawer>
+
+      <Drawer open={settingsOpen} onClose={() => setSettingsOpen(false)} title="Form settings" maxWidth="md">
+        <FormSettingsPanel
+          form={form}
+          onChange={setForm}
+          onClose={() => setSettingsOpen(false)}
+        />
       </Drawer>
     </div>
   )

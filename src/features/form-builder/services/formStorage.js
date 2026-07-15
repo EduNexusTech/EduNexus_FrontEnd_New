@@ -157,3 +157,28 @@ export function saveSubmission(formId, data) {
   writeJson(SUBMISSION_STORAGE_KEY, all)
   return submission
 }
+
+export function duplicateForm(id) {
+  const source = getFormById(id)
+  if (!source) return null
+  const forms = listForms()
+  const baseName = `${source.formName || source.title || 'Form'} (Copy)`
+  const copy = createEmptyForm({
+    title: baseName,
+    formName: baseName,
+    description: source.description,
+    schoolName: source.schoolName,
+    logoUrl: source.logoUrl,
+    headerSubtitle: source.headerSubtitle,
+    fields: JSON.parse(JSON.stringify(source.fields)),
+    settings: { ...source.settings },
+  })
+  copy.slug = uniqueSlug(baseName, forms, copy.id)
+  return saveForm(copy)
+}
+
+export function unpublishForm(id) {
+  const form = getFormById(id)
+  if (!form) return null
+  return saveForm({ ...form, status: 'draft' })
+}

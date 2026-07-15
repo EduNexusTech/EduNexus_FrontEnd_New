@@ -1,29 +1,39 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiPlus, FiEdit2, FiTrash2, FiEye, FiLink, FiCpu, FiFileText } from 'react-icons/fi'
+import { FiPlus, FiEdit2, FiTrash2, FiEye, FiLink, FiCpu, FiFileText, FiCopy, FiSearch, FiInbox } from 'react-icons/fi'
 import { PageHeader } from '@/components/common/PageHeader'
 import Card from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import CreateFormModal from '../components/CreateFormModal'
-import { createEmptyForm, deleteForm, getPublicFormUrl, listForms, saveForm } from '../services/formStorage'
+import { createEmptyForm, deleteForm, duplicateForm, getPublicFormUrl, listForms, listSubmissions, saveForm } from '../services/formStorage'
 import toast from 'react-hot-toast'
 
 export default function FormBuilderListPage() {
   const navigate = useNavigate()
   const [forms, setForms] = useState(() => listForms())
   const [createOpen, setCreateOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const refresh = () => setForms(listForms())
 
-  // Always reload from storage when visiting the list (and heal any duplicates)
   useEffect(() => {
     refresh()
   }, [])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return forms
+    return forms.filter((f) => {
+      const name = (f.formName || f.title || '').toLowerCase()
+      return name.includes(q) || (f.description || '').toLowerCase().includes(q)
+    })
+  }, [forms, search])
 
   const stats = useMemo(() => ({
     total: forms.length,
     published: forms.filter((f) => f.status === 'published').length,
     draft: forms.filter((f) => f.status === 'draft').length,
+    submissions: forms.reduce((sum, f) => sum + listSubmissions(f.id).length, 0),
   }), [forms])
 
   const handleCreate = (title, { method = 'manual' } = {}) => {
@@ -43,6 +53,17 @@ export default function FormBuilderListPage() {
     deleteForm(id)
     refresh()
     toast.success('Form deleted')
+  }
+
+  const handleDuplicate = (id, name) => {
+    const copy = duplicateForm(id)
+    if (!copy) {
+      toast.error('Could not duplicate form')
+      return
+    }
+    refresh()
+    toast.success(`"${name}" duplicated`)
+    navigate(`/form-builder/${copy.id}/edit`)
   }
 
   const copyUrl = async (slug) => {
@@ -77,7 +98,7 @@ export default function FormBuilderListPage() {
         onCreate={handleCreate}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="!p-4">
           <p className="text-sm text-muted-foreground">Total Forms</p>
           <p className="text-2xl font-bold">{stats.total}</p>
@@ -90,7 +111,23 @@ export default function FormBuilderListPage() {
           <p className="text-sm text-muted-foreground">Drafts</p>
           <p className="text-2xl font-bold text-amber-600">{stats.draft}</p>
         </Card>
+        <Card className="!p-4">
+          <p className="text-sm text-muted-foreground">Total Responses</p>
+          <p className="text-2xl font-bold text-brand-600">{stats.submissions}</p>
+        </Card>
       </div>
+
+      {forms.length > 0 ? (
+        <div className="relative max-w-md">
+          <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search forms..."
+            className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
+          />
+        </div>
+      ) : null}
 
       {forms.length === 0 ? (
         <Card className="flex flex-col items-center py-16 text-center">
@@ -109,10 +146,15 @@ export default function FormBuilderListPage() {
             <FiPlus className="h-4 w-4" /> Create Form
           </button>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="py-12 text-center text-sm text-muted-foreground">
+          No forms match &quot;{search}&quot;
+        </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {forms.map((form) => {
+          {filtered.map((form) => {
             const displayName = form.formName || form.title || 'Untitled Form'
+            const responseCount = listSubmissions(form.id).length
             return (
             <Card key={form.id} hover className="flex flex-col !p-5">
               <div className="flex items-start justify-between gap-2">
@@ -126,11 +168,16 @@ export default function FormBuilderListPage() {
                   {form.status}
                 </Badge>
               </div>
-              {form.settings?.aiGenerated ? (
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-brand-600">
-                  <FiCpu className="h-3 w-3" /> AI generated
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                {form.settings?.aiGenerated ? (
+                  <span className="inline-flex items-center gap-1 text-brand-600">
+                    <FiCpu className="h-3 w-3" /> AI generated
+                  </span>
+                ) : null}
+                <span className="inline-flex items-center gap-1">
+                  <FiInbox className="h-3 w-3" /> {responseCount} response{responseCount !== 1 ? 's' : ''}
                 </span>
-              ) : null}
+              </div>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
                 <Link
                   to={`/form-builder/${form.id}/edit`}
@@ -144,6 +191,13 @@ export default function FormBuilderListPage() {
                 >
                   <FiEye className="h-3.5 w-3.5" /> Preview
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => handleDuplicate(form.id, displayName)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
+                >
+                  <FiCopy className="h-3.5 w-3.5" /> Duplicate
+                </button>
                 {form.status === 'published' ? (
                   <button
                     type="button"

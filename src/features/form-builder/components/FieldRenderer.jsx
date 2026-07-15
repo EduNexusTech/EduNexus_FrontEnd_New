@@ -1,10 +1,36 @@
 import { cn } from '@/lib/utils'
 import { FiImage } from 'react-icons/fi'
+import RichTextContent from './RichTextContent'
+import { hasRichFormatting } from '../utils/richText'
 
 const btnClass = {
   primary: 'bg-brand-600 text-white hover:bg-brand-700',
   secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200',
   outline: 'border border-border bg-white text-foreground hover:bg-muted',
+}
+
+function RichLabel({ field, mode }) {
+  if (!field.label || ['divider', 'spacer', 'hidden'].includes(field.type)) return null
+  if (hasRichFormatting(field.label)) {
+    return (
+      <div className="text-sm font-medium text-foreground">
+        <RichTextContent html={field.label} />
+        {field.required && mode === 'fill' ? <span className="text-red-500"> *</span> : null}
+        {field.required && mode === 'design' ? (
+          <span className="ml-1 text-xs font-normal text-muted-foreground">(required)</span>
+        ) : null}
+      </div>
+    )
+  }
+  return (
+    <label className="block text-sm font-medium text-foreground">
+      {field.label}
+      {field.required && mode === 'fill' ? <span className="text-red-500"> *</span> : null}
+      {field.required && mode === 'design' ? (
+        <span className="ml-1 text-xs font-normal text-muted-foreground">(required)</span>
+      ) : null}
+    </label>
+  )
 }
 
 export default function FieldRenderer({
@@ -24,20 +50,16 @@ export default function FieldRenderer({
       {children}
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
       {field.helpText && mode !== 'design' ? (
-        <p className="text-xs text-muted-foreground">{field.helpText}</p>
+        <RichTextContent
+          html={field.helpText}
+          className="text-xs text-muted-foreground"
+          as="div"
+        />
       ) : null}
     </div>
   )
 
-  const label = field.label && !['divider', 'spacer', 'hidden'].includes(field.type) ? (
-    <label className="block text-sm font-medium text-foreground">
-      {field.label}
-      {field.required && mode === 'fill' ? <span className="text-red-500"> *</span> : null}
-      {field.required && mode === 'design' ? (
-        <span className="ml-1 text-xs font-normal text-muted-foreground">(required)</span>
-      ) : null}
-    </label>
-  ) : null
+  const label = field.type !== 'checkbox' ? <RichLabel field={field} mode={mode} /> : null
 
   switch (field.type) {
     case 'logo':
@@ -55,15 +77,41 @@ export default function FieldRenderer({
     case 'school-name':
       return (
         <div className="text-center">
-          <h2 className="text-xl font-bold text-brand-700">{field.content || schoolName || 'School Name'}</h2>
+          <RichTextContent
+            html={field.content}
+            fallback={schoolName || 'School Name'}
+            className="text-xl font-bold text-brand-700"
+            as="h2"
+          />
         </div>
       )
     case 'heading':
-      return <h1 className="text-2xl font-bold text-foreground">{field.content || field.label}</h1>
+      return (
+        <RichTextContent
+          html={field.content}
+          fallback={field.label}
+          className="text-2xl font-bold text-foreground"
+          as="h1"
+        />
+      )
     case 'subheading':
-      return <h2 className="text-lg font-semibold text-foreground">{field.content || field.label}</h2>
+      return (
+        <RichTextContent
+          html={field.content}
+          fallback={field.label}
+          className="text-lg font-semibold text-foreground"
+          as="h2"
+        />
+      )
     case 'paragraph':
-      return <p className="text-sm leading-relaxed text-muted-foreground">{field.content || field.label}</p>
+      return (
+        <RichTextContent
+          html={field.content}
+          fallback={field.label}
+          className="text-sm leading-relaxed text-muted-foreground"
+          as="div"
+        />
+      )
     case 'divider':
       return <hr className="border-border" />
     case 'spacer':
@@ -142,10 +190,14 @@ export default function FieldRenderer({
             disabled={disabled || readOnly}
             checked={Boolean(value)}
             onChange={(e) => onChange?.(e.target.checked)}
-            className="mt-0.5 rounded text-brand-600"
+            className="mt-0.5 shrink-0 rounded text-brand-600"
           />
-          <span>
-            {field.label}
+          <span className="min-w-0 flex-1">
+            {hasRichFormatting(field.label) ? (
+              <RichTextContent html={field.label} as="span" />
+            ) : (
+              field.label
+            )}
             {field.required && mode === 'fill' ? <span className="text-red-500"> *</span> : null}
           </span>
         </label>,

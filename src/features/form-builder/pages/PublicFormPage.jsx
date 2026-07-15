@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { FiCheckCircle } from 'react-icons/fi'
 import FieldRenderer from '../components/FieldRenderer'
+import RichTextContent from '../components/RichTextContent'
 import { getFormBySlug, saveSubmission } from '../services/formStorage'
 import { isInputField } from '../utils/fieldFactory'
 import NotFoundPage from '@/pages/NotFoundPage'
@@ -77,9 +78,12 @@ export default function PublicFormPage() {
         <div className="w-full max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-lg">
           <FiCheckCircle className="mx-auto h-14 w-14 text-green-500" />
           <h1 className="mt-4 text-xl font-bold">Submission received</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {form.settings?.thankYouMessage || 'Thank you for your submission!'}
-          </p>
+          <RichTextContent
+            html={form.settings?.thankYouMessage}
+            fallback="Thank you for your submission!"
+            className="mt-2 text-sm text-muted-foreground"
+            as="div"
+          />
         </div>
       </div>
     )
@@ -149,9 +153,11 @@ export default function PublicFormPage() {
             </button>
           ) : null}
         </form>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Powered by EduNexus Form Builder
-        </p>
+        {form.settings?.showBranding !== false ? (
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Powered by EduNexus Form Builder
+          </p>
+        ) : null}
       </div>
     </div>
   )

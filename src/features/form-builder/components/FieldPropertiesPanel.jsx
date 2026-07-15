@@ -1,5 +1,6 @@
 import { FiPlus, FiTrash2 } from 'react-icons/fi'
 import { getPaletteItem } from '../constants/fieldPalette'
+import RichTextEditor from './RichTextEditor'
 
 export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
   if (!field) {
@@ -49,7 +50,19 @@ export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
         <p className="text-xs text-muted-foreground">{palette?.label || field.type}</p>
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        {!['divider', 'spacer'].includes(field.type) ? (
+        {['checkbox'].includes(field.type) ? (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Checkbox label</label>
+            <RichTextEditor
+              value={field.label || ''}
+              onChange={(html) => update({ label: html })}
+              placeholder="I agree to the terms..."
+              minHeight={64}
+            />
+          </div>
+        ) : null}
+
+        {!['divider', 'spacer'].includes(field.type) && field.type !== 'checkbox' ? (
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Label</label>
             <input
@@ -63,11 +76,11 @@ export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
         {hasContent ? (
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Content</label>
-            <textarea
-              rows={3}
+            <RichTextEditor
               value={field.content || ''}
-              onChange={(e) => update({ content: e.target.value })}
-              className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
+              onChange={(html) => update({ content: html })}
+              placeholder="Enter text — use toolbar for bold, italic, lists..."
+              minHeight={field.type === 'paragraph' ? 120 : 72}
             />
           </div>
         ) : null}
@@ -108,10 +121,11 @@ export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Help text</label>
-              <input
+              <RichTextEditor
                 value={field.helpText || ''}
-                onChange={(e) => update({ helpText: e.target.value })}
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
+                onChange={(html) => update({ helpText: html })}
+                placeholder="Optional help below the field"
+                minHeight={64}
               />
             </div>
             <label className="flex items-center gap-2 text-sm">
