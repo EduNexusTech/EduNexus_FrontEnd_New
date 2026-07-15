@@ -60,13 +60,15 @@ export default function AuthBackground() {
 export function AuthBackgroundFade({ children }) {
   return (
     <motion.div
-      className="auth-login-root clay-app auth-page-gradient font-sans"
+      className="auth-login-root relative flex min-h-screen items-center justify-center overflow-hidden bg-background font-sans"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      <AuthBackground />
-      {children}
+      <div className="login-mesh pointer-events-none absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl login-orb-1" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-40 -right-20 h-[28rem] w-[28rem] rounded-full bg-indigo-400/15 blur-3xl login-orb-2" aria-hidden />
+      <div className="relative z-10 w-full">{children}</div>
     </motion.div>
   )
 }

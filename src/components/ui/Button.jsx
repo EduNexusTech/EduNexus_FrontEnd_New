@@ -1,4 +1,4 @@
-import { cn } from '@/utils/format'
+import { cn } from '@/lib/utils'
 
 const variants = {
   primary: 'lms-btn-primary',

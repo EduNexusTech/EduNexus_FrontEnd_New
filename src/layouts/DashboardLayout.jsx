@@ -1,24 +1,40 @@
-import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
-import PageContainer from '@/components/layout/PageContainer'
 import useAutomationRunner from '@/hooks/useAutomationRunner'
+import { useUI } from '@/contexts/UIContext'
+import { cn } from '@/lib/utils'
 import '@/styles/dashboard-clay.css'
 
 export default function DashboardLayout() {
-  const [mobileOpen, setMobileOpen] = useState(false)
   useAutomationRunner()
+  const { mobileSidebarOpen, setMobileSidebarOpen } = useUI()
 
   return (
-    <div className="clay-app clay-app-shell flex h-screen gap-3 overflow-hidden p-3 lg:gap-4 lg:p-4">
-      <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
-      <div className="clay-main-panel clay-app flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header onMenuClick={() => setMobileOpen(true)} />
-        <main className="clay-scroll-hidden flex-1 overflow-x-hidden overflow-y-auto">
-          <PageContainer className="clay-app px-4 py-4 lg:px-7 lg:py-5">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
+      <div className="hidden h-full min-h-0 shrink-0 lg:block">
+        <Sidebar />
+      </div>
+
+      {mobileSidebarOpen ? (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden
+          />
+          <div className={cn('absolute inset-y-0 left-0 z-50 shadow-xl')}>
+            <Sidebar mobile onClose={() => setMobileSidebarOpen(false)} />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-thin">
+          <div className="mx-auto w-full min-w-0 max-w-full space-y-6 p-4 lg:p-6">
             <Outlet />
-          </PageContainer>
+          </div>
         </main>
       </div>
     </div>

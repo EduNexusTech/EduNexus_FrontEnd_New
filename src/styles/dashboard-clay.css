@@ -6,14 +6,14 @@
   /* Button action colors */
   --btn-create: #16a34a;
   --btn-create-hover: #15803d;
-  --btn-edit: #2563eb;
-  --btn-edit-hover: #1d4ed8;
+  --btn-edit: #4f46e5;
+  --btn-edit-hover: #4338ca;
   --btn-view: #0ea5e9;
   --btn-view-hover: #0284c7;
   --btn-delete: #dc2626;
   --btn-delete-hover: #b91c1c;
-  --btn-save: #2563eb;
-  --btn-save-hover: #1d4ed8;
+  --btn-save: #4f46e5;
+  --btn-save-hover: #4338ca;
   --btn-cancel: #6b7280;
   --btn-cancel-hover: #4b5563;
   --btn-refresh: #0891b2;
@@ -107,8 +107,8 @@
   --lms-chart-6: #0f766e;
   --lms-chart-7: #f59e0b;
   --lms-chart-8: #dc2626;
-  --lms-chart-primary: #2563eb;
-  --lms-chart-line: #2563eb;
+  --lms-chart-primary: #4f46e5;
+  --lms-chart-line: #4f46e5;
   --lms-chart-grid: #e2e8f0;
   --lms-chart-tick: #475569;
   --lms-chart-axis: #94a3b8;
@@ -145,6 +145,107 @@
 .clay-app-shell > * {
   position: relative;
   z-index: 1;
+  min-width: 0;
+}
+
+/*
+ * Firefox flex/grid overflow fix:
+ * flex/grid children default to min-height/min-width:auto and won't shrink,
+ * so overflow scroll clips cards when the viewport shrinks.
+ */
+.clay-app-shell {
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+
+.clay-main-panel,
+.clay-scroll-hidden {
+  min-height: 0;
+  min-width: 0;
+}
+
+.clay-scroll-hidden {
+  /* Ensure Firefox creates a real scrollport */
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (-moz-appearance: none) {
+  .clay-app-shell {
+    /* Avoid 100vh urlbar jump / clipping quirks in Firefox */
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .clay-main-panel {
+    /* backdrop-filter + overflow:hidden can clip descendants oddly in Gecko */
+    transform: translateZ(0);
+  }
+
+  .clay-scroll-hidden {
+    scrollbar-width: thin;
+  }
+
+  .lms-page,
+  .clay-app {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Grid items must be allowed to shrink below content size */
+  .lms-page .grid > *,
+  .clay-app .grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/*
+ * Auto-fit grids based on available content width (not viewport).
+ * Fixes zoom cases where xl:4-col still fires but sidebar leaves too little
+ * room, so Organizations/Pending cards get clipped (e.g. Firefox @ 90%).
+ */
+.lms-grid-stats {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15.5rem), 1fr));
+}
+
+.lms-grid-charts {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.lms-grid-quick {
+  display: grid;
+  gap: 0.625rem;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+}
+
+.lms-grid-hub-stats {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+}
+
+.lms-grid-3 {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 
 /* Frosted white glass main panel */
@@ -158,6 +259,10 @@
     0 4px 24px var(--clay-shadow-dark),
     0 1px 2px var(--clay-shadow-soft),
     inset 0 1px 0 var(--clay-glass-highlight);
+  min-width: 0;
+  min-height: 0;
+  container-type: inline-size;
+  container-name: lms-main;
 }
 
 /* Glass header */
@@ -292,42 +397,28 @@
   background: var(--clay-border);
 }
 
-/* White glass cards */
+/* Cards — LMS clean style */
 .clay-card {
   position: relative;
-  border-radius: 1.1rem;
-  border: 1px solid var(--clay-glass-edge);
-  backdrop-filter: var(--clay-blur-sm);
-  -webkit-backdrop-filter: var(--clay-blur-sm);
-  box-shadow:
-    0 4px 20px var(--clay-shadow-dark),
-    0 1px 2px var(--clay-shadow-soft),
-    inset 0 1px 0 var(--clay-glass-highlight);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  border-radius: 0.75rem;
+  border: 1px solid var(--clay-border);
+  background: #ffffff;
+  box-shadow: var(--shadow-card, 0 1px 3px 0 rgb(0 0 0 / 0.06));
+  transition: box-shadow 0.2s ease;
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .clay-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0.5;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    transparent 42%
-  );
+  display: none;
 }
 
 .clay-card:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 10px 28px var(--clay-shadow-dark),
-    0 0 0 1px rgba(59, 130, 246, 0.12),
-    inset 0 1px 0 var(--clay-glass-highlight);
-  border-color: rgba(59, 130, 246, 0.35);
+  transform: none;
+  box-shadow: var(--shadow-elevated, 0 4px 6px -1px rgb(0 0 0 / 0.07));
+  border-color: var(--clay-border);
 }
 
 .clay-card-mint {
@@ -526,6 +617,12 @@
 .clay-scroll-hidden {
   scrollbar-width: thin;
   scrollbar-color: rgba(59, 130, 246, 0.35) transparent;
+}
+
+.lms-page {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .clay-scroll-hidden::-webkit-scrollbar {
@@ -1126,8 +1223,8 @@
 }
 
 .lms-tab-nav-item--active {
-  border-bottom-color: var(--lms-chart-primary);
-  color: var(--clay-text-sharp);
+  border-bottom-color: #4f46e5;
+  color: #4f46e5;
   font-weight: 700;
 }
 
@@ -1199,6 +1296,9 @@
 
 .chart-3d-stage {
   position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   transform: none;
   filter: none;
   transition: none;
@@ -1216,6 +1316,32 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: var(--clay-blur);
   -webkit-backdrop-filter: var(--clay-blur);
+  min-width: 0;
+  max-width: 100%;
+  /* Allow tooltips to sit above bars instead of being clipped behind card overflow */
+  overflow: visible;
+}
+
+.clay-chart-panel.clay-card::after {
+  z-index: 0;
+}
+
+.clay-chart-panel .chart-3d-stage,
+.clay-chart-panel .chart-donut-3d,
+.clay-chart-panel .recharts-responsive-container {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.clay-chart-panel .recharts-wrapper,
+.clay-chart-panel .recharts-surface {
+  overflow: visible !important;
+}
+
+.clay-chart-panel .recharts-tooltip-wrapper {
+  z-index: 50 !important;
+  pointer-events: none;
 }
 
 .chart-donut-hub span {

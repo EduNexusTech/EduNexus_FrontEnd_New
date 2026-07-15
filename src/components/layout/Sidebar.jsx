@@ -1,5 +1,5 @@
+import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import {
   FiGrid,
   FiUsers,
@@ -18,11 +18,24 @@ import {
   FiCpu,
   FiMessageSquare,
   FiZap,
+  FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCalendar,
+  FiCreditCard,
+  FiTruck,
+  FiBookOpen,
+  FiBarChart2,
+  FiRadio,
+  FiGitBranch,
+  FiClock,
+  FiGlobe,
+  FiLayout,
 } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
+import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
-import { cn } from '@/utils/format'
-import '@/styles/dashboard-clay.css'
+import { cn } from '@/lib/utils'
 
 const iconMap = {
   dashboard: FiGrid,
@@ -42,119 +55,171 @@ const iconMap = {
 }
 
 const superAdminNav = [
-  { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
+  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: FiGrid },
   {
+    id: 'management',
     label: 'Management',
+    icon: FiBriefcase,
     children: [
-      { label: 'Organizations', path: '/organizations', icon: FiBriefcase },
-      { label: 'Schools', path: '/schools', icon: FiBook },
-      { label: 'Users', path: '/users', icon: FiUsers },
-      { label: 'Memberships', path: '/memberships', icon: FiUsers },
+      { id: 'organizations', label: 'Organizations', path: '/organizations', icon: FiBriefcase },
+      { id: 'schools', label: 'Schools', path: '/schools', icon: FiBook },
+      { id: 'users', label: 'Users', path: '/users', icon: FiUsers },
+      { id: 'memberships', label: 'Memberships', path: '/memberships', icon: FiUsers },
     ],
   },
   {
+    id: 'access',
     label: 'Access Control',
+    icon: FiShield,
     children: [
-      { label: 'Roles', path: '/roles', icon: FiShield },
-      { label: 'Permissions', path: '/permissions', icon: FiShield },
-      { label: 'User Roles', path: '/user-roles', icon: FiShield },
-      { label: 'Modules', path: '/modules', icon: FiLayers },
-      { label: 'Menus', path: '/menus', icon: FiMenu },
+      { id: 'roles', label: 'Roles', path: '/roles', icon: FiShield },
+      { id: 'permissions', label: 'Permissions', path: '/permissions', icon: FiShield },
+      { id: 'user-roles', label: 'User Roles', path: '/user-roles', icon: FiShield },
+      { id: 'modules', label: 'Modules', path: '/modules', icon: FiLayers },
+      { id: 'menus', label: 'Menus', path: '/menus', icon: FiMenu },
     ],
   },
   {
+    id: 'masters',
     label: 'Master Data',
+    icon: FiDatabase,
     children: [
-      { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
-      { label: 'Academic Structure', path: '/academics', icon: FiBook },
+      { id: 'masters-hub', label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { id: 'academics', label: 'Academic Structure', path: '/academics', icon: FiBook },
     ],
   },
   {
+    id: 'ai',
     label: 'AI & Automation',
+    icon: FiCpu,
     children: [
-      { label: 'AI Hub', path: '/ai-hub', icon: FiCpu },
-      { label: 'Nexus AI', path: '/ai-hub/assistant', icon: FiMessageSquare },
-      { label: 'Automations', path: '/ai-hub/automations', icon: FiZap },
+      { id: 'ai-hub', label: 'AI Hub', path: '/ai-hub', icon: FiCpu },
+      { id: 'nexus-ai', label: 'Nexus AI', path: '/ai-hub/assistant', icon: FiMessageSquare },
+      { id: 'automations', label: 'Automations', path: '/ai-hub/automations', icon: FiZap },
     ],
   },
   {
+    id: 'system',
     label: 'System',
+    icon: FiSettings,
     children: [
-      { label: 'EduNexus Post', path: '/edu-nexus-post', icon: FiMail },
-      { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
-      { label: 'Settings', path: '/settings', icon: FiSettings },
-      { label: 'Notifications', path: '/notifications', icon: FiBell },
+      { id: 'edu-post', label: 'EduNexus Post', path: '/edu-nexus-post', icon: FiMail },
+      { id: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
+      { id: 'settings', label: 'Settings', path: '/settings', icon: FiSettings },
+      { id: 'notifications', label: 'Notifications', path: '/notifications', icon: FiBell },
     ],
   },
 ]
 
 const orgAdminNav = [
-  { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
+  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: FiGrid },
   {
+    id: 'management',
     label: 'Management',
+    icon: FiBriefcase,
     children: [
-      { label: 'Schools', path: '/schools', icon: FiBook },
-      { label: 'Users', path: '/users', icon: FiUsers },
-      { label: 'Memberships', path: '/memberships', icon: FiUsers },
+      { id: 'schools', label: 'Schools', path: '/schools', icon: FiBook },
+      { id: 'users', label: 'Users', path: '/users', icon: FiUsers },
+      { id: 'memberships', label: 'Memberships', path: '/memberships', icon: FiUsers },
     ],
   },
   {
+    id: 'access',
     label: 'Access Control',
+    icon: FiShield,
     children: [
-      { label: 'Roles', path: '/roles', icon: FiShield },
-      { label: 'User Roles', path: '/user-roles', icon: FiShield },
+      { id: 'roles', label: 'Roles', path: '/roles', icon: FiShield },
+      { id: 'user-roles', label: 'User Roles', path: '/user-roles', icon: FiShield },
     ],
   },
   {
+    id: 'masters',
     label: 'Master Data',
+    icon: FiDatabase,
     children: [
-      { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
-      { label: 'Academic Structure', path: '/academics', icon: FiBook },
+      { id: 'masters-hub', label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { id: 'academics', label: 'Academic Structure', path: '/academics', icon: FiBook },
     ],
   },
   {
+    id: 'system',
     label: 'System',
+    icon: FiSettings,
     children: [
-      { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
-      { label: 'Notifications', path: '/notifications', icon: FiBell },
+      { id: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
+      { id: 'notifications', label: 'Notifications', path: '/notifications', icon: FiBell },
     ],
   },
 ]
 
 const schoolAdminNav = [
-  { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
+  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: FiGrid },
   {
-    label: 'School',
+    id: 'admissions',
+    label: 'Admissions',
+    icon: FiClipboard,
     children: [
-      { label: 'School Profile', path: '/school-profile', icon: FiBook },
-      { label: 'School Settings', path: '/school-settings', icon: FiSettings },
-      { label: 'School Masters', path: '/school-masters', icon: FiDatabase },
+      { id: 'adm-overview', label: 'Overview', path: '/admissions', icon: FiGrid },
+      { id: 'adm-setup', label: 'Setup', path: '/admissions/setup', icon: FiSettings },
+      { id: 'adm-enquiries', label: 'Enquiries', path: '/admissions/enquiries', icon: FiMessageSquare },
+      { id: 'adm-pipeline', label: 'Pipeline', path: '/admissions/pipeline', icon: FiGitBranch },
+      { id: 'adm-followups', label: 'Follow-ups', path: '/admissions/follow-ups', icon: FiClock },
+      { id: 'adm-internal', label: 'Internal Apps', path: '/admissions/applications/internal', icon: FiFileText },
+      { id: 'adm-external', label: 'External Apps', path: '/admissions/applications/external', icon: FiGlobe },
+      { id: 'adm-conversion', label: 'Conversion', path: '/admissions/conversion', icon: FiUserCheck },
+      { id: 'adm-forms', label: 'Form Builder', path: '/form-builder', icon: FiLayout },
+    ],
+  },
+  { id: 'students', label: 'Students', path: '/students', icon: FiUsers },
+  { id: 'teachers', label: 'Teachers', path: '/teachers', icon: FiUserCheck },
+  { id: 'parents', label: 'Parents', path: '/parents', icon: FiUsers },
+  {
+    id: 'lms',
+    label: 'LMS',
+    icon: FiBookOpen,
+    children: [
+      { id: 'lms-courses', label: 'Courses', path: '/lms/courses', icon: FiBookOpen },
+      { id: 'lms-assignments', label: 'Assignments', path: '/lms/assignments', icon: FiClipboard },
+    ],
+  },
+  { id: 'attendance', label: 'Attendance', path: '/attendance', icon: FiCalendar },
+  { id: 'timetable', label: 'Timetable', path: '/timetable', icon: FiCalendar },
+  { id: 'homework', label: 'Homework', path: '/homework', icon: FiClipboard },
+  { id: 'announcements', label: 'Announcements', path: '/announcements', icon: FiRadio },
+  { id: 'examinations', label: 'Exams', path: '/examinations', icon: FiFileText },
+  { id: 'fees', label: 'Fees', path: '/fees', icon: FiCreditCard },
+  { id: 'transport', label: 'Transport', path: '/transport', icon: FiTruck },
+  { id: 'library', label: 'Library', path: '/library', icon: FiBook },
+  { id: 'reports', label: 'Reports', path: '/reports', icon: FiBarChart2 },
+  {
+    id: 'school',
+    label: 'School Admin',
+    icon: FiBook,
+    children: [
+      { id: 'school-profile', label: 'School Profile', path: '/school-profile', icon: FiBook },
+      { id: 'school-settings', label: 'School Settings', path: '/school-settings', icon: FiSettings },
+      { id: 'school-masters', label: 'School Masters', path: '/school-masters', icon: FiDatabase },
+      { id: 'staff', label: 'Staff', path: '/staff', icon: FiUserCheck },
+      { id: 'communications', label: 'Communications', path: '/communications', icon: FiMail },
+      { id: 'school-users', label: 'School Users', path: '/school-users', icon: FiUsers },
     ],
   },
   {
-    label: 'Management',
-    children: [
-      { label: 'Admissions', path: '/admissions', icon: FiClipboard },
-      { label: 'Students', path: '/students', icon: FiUsers },
-      { label: 'Teachers', path: '/teachers', icon: FiUserCheck },
-      { label: 'Parents', path: '/parents', icon: FiUsers },
-      { label: 'Staff', path: '/staff', icon: FiUserCheck },
-      { label: 'Communications', path: '/communications', icon: FiMail },
-      { label: 'School Users', path: '/school-users', icon: FiUsers },
-    ],
-  },
-  {
+    id: 'masters',
     label: 'Master Data',
+    icon: FiDatabase,
     children: [
-      { label: 'Masters Hub', path: '/masters', icon: FiDatabase },
-      { label: 'Academic Structure', path: '/academics', icon: FiBook },
+      { id: 'masters-hub', label: 'Masters Hub', path: '/masters', icon: FiDatabase },
+      { id: 'academics', label: 'Academic Structure', path: '/academics', icon: FiBook },
     ],
   },
   {
+    id: 'system',
     label: 'System',
+    icon: FiSettings,
     children: [
-      { label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
-      { label: 'Notifications', path: '/notifications', icon: FiBell },
+      { id: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
+      { id: 'notifications', label: 'Notifications', path: '/notifications', icon: FiBell },
     ],
   },
 ]
@@ -168,6 +233,15 @@ function resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin }) {
 
 function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/ai-hub') return pathname === '/ai-hub'
+  if (itemPath === '/admissions') {
+    return pathname === '/admissions'
+  }
+  if (itemPath === '/lms/courses') {
+    return pathname === '/lms/courses' || pathname.startsWith('/lms/courses/')
+  }
+  if (itemPath === '/lms/assignments') {
+    return pathname === '/lms/assignments' || pathname.startsWith('/lms/assignments/')
+  }
   if (itemPath === '/school-profile') {
     return pathname === '/school-profile' || /^\/schools\/[^/]+\/profile/.test(pathname)
   }
@@ -183,8 +257,15 @@ function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/school-users') {
     return pathname === '/school-users' || pathname.startsWith('/school-users/')
   }
-  if (itemPath === '/admissions') {
-    return pathname === '/admissions' || pathname.startsWith('/admissions/')
+  if (itemPath === '/admissions/enquiries') {
+    return pathname.startsWith('/admissions/enquiries') || pathname.startsWith('/admissions/leads')
+  }
+  if (itemPath === '/admissions/applications/internal') {
+    return (
+      pathname.startsWith('/admissions/applications/internal') ||
+      (pathname.startsWith('/admissions/applications') &&
+        !pathname.startsWith('/admissions/applications/external'))
+    )
   }
   if (itemPath === '/students') {
     return pathname === '/students' || pathname.startsWith('/students/')
@@ -207,97 +288,166 @@ function isNavItemActive(pathname, itemPath) {
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`)
 }
 
-function NavItem({ item, onMobileClose, active }) {
-  const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
+function groupHasActiveChild(pathname, item) {
+  if (!item.children) return isNavItemActive(pathname, item.path)
+  return item.children.some((child) => isNavItemActive(pathname, child.path))
+}
+
+function SidebarNav({ items, collapsed, onNavigate }) {
+  const location = useLocation()
+  const [expanded, setExpanded] = useState(() =>
+    items.filter((item) => item.children && groupHasActiveChild(location.pathname, item)).map((item) => item.id),
+  )
+
+  const toggleExpand = (id) => {
+    setExpanded((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
 
   return (
-    <NavLink
-      to={item.path}
-      onClick={onMobileClose}
-      className={cn(
-        'clay-nav-item mb-1 flex items-center gap-3 px-4 py-2.5 text-[14px]',
-        active && 'active',
-      )}
-    >
-      <Icon className="h-[20px] w-[20px] shrink-0" strokeWidth={1.85} />
-      <span className="truncate">{item.label}</span>
-    </NavLink>
+    <nav className="flex flex-col gap-1 px-3 py-4">
+      {items.map((item) => {
+        const Icon = item.icon || iconMap[item.path?.slice(1)] || FiGrid
+        const hasChildren = item.children?.length > 0
+        const active = hasChildren
+          ? groupHasActiveChild(location.pathname, item)
+          : isNavItemActive(location.pathname, item.path)
+        const isExpanded = expanded.includes(item.id) || active
+
+        if (hasChildren) {
+          return (
+            <div key={item.id}>
+              <button
+                type="button"
+                onClick={() => toggleExpand(item.id)}
+                title={collapsed ? item.label : undefined}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  active
+                    ? 'bg-brand-50 text-brand-700'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    <FiChevronDown className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')} />
+                  </>
+                )}
+              </button>
+              {!collapsed && isExpanded && (
+                <div className="ml-4 mt-1 flex flex-col gap-0.5 border-l border-border pl-3">
+                  {item.children.map((child) => {
+                    const ChildIcon = child.icon || FiGrid
+                    return (
+                      <NavLink
+                        key={child.id}
+                        to={child.path}
+                        onClick={onNavigate}
+                        className={({ isActive }) =>
+                          cn(
+                            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                            isActive || isNavItemActive(location.pathname, child.path)
+                              ? 'bg-brand-50 font-medium text-brand-700'
+                              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                          )
+                        }
+                      >
+                        <ChildIcon className="h-4 w-4 shrink-0" />
+                        {child.label}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return (
+          <NavLink
+            key={item.id}
+            to={item.path}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive || isNavItemActive(location.pathname, item.path)
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )
+            }
+          >
+            <Icon className="h-5 w-5 shrink-0" />
+            {!collapsed && <span className="flex-1">{item.label}</span>}
+          </NavLink>
+        )
+      })}
+    </nav>
   )
 }
 
-function SidebarProfile() {
-  const { user } = useAuth()
+export default function Sidebar({ mobile, onClose }) {
+  const { user, isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
+  const { sidebarCollapsed, toggleSidebar } = useUI()
+  const navItems = resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin })
+  const collapsed = !mobile && sidebarCollapsed
+
   const displayName =
     user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email || 'User'
-  const firstName = displayName.split(' ')[0]
 
   return (
-    <div className="clay-sidebar-profile flex items-center gap-3 px-5 py-5">
-      <div className="clay-sidebar-avatar-ring shrink-0 rounded-full">
-        <Avatar name={displayName} src={user?.profile_image} size="md" />
-      </div>
-      <p className="clay-sidebar-profile-name min-w-0 flex-1 truncate text-sm">
-        Hi, {firstName}! <span aria-hidden>👋</span>
-      </p>
-    </div>
-  )
-}
-
-export default function Sidebar({ mobileOpen, onMobileClose }) {
-  const location = useLocation()
-  const { isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
-  const navItems = resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin })
-
-  const content = (
-    <aside className="clay-app clay-sidebar flex h-full w-[260px] flex-col">
-      <SidebarProfile />
-
-      <nav className="clay-sidebar-nav flex-1 overflow-y-auto px-3 pb-4">
-        {navItems.map((group, gi) => (
-          <div key={gi}>
-            {gi > 0 ? <div className="clay-sidebar-divider" /> : null}
-            {group.children ? (
-              group.children.map((item) => (
-                <NavItem
-                  key={item.path}
-                  item={item}
-                  onMobileClose={onMobileClose}
-                  active={isNavItemActive(location.pathname, item.path)}
-                />
-              ))
-            ) : (
-              <NavItem
-                item={group}
-                onMobileClose={onMobileClose}
-                active={isNavItemActive(location.pathname, group.path)}
-              />
-            )}
-          </div>
-        ))}
-      </nav>
-    </aside>
-  )
-
-  return (
-    <>
-      <div className="hidden h-full shrink-0 lg:block">{content}</div>
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 lg:hidden"
-        >
-          <div className="absolute inset-0 bg-slate-900/40" onClick={onMobileClose} />
-          <motion.div
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            className="absolute left-3 top-3 h-[calc(100%-1.5rem)] w-[260px]"
-          >
-            {content}
-          </motion.div>
-        </motion.div>
+    <aside
+      className={cn(
+        'flex h-full min-h-0 flex-col border-r border-border bg-card transition-all duration-300',
+        mobile ? 'w-72' : collapsed ? 'w-[72px]' : 'w-64',
       )}
-    </>
+    >
+      <div
+        className={cn(
+          'border-b border-border',
+          collapsed ? 'flex flex-col items-center gap-2 px-2 py-3' : 'flex h-16 items-center gap-3 px-4',
+        )}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
+          <FiBook className="h-5 w-5" />
+        </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold text-foreground">EduNexus</p>
+            <p className="truncate text-xs text-muted-foreground">School ERP + LMS</p>
+          </div>
+        )}
+        {!mobile && (
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <FiChevronRight className="h-4 w-4" /> : <FiChevronLeft className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
+        <SidebarNav items={navItems} collapsed={collapsed} onNavigate={onClose} />
+      </div>
+
+      {!collapsed && (
+        <div className="border-t border-border p-4">
+          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+            <div className="flex items-center gap-3">
+              <Avatar name={displayName} src={user?.profile_image} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </aside>
   )
 }

@@ -3,8 +3,8 @@
 .landing-page {
   --lp-bg: #ffffff;
   --lp-surface: rgba(255, 255, 255, 0.88);
-  --lp-text: #0f172a;
-  --lp-muted: #475569;
+  --lp-text: #0a0a0a;
+  --lp-muted: #334155;
   --lp-border: #e2e8f0;
   --lp-glass-border: #e2e8f0;
   --lp-primary: #2563eb;

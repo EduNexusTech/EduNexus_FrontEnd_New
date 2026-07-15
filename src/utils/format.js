@@ -73,6 +73,4 @@ export function resolveMediaUrl(path) {
   return `${base.replace(/\/+$/, '')}${value.startsWith('/') ? value : `/${value}`}`
 }
 
-export function cn(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
+export { cn } from '@/lib/utils'

@@ -14,12 +14,13 @@ const columns = [
   { accessorKey: 'application_date', header: 'Applied' },
 ]
 
-export default function AdmissionApplicationList() {
+export default function AdmissionApplicationList({ embedded = false }) {
   const [statusFilter, setStatusFilter] = useState('')
   const listParams = useMemo(() => (statusFilter ? { status: statusFilter } : {}), [statusFilter])
 
   return (
     <ResourceListPage
+      embedded={embedded}
       title="Admission Applications"
       subtitle="Application form through enrollment pipeline"
       queryKey="admission-applications"

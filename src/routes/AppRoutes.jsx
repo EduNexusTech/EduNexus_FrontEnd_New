@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute, { PublicRoute } from './ProtectedRoute'
 import LandingPage from '@/website/LandingPage'
 import DashboardLayout from '@/layouts/DashboardLayout'
@@ -43,11 +43,33 @@ import CommunicationMessageForm from '@/pages/communications/CommunicationMessag
 import CommunicationMessageDetail from '@/pages/communications/CommunicationMessageDetail'
 
 import AdmissionsHubPage from '@/pages/admissions/AdmissionsHubPage'
-import AdmissionLeadList from '@/pages/admissions/AdmissionLeadList'
 import AdmissionLeadForm from '@/pages/admissions/AdmissionLeadForm'
-import AdmissionApplicationList from '@/pages/admissions/AdmissionApplicationList'
 import AdmissionApplicationForm from '@/pages/admissions/AdmissionApplicationForm'
 import AdmissionApplicationDetail from '@/pages/admissions/AdmissionApplicationDetail'
+import AdmissionSetupPage from '@/features/admissions/pages/AdmissionSetupPage'
+import {
+  EnquiriesPage,
+  PipelinePage,
+  FollowUpsPage,
+  InternalApplicationsPage,
+  ExternalApplicationsPage,
+  ConversionPage,
+  AdmissionsLeadsRedirect,
+  AdmissionsApplicationsRedirect,
+} from '@/pages/admissions/AdmissionsLmsPages'
+import {
+  AttendancePage,
+  TimetablePage,
+  HomeworkPage,
+  AnnouncementsPage,
+  ExaminationsPage,
+  FeesPage,
+  TransportPage,
+  LibraryPage,
+  ReportsPage,
+  LmsCoursesPage,
+  LmsAssignmentsPage,
+} from '@/pages/school-ops/SchoolOpsPages'
 
 import UserList from '@/pages/users/UserList'
 import UserForm from '@/pages/users/UserForm'
@@ -91,6 +113,11 @@ import EduNexusPostPage from '@/pages/edu-nexus-post/EduNexusPostPage'
 import AiHubPage from '@/pages/ai-hub/AiHubPage'
 import AiAssistantPage from '@/pages/ai-hub/AiAssistantPage'
 import AutomationsPage from '@/pages/ai-hub/AutomationsPage'
+import FormBuilderListPage from '@/features/form-builder/pages/FormBuilderListPage'
+import FormBuilderNewPage from '@/features/form-builder/pages/FormBuilderNewPage'
+import FormDesignerPage from '@/features/form-builder/pages/FormDesignerPage'
+import FormPreviewPage from '@/features/form-builder/pages/FormPreviewPage'
+import PublicFormPage from '@/features/form-builder/pages/PublicFormPage'
 
 export default function AppRoutes() {
   return (
@@ -102,6 +129,8 @@ export default function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Route>
 
+      <Route path="/f/:slug" element={<PublicFormPage />} />
+
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -109,6 +138,12 @@ export default function AppRoutes() {
           <Route path="/ai-hub" element={<AiHubPage />} />
           <Route path="/ai-hub/assistant" element={<AiAssistantPage />} />
           <Route path="/ai-hub/automations" element={<AutomationsPage />} />
+
+          <Route path="/form-builder" element={<FormBuilderListPage />} />
+          <Route path="/form-builder/new" element={<FormBuilderNewPage />} />
+          <Route path="/form-builder/:id/edit" element={<FormDesignerPage />} />
+          <Route path="/form-builder/:id/preview" element={<FormPreviewPage />} />
+
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
 
@@ -157,13 +192,33 @@ export default function AppRoutes() {
           <Route path="/communications/messages/:id/edit" element={<CommunicationMessageForm />} />
 
           <Route path="/admissions" element={<AdmissionsHubPage />} />
-          <Route path="/admissions/leads" element={<AdmissionLeadList />} />
+          <Route path="/admissions/setup" element={<AdmissionSetupPage />} />
+          <Route path="/admissions/enquiries" element={<EnquiriesPage />} />
+          <Route path="/admissions/pipeline" element={<PipelinePage />} />
+          <Route path="/admissions/follow-ups" element={<FollowUpsPage />} />
+          <Route path="/admissions/applications/internal" element={<InternalApplicationsPage />} />
+          <Route path="/admissions/applications/external" element={<ExternalApplicationsPage />} />
+          <Route path="/admissions/conversion" element={<ConversionPage />} />
+          <Route path="/admissions/leads" element={<AdmissionsLeadsRedirect />} />
           <Route path="/admissions/leads/new" element={<AdmissionLeadForm />} />
           <Route path="/admissions/leads/:id/edit" element={<AdmissionLeadForm />} />
-          <Route path="/admissions/applications" element={<AdmissionApplicationList />} />
+          <Route path="/admissions/applications" element={<AdmissionsApplicationsRedirect />} />
           <Route path="/admissions/applications/new" element={<AdmissionApplicationForm />} />
           <Route path="/admissions/applications/:id" element={<AdmissionApplicationDetail />} />
           <Route path="/admissions/applications/:id/edit" element={<AdmissionApplicationForm />} />
+
+          <Route path="/lms" element={<Navigate to="/lms/courses" replace />} />
+          <Route path="/lms/courses" element={<LmsCoursesPage />} />
+          <Route path="/lms/assignments" element={<LmsAssignmentsPage />} />
+          <Route path="/attendance" element={<AttendancePage />} />
+          <Route path="/timetable" element={<TimetablePage />} />
+          <Route path="/homework" element={<HomeworkPage />} />
+          <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/examinations" element={<ExaminationsPage />} />
+          <Route path="/fees" element={<FeesPage />} />
+          <Route path="/transport" element={<TransportPage />} />
+          <Route path="/library" element={<LibraryPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
 
           <Route path="/school-users" element={<SchoolUserList />} />
           <Route path="/school-users/new" element={<SchoolUserForm />} />

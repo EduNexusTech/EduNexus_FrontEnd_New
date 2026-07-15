@@ -1,0 +1,58 @@
+import { DEFAULT_ADMISSION_FEATURES } from '../types/setup'
+
+export const MOCK_ACADEMIC_YEARS = [
+  {
+    id: 'ay-2026-27',
+    label: '2026-27',
+    startDate: '2026-04-01',
+    endDate: '2027-03-31',
+    status: 'active',
+    isCurrent: true,
+    features: {
+      ...DEFAULT_ADMISSION_FEATURES,
+      assessment: true,
+      exams: true,
+      timetable: true,
+    },
+    createdAt: '2025-11-01T10:00:00Z',
+    updatedAt: '2026-01-15T09:30:00Z',
+  },
+  {
+    id: 'ay-2025-26',
+    label: '2025-26',
+    startDate: '2025-04-01',
+    endDate: '2026-03-31',
+    status: 'inactive',
+    isCurrent: false,
+    features: {
+      ...DEFAULT_ADMISSION_FEATURES,
+      onlineAdmissionForm: false,
+      assessment: true,
+      exams: true,
+      timetable: false,
+    },
+    createdAt: '2024-10-15T08:00:00Z',
+    updatedAt: '2026-03-31T18:00:00Z',
+  },
+  {
+    id: 'ay-2027-28',
+    label: '2027-28',
+    startDate: '2027-04-01',
+    endDate: '2028-03-31',
+    status: 'inactive',
+    isCurrent: false,
+    features: {
+      enquiry: true,
+      onlineAdmissionForm: true,
+      assessment: false,
+      exams: false,
+      timetable: false,
+      followUps: true,
+      internalApplication: false,
+      externalApplication: false,
+      conversion: false,
+    },
+    createdAt: '2026-02-01T12:00:00Z',
+    updatedAt: '2026-02-01T12:00:00Z',
+  },
+]

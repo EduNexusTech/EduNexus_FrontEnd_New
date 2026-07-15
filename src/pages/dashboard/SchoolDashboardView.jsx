@@ -98,12 +98,12 @@ export default function SchoolDashboardView() {
   ]
 
   return (
-    <div className="clay-app w-full pb-4">
+    <div className="clay-app w-full min-w-0 max-w-full pb-4">
       <ClayInsightBanner userName={userName} message={schoolLabel} />
       <ClayStatGrid stats={stats} />
 
       <ClayAnalyticsSection title="Analytics">
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lms-grid-charts">
           <ClayBarChartPanel title="Enrollment by Role" data={barData} />
           <ClayDonutPanel title="Population Mix" data={donutData} />
           <ClayLineChartPanel title="Headcount Summary" data={lineData} />

@@ -134,7 +134,7 @@ export default function ResourceFormPage({
       <PageHeader title={isEdit ? `Edit ${title}` : `New ${title}`} />
 
       <Card className="w-full lms-form-card">
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-1">
+        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]">
           {fields.map((field) => (
             <div key={field.name} className={field.fullWidth ? 'sm:col-span-2 lg:col-span-3' : ''}>
               {renderField(field)}

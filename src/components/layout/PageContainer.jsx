@@ -1,13 +1,8 @@
-import { cn } from '@/utils/format'
+import { cn } from '@/lib/utils'
 
 /**
- * Full-width page shell for dashboard routes.
- * Use on every page inside DashboardLayout for consistent spacing and width.
+ * Page content wrapper — layout handles outer padding; use for optional inner width constraints.
  */
 export default function PageContainer({ children, className }) {
-  return (
-    <div className={cn('clay-app lms-page w-full min-h-full', className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('lms-page w-full min-h-full min-w-0 space-y-6', className)}>{children}</div>
 }

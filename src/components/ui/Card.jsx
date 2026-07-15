@@ -1,60 +1,65 @@
-import { cn } from '@/utils/format'
+import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
 
-export default function Card({ children, className, padding = true, hover = false }) {
+export const Card = forwardRef(function Card({ className, children, padding = true, hover = false, ...props }, ref) {
   return (
     <div
+      ref={ref}
       className={cn(
-        'clay-card clay-card-white border-0',
+        'rounded-xl border border-border bg-card text-card-foreground shadow-[var(--shadow-card)] min-w-0',
         padding && 'p-6',
-        hover && 'cursor-pointer',
+        hover && 'transition-shadow hover:shadow-[var(--shadow-elevated)]',
         className,
       )}
+      {...props}
     >
       {children}
     </div>
   )
-}
+})
 
-export { Card }
+export const CardHeader = forwardRef(function CardHeader({ className, ...props }, ref) {
+  return <div ref={ref} className={cn('flex flex-col space-y-1.5 p-6', className)} {...props} />
+})
+
+export const CardTitle = forwardRef(function CardTitle({ className, ...props }, ref) {
+  return <h3 ref={ref} className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
+})
+
+export const CardDescription = forwardRef(function CardDescription({ className, ...props }, ref) {
+  return <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+})
+
+export const CardContent = forwardRef(function CardContent({ className, ...props }, ref) {
+  return <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+})
+
+export default Card
 
 export function StatCard({ title, value, change, icon: Icon, color = 'primary' }) {
-  const colors = {
-    primary: 'clay-card-mint text-[var(--clay-primary)]',
-    success: 'clay-card-green text-[var(--clay-primary)]',
-    warning: 'clay-card-pale text-[var(--clay-primary)]',
-    accent: 'clay-card-accent text-[var(--clay-primary)]',
+  const iconBg = {
+    primary: 'bg-brand-50 text-brand-600',
+    success: 'bg-green-50 text-green-600',
+    warning: 'bg-amber-50 text-amber-600',
+    accent: 'bg-brand-50 text-brand-600',
   }
 
   return (
-    <Card hover className={cn('relative overflow-hidden', colors[color])}>
+    <Card hover className="relative overflow-hidden">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-bold text-[var(--clay-text-sharp)]">{title}</p>
-          <p className="mt-2 text-2xl font-bold text-[var(--clay-text-sharp)]">{value}</p>
-          {change && <p className="mt-1 text-xs font-medium text-[var(--clay-primary-soft)]">{change}</p>}
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
+          {change ? <p className="text-xs font-medium text-muted-foreground">{change}</p> : null}
         </div>
-        {Icon && (
-          <div className="clay-icon-3d flex h-12 w-12 items-center justify-center text-[var(--clay-primary)]">
-            <Icon className="h-6 w-6" />
+        {Icon ? (
+          <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', iconBg[color])}>
+            <Icon className="h-5 w-5" />
           </div>
-        )}
+        ) : null}
       </div>
     </Card>
   )
 }
 
-/** Page title is shown in the top Header — this renders subtitle and actions only. */
-export function PageHeader({ title: _title, subtitle, actions }) {
-  if (!subtitle && !actions) return null
-
-  return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      {subtitle ? (
-        <p className="text-sm font-semibold text-[var(--clay-primary-soft)]">{subtitle}</p>
-      ) : (
-        <span />
-      )}
-      {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
-    </div>
-  )
-}
+export { PageHeader } from '@/components/common/PageHeader'

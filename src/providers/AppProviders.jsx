@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { TenantProvider } from '@/contexts/TenantContext'
+import { UIProvider } from '@/contexts/UIContext'
 import AppRoutes from '@/routes/AppRoutes'
 
 const queryClient = new QueryClient({
@@ -21,23 +22,23 @@ export default function AppProviders({ children }) {
       <BrowserRouter>
         <AuthProvider>
           <TenantProvider>
-            {children || <AppRoutes />}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  backdropFilter: 'blur(20px) saturate(1.7)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(1.7)',
-                  color: '#061410',
-                  border: '1px solid rgba(255, 255, 255, 0.75)',
-                  boxShadow: '0 8px 28px rgba(30, 77, 58, 0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
-                  fontWeight: 600,
-                },
-              }}
-            />
+            <UIProvider>
+              {children || <AppRoutes />}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    borderRadius: '12px',
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: 'var(--shadow-elevated)',
+                    fontWeight: 500,
+                  },
+                }}
+              />
+            </UIProvider>
           </TenantProvider>
         </AuthProvider>
       </BrowserRouter>

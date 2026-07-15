@@ -1,5 +1,6 @@
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
+import AuditDataDiffTable from '@/components/audit/AuditDataDiffTable'
 import { auditLogService } from '@/api/services'
 import { formatDateTime } from '@/utils/format'
 import { resolveRecordId } from '@/utils/record'
@@ -22,23 +23,14 @@ const DETAIL_FIELDS = [
   { key: 'ip_address', label: 'IP Address' },
   { key: 'timestamp', label: 'Timestamp', render: (item) => formatDateTime(item.timestamp) },
   {
-    key: 'old_data',
-    label: 'Old Data',
+    key: 'data_changes',
+    label: 'Data changes',
     fullWidth: true,
     render: (item) => (
-      <pre className="max-h-40 overflow-auto rounded bg-white p-2 text-xs font-normal text-text">
-        {JSON.stringify(item.old_data, null, 2)}
-      </pre>
-    ),
-  },
-  {
-    key: 'new_data',
-    label: 'New Data',
-    fullWidth: true,
-    render: (item) => (
-      <pre className="max-h-40 overflow-auto rounded bg-white p-2 text-xs font-normal text-text">
-        {JSON.stringify(item.new_data, null, 2)}
-      </pre>
+      <AuditDataDiffTable
+        oldData={item.old_data ?? item.old_values ?? item.previous_data}
+        newData={item.new_data ?? item.new_values ?? item.current_data}
+      />
     ),
   },
 ]

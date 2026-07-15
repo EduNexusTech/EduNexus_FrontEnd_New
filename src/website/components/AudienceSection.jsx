@@ -21,11 +21,11 @@ export default function AudienceSection() {
           <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#3b82f6]">
             Built for every role
           </span>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl">
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight landing-text-primary sm:text-4xl lg:text-5xl xl:text-6xl">
             One LMS.{' '}
-            <span className="landing-gradient-text-light">Learners, educators & admins.</span>
+            <span className="landing-gradient-text">Learners, educators & admins.</span>
           </h2>
-          <p className="mt-5 text-lg font-semibold text-white/70">
+          <p className="mt-5 text-lg font-semibold landing-text-muted">
             Tailored experiences for how each person interacts with your institution.
           </p>
         </motion.div>
@@ -45,9 +45,9 @@ export default function AudienceSection() {
                 <div className={`inline-flex rounded-2xl bg-gradient-to-br ${item.gradient} p-4 text-white shadow-xl`}>
                   <Icon className="h-7 w-7" />
                 </div>
-                <p className="mt-6 text-xs font-extrabold uppercase tracking-wider text-white/55">{item.subtitle}</p>
-                <h3 className="mt-2 text-2xl font-extrabold text-white">{item.title}</h3>
-                <p className="mt-4 text-sm font-semibold leading-relaxed text-white/65">{item.description}</p>
+                <p className="mt-6 text-xs font-extrabold uppercase tracking-wider landing-text-muted">{item.subtitle}</p>
+                <h3 className="mt-2 text-2xl font-extrabold landing-text-primary">{item.title}</h3>
+                <p className="mt-4 text-sm font-semibold leading-relaxed landing-text-muted">{item.description}</p>
                 <div className={`pointer-events-none absolute -bottom-12 -right-12 h-40 w-40 rounded-full bg-gradient-to-br ${item.gradient} opacity-10 blur-2xl transition group-hover:opacity-20`} />
               </motion.article>
             )

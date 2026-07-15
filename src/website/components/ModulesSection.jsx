@@ -83,11 +83,11 @@ export default function ModulesSection() {
             </div>
 
             <div className="landing-glass-dark mt-8 w-full rounded-2xl p-6 lg:p-8">
-              <p className="text-xs font-extrabold uppercase tracking-wider text-white/55">Institutional backbone</p>
-              <p className="mt-3 text-sm font-semibold leading-relaxed text-white/75 lg:text-base">
-                Multi-tenant <strong className="text-white">organizations & schools</strong>, granular{' '}
-                <strong className="text-white">roles & permissions</strong>, master data, audit logs, and{' '}
-                <strong className="text-white">EduNexus Post</strong> — the ERP layer your LMS runs on.
+              <p className="text-xs font-extrabold uppercase tracking-wider landing-text-muted">Institutional backbone</p>
+              <p className="mt-3 text-sm font-semibold leading-relaxed landing-text-muted lg:text-base">
+                Multi-tenant <strong className="landing-text-primary">organizations & schools</strong>, granular{' '}
+                <strong className="landing-text-primary">roles & permissions</strong>, master data, audit logs, and{' '}
+                <strong className="landing-text-primary">EduNexus Post</strong> — the ERP layer your LMS runs on.
               </p>
             </div>
           </motion.div>

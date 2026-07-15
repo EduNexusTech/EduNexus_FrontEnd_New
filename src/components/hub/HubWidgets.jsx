@@ -6,7 +6,7 @@ import { cn } from '@/utils/format'
 const STAT_BG = ['clay-card-glass-teal', 'clay-card-green', 'clay-card-glass-forest', 'clay-card-white']
 
 export function HubPageShell({ children, className }) {
-  return <div className={cn('lms-page w-full', className)}>{children}</div>
+  return <div className={cn('lms-page w-full min-w-0', className)}>{children}</div>
 }
 
 export function HubSectionTitle({ icon: Icon, title, subtitle }) {
@@ -23,11 +23,11 @@ export function HubSectionTitle({ icon: Icon, title, subtitle }) {
 
 export function HubStatGrid({ stats = [] }) {
   return (
-    <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+    <div className="lms-grid-hub-stats mb-6">
       {stats.map((stat, i) => (
-        <Card key={stat.label} className={cn('p-4', STAT_BG[i % STAT_BG.length], stat.className)}>
+        <Card key={stat.label} className={cn('min-w-0 p-4', STAT_BG[i % STAT_BG.length], stat.className)}>
           <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--clay-primary-soft)]">{stat.label}</p>
-          <p className="mt-1 text-2xl font-bold text-[var(--clay-text-sharp)]">{stat.value}</p>
+          <p className="mt-1 break-words text-2xl font-bold text-[var(--clay-text-sharp)]">{stat.value}</p>
         </Card>
       ))}
     </div>

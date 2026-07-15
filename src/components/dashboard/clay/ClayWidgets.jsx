@@ -27,7 +27,9 @@ import {
   Pie,
   Cell,
 } from 'recharts'
+import { cn } from '@/lib/utils'
 import { formatNumber } from '@/utils/format'
+import { Card } from '@/components/ui/Card'
 import { resolveActionIcon } from '@/utils/dashboardIcons'
 import {
   CHART_SERIES_COLORS,
@@ -39,12 +41,12 @@ import {
 import {
   CHART_THEME,
   chartTooltipStyle,
+  chartTooltipWrapperStyle,
   chartTickStyle,
   getChartColor,
 } from '@/utils/chartTheme'
 
 const CHART_COLORS = CHART_SERIES_COLORS
-const STAT_BG = ['clay-card-glass-teal', 'clay-card-green', 'clay-card-glass-forest', 'clay-card-white']
 
 const CHART_TICK = chartTickStyle
 const CHART_GRID = CHART_THEME.grid
@@ -60,17 +62,17 @@ export function ClayInsightBanner({ userName, message }) {
   })
 
   return (
-    <div className="clay-app clay-glass-banner clay-banner-3d mb-5 flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="mb-0 flex flex-col gap-2 bg-gradient-to-r from-brand-50 to-card sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="text-xs font-semibold text-[var(--clay-primary-soft)]">
+        <p className="text-xs font-medium text-muted-foreground">
           {greeting}, {firstName}
         </p>
-        <p className="mt-0.5 text-sm font-semibold text-[var(--clay-text-sharp)]">
+        <p className="mt-0.5 text-sm font-semibold text-foreground">
           {message || 'Here is your analytics overview for today.'}
         </p>
       </div>
-      <p className="shrink-0 text-xs text-[var(--clay-primary-soft)]">{today}</p>
-    </div>
+      <p className="shrink-0 text-xs text-muted-foreground">{today}</p>
+    </Card>
   )
 }
 
@@ -81,34 +83,31 @@ export function ClayWelcomeHero({ userName, message }) {
 
 export function ClayStatGrid({ stats = [] }) {
   return (
-    <div className="clay-app mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map((stat, i) => {
         const Icon = stat.icon
-        const bg = STAT_BG[i % STAT_BG.length]
         return (
-          <motion.div
-            key={stat.title}
-            className={`clay-card ${bg} p-4`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <div className="mb-2 flex items-start justify-between">
-              <div className="clay-icon-3d flex h-9 w-9 items-center justify-center text-[var(--clay-primary)]">
-                <Icon className="h-4 w-4" />
+          <motion.div key={stat.title} initial={false} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+            <Card hover className="w-full min-w-0 max-w-full">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 space-y-2">
+                  <p className="truncate text-sm font-medium text-muted-foreground">{stat.title}</p>
+                  <p className="break-words text-3xl font-bold tracking-tight text-foreground">{stat.value}</p>
+                  {stat.trend ? (
+                    <p className="flex items-center gap-1 text-xs font-medium text-success">
+                      <FiTrendingUp className="h-3.5 w-3.5" />
+                      {stat.trend}
+                    </p>
+                  ) : null}
+                  {stat.hint ? <p className="text-xs text-muted-foreground">{stat.hint}</p> : null}
+                </div>
+                {Icon ? (
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                ) : null}
               </div>
-              {stat.trend ? (
-                <span className="clay-trend-up">
-                  <FiTrendingUp className="mr-0.5 inline h-3 w-3" />
-                  {stat.trend}
-                </span>
-              ) : null}
-            </div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--clay-primary-soft)]">
-              {stat.title}
-            </p>
-            <p className="mt-0.5 text-2xl font-bold text-[var(--clay-text-sharp)]">{stat.value}</p>
-            {stat.hint ? <p className="mt-0.5 text-[11px] text-[var(--clay-primary-soft)]">{stat.hint}</p> : null}
+            </Card>
           </motion.div>
         )
       })}
@@ -118,19 +117,20 @@ export function ClayStatGrid({ stats = [] }) {
 
 export function ClayQuickGrid({ actions = [] }) {
   return (
-    <div className="clay-app mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+    <div className="clay-app lms-grid-quick mb-5">
       {actions.slice(0, 12).map((action, i) => {
         const Icon = resolveActionIcon(action)
         return (
           <motion.div
             key={action.key || action.path}
-            initial={{ opacity: 0, scale: 0.98 }}
+            className="min-w-0"
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02 }}
           >
             <Link
               to={action.path}
-              className="clay-card clay-card-white flex flex-col items-center gap-2 p-3.5 text-center"
+              className="clay-card clay-card-white flex h-full min-w-0 flex-col items-center gap-2 p-3.5 text-center"
             >
               <div className="clay-icon-3d flex h-10 w-10 items-center justify-center text-[var(--clay-primary)]">
                 <Icon className="h-4 w-4" strokeWidth={1.75} />
@@ -146,7 +146,7 @@ export function ClayQuickGrid({ actions = [] }) {
 
 export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKey = 'label' }) {
   return (
-    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full min-w-0 p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -156,13 +156,19 @@ export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKe
       ) : (
         <div className="chart-3d-stage">
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data} barCategoryGap="22%" margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+            <BarChart data={data} barCategoryGap="22%" margin={{ top: 28, right: 16, left: 0, bottom: 0 }}>
               <Chart3DDefs />
               <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
               <XAxis dataKey={labelKey} tick={CHART_TICK} tickLine={false} axisLine={false} />
               <YAxis tick={CHART_TICK} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={chartTooltipStyle} cursor={{ fill: CHART_THEME.cursor }} />
               <Bar dataKey={dataKey} shape={(props) => <Bar3DShape {...props} />} />
+              <Tooltip
+                contentStyle={chartTooltipStyle}
+                wrapperStyle={chartTooltipWrapperStyle}
+                cursor={{ fill: CHART_THEME.cursor }}
+                offset={12}
+                allowEscapeViewBox={{ x: false, y: true }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -173,7 +179,7 @@ export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKe
 
 export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelKey = 'label' }) {
   return (
-    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full min-w-0 p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -183,12 +189,11 @@ export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelK
       ) : (
         <div className="chart-3d-stage">
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+            <LineChart data={data} margin={{ top: 28, right: 16, left: 0, bottom: 0 }}>
               <Chart3DDefs />
               <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
               <XAxis dataKey={labelKey} tick={CHART_TICK} tickLine={false} axisLine={false} />
               <YAxis tick={CHART_TICK} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={chartTooltipStyle} />
               <Area
                 type="monotone"
                 dataKey={dataKey}
@@ -204,6 +209,12 @@ export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelK
                 dot={(props) => <Dot3DShape {...props} />}
                 activeDot={(props) => <ActiveDot3DShape {...props} />}
               />
+              <Tooltip
+                contentStyle={chartTooltipStyle}
+                wrapperStyle={chartTooltipWrapperStyle}
+                offset={12}
+                allowEscapeViewBox={{ x: false, y: true }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -216,7 +227,7 @@ export function ClayDonutPanel({ title, data = [] }) {
   const total = data.reduce((sum, d) => sum + (d.value || 0), 0) || 1
 
   return (
-    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full p-5">
+    <div className="clay-app clay-card clay-card-white clay-chart-panel h-full min-w-0 p-5">
       <h3 className="chart-panel-title mb-3 flex items-center">
         <span className="chart-panel-accent" aria-hidden />
         {title}
@@ -245,7 +256,12 @@ export function ClayDonutPanel({ title, data = [] }) {
                     <Cell key={index} fill={`url(#pie3d-grad-${index % CHART_COLORS.length})`} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={chartTooltipStyle} />
+                <Tooltip
+                  contentStyle={chartTooltipStyle}
+                  wrapperStyle={chartTooltipWrapperStyle}
+                  offset={12}
+                  allowEscapeViewBox={{ x: true, y: true }}
+                />
               </PieChart>
             </ResponsiveContainer>
             <div className="chart-donut-hub pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>

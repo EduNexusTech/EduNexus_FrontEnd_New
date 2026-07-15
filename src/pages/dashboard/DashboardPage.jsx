@@ -21,7 +21,7 @@ import {
   FiUsers,
   FiFileText,
 } from '@/components/dashboard/clay/ClayWidgets'
-import '@/styles/dashboard-clay.css'
+import { PageHeader } from '@/components/ui/Card'
 
 function SuperAdminDashboardView() {
   const { user } = useAuth()
@@ -101,16 +101,17 @@ function SuperAdminDashboardView() {
   ].filter((d) => d.value > 0)
 
   return (
-    <div className="clay-app w-full pb-4">
+    <div className="space-y-6 w-full min-w-0 max-w-full">
+      <PageHeader title="Dashboard" description="Platform growth, distribution, and live activity" />
       <ClayInsightBanner
         userName={userName}
-        message="Platform growth, distribution, and live activity"
+        message="Welcome back — here is your latest overview"
       />
 
       <ClayStatGrid stats={stats} />
 
       <ClayAnalyticsSection title="Analytics">
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lms-grid-charts">
           <ClayBarChartPanel
             title="Platform Snapshot"
             data={platformBarData.length ? platformBarData : growthData}
@@ -131,13 +132,13 @@ function DefaultDashboardView() {
     user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
 
   return (
-    <div className="clay-app w-full pb-4">
+    <div className="space-y-6 w-full">
       <ClayInsightBanner userName={userName} message="Welcome to EduNexus." />
-      <div className="clay-card clay-card-white p-8 text-center">
-        <p className="text-[var(--clay-primary-soft)]">
+      <Card>
+        <p className="text-sm text-muted-foreground">
           Your account does not have a dashboard for this role yet. Use the sidebar to open modules available to you.
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

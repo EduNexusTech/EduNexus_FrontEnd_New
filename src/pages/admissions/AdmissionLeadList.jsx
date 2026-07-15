@@ -30,7 +30,7 @@ const columns = [
   { accessorKey: 'enquiry_date', header: 'Enquiry Date' },
 ]
 
-export default function AdmissionLeadList() {
+export default function AdmissionLeadList({ embedded = false }) {
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState('')
   const listParams = useMemo(() => (statusFilter ? { status: statusFilter } : {}), [statusFilter])
@@ -47,6 +47,7 @@ export default function AdmissionLeadList() {
 
   return (
     <ResourceListPage
+      embedded={embedded}
       title="Admission Leads"
       subtitle="Enquiries and lead management with follow-ups"
       queryKey="admission-leads"

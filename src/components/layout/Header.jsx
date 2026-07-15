@@ -1,20 +1,19 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
+import { useUI } from '@/contexts/UIContext'
 import { notificationService } from '@/api/services'
 import { Drawer } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Feedback'
 import { formatDateTime, fromNow } from '@/utils/format'
+import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
-import { resolvePageTitle } from '@/utils/pageTitle'
-import '@/styles/dashboard-clay.css'
 
-export default function Header({ onMenuClick }) {
-  const location = useLocation()
-  const pageTitle = resolvePageTitle(location.pathname)
+export default function Header() {
   const { user, logout, isSchoolAdmin } = useAuth()
+  const { setMobileSidebarOpen } = useUI()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [profileOpen, setProfileOpen] = useState(false)
@@ -53,44 +52,50 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-      <header className="clay-app clay-header-bar sticky top-0 z-30 flex h-12 shrink-0 items-center justify-between gap-3 px-4 lg:px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onMenuClick}
-            className="clay-icon-btn p-2 lg:hidden"
-          >
-            <FiMenu className="h-4 w-4" />
-          </button>
-          <h1 className="truncate text-base font-bold tracking-tight text-[var(--clay-text-sharp)] md:text-lg">{pageTitle}</h1>
-        </div>
+      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-4 border-b border-border bg-card/80 px-4 backdrop-blur-md lg:px-6">
+        <button
+          type="button"
+          onClick={() => setMobileSidebarOpen(true)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+          aria-label="Open menu"
+        >
+          <FiMenu className="h-5 w-5" />
+        </button>
 
-        <div className="hidden max-w-sm flex-1 md:flex">
-          <div className="clay-search flex w-full items-center gap-2 px-3 py-2">
-            <FiSearch className="h-3.5 w-3.5 shrink-0 text-[var(--clay-primary-soft)]" />
+        <div className="hidden flex-1 md:block">
+          <div className="flex max-w-md items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+            <FiSearch className="h-4 w-4 shrink-0 text-muted-foreground" />
             <input
               type="search"
               placeholder="Search modules, users, schools..."
-              className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--clay-primary-soft)]"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => {}}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+          aria-label="Search"
+        >
+          <FiSearch className="h-5 w-5" />
+        </button>
+
+        <div className="ml-auto flex items-center gap-1">
           {!isSchoolAdmin ? (
             <>
               <Link
                 to="/ai-hub"
                 title="AI Hub"
-                className="clay-icon-btn p-2.5 transition"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <FiZap className="h-5 w-5" />
               </Link>
-
               <Link
                 to="/edu-nexus-post"
                 title="EduNexus Mailer"
-                className="clay-icon-btn p-2.5 transition"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <FiMail className="h-5 w-5" />
               </Link>
@@ -100,42 +105,43 @@ export default function Header({ onMenuClick }) {
           <button
             type="button"
             onClick={() => setNotifOpen(true)}
-            className="clay-icon-btn relative p-2.5"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             title="Notifications"
           >
             <FiBell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+            {unreadCount > 0 ? (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
-            )}
+            ) : null}
           </button>
 
-          <div className="relative">
+          <div className="relative ml-1">
             <button
               type="button"
               onClick={() => setProfileOpen(!profileOpen)}
-              className="clay-icon-btn flex items-center gap-2 p-1.5 pr-3"
+              className="inline-flex items-center gap-2 rounded-lg p-1.5 pr-2 transition-colors hover:bg-muted"
             >
               <Avatar name={displayName} src={user?.profile_image} size="sm" />
-              <span className="hidden sm:block text-sm font-semibold text-[var(--clay-text-sharp)] max-w-[120px] truncate">
-                {displayName}
-              </span>
-              <FiChevronDown className="h-4 w-4 text-muted hidden sm:block" />
+              <div className="hidden text-left md:block">
+                <p className="max-w-[120px] truncate text-sm font-medium leading-none text-foreground">{displayName}</p>
+                <p className="max-w-[120px] truncate text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+              <FiChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
             </button>
 
-            {profileOpen && (
+            {profileOpen ? (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-[var(--clay-glass-edge)] bg-white/95 backdrop-blur-xl py-2 card-shadow">
-                  <div className="px-4 py-2 border-b border-[var(--clay-border)]">
-                    <p className="text-sm font-bold truncate text-[var(--clay-text-sharp)]">{displayName}</p>
-                    <p className="text-xs font-medium text-[var(--clay-primary-soft)] truncate">{user?.email}</p>
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-border bg-card py-2 shadow-[var(--shadow-elevated)]">
+                  <div className="border-b border-border px-4 py-2">
+                    <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                   <Link
                     to="/profile"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
                   >
                     <FiUser className="h-4 w-4" /> Profile
                   </Link>
@@ -143,7 +149,7 @@ export default function Header({ onMenuClick }) {
                     <Link
                       to="/school-profile"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
                     >
                       <FiBook className="h-4 w-4" /> School Profile
                     </Link>
@@ -151,47 +157,52 @@ export default function Header({ onMenuClick }) {
                   <Link
                     to="/change-password"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--clay-text-sharp)] hover:bg-slate-50"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
                   >
                     <FiKey className="h-4 w-4" /> Change Password
                   </Link>
                   <button
+                    type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-danger hover:bg-red-50"
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-red-50"
                   >
                     <FiLogOut className="h-4 w-4" /> Logout
                   </button>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
 
       <Drawer open={notifOpen} onClose={() => setNotifOpen(false)} title="Notifications">
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm text-muted">{unreadCount} unread</p>
-          {unreadCount > 0 && (
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">{unreadCount} unread</p>
+          {unreadCount > 0 ? (
             <button
+              type="button"
               onClick={() => markAllMutation.mutate()}
-              className="text-sm text-[var(--clay-teal)] font-medium hover:underline"
+              className="text-sm font-medium text-brand-600 hover:underline"
             >
               Mark all read
             </button>
-          )}
+          ) : null}
         </div>
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <p className="text-center text-muted py-8">No notifications</p>
+            <p className="py-8 text-center text-muted-foreground">No notifications</p>
           ) : (
             notifications.map((n) => (
               <div
                 key={n.id}
-                className={`rounded-xl border p-4 backdrop-blur-md ${n.is_read ? 'border-[var(--clay-glass-edge)] bg-white/90' : 'border-[var(--clay-accent)]/30 bg-blue-50/60'}`}
+                className={cn(
+                  'rounded-xl border p-4',
+                  n.is_read ? 'border-border bg-card' : 'border-brand-200 bg-brand-50/50',
+                )}
               >
-                <p className="font-medium text-sm">{n.title}</p>
-                <p className="text-sm text-muted mt-1">{n.message}</p>
-                <p className="text-xs text-muted mt-2">{fromNow(n.created_at)}</p>
+                <p className="text-sm font-medium text-foreground">{n.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{n.message}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{fromNow(n.created_at)}</p>
               </div>
             ))
           )}

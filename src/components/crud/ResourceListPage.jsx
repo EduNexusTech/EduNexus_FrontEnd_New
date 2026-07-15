@@ -36,6 +36,8 @@ export default function ResourceListPage({
   onView,
   deleteSuccessMessage = 'Deleted successfully',
   deleteBehavior = 'remove',
+  /** When true, hide breadcrumb + page header (used inside LMS module shells) */
+  embedded = false,
 }) {
   const queryClient = useQueryClient()
   const pagination = usePagination()
@@ -163,29 +165,33 @@ export default function ResourceListPage({
 
   if (error) return <ErrorState message={getErrorMessage(error, 'Failed to load data')} onRetry={refetch} />
 
+  const headerActions = (
+    <>
+      <Button variant="refresh" onClick={() => refetch()} loading={isFetching}>
+        <FiRefreshCw /> Refresh
+      </Button>
+      <Button variant="excel" onClick={handleExport}>
+        <FiDownload /> Export Excel
+      </Button>
+      {extraActions}
+      {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
+        <Link to={`${basePath}/new`}>
+          <Button variant="create"><FiPlus /> Add New</Button>
+        </Link>
+      )}
+    </>
+  )
+
   return (
-    <div className="lms-page w-full">
-      <Breadcrumb items={breadcrumb || [{ label: title }]} />
-      <PageHeader
-        title={title}
-        subtitle={subtitle}
-        actions={
-          <>
-            <Button variant="refresh" onClick={() => refetch()} loading={isFetching}>
-              <FiRefreshCw /> Refresh
-            </Button>
-            <Button variant="excel" onClick={handleExport}>
-              <FiDownload /> Export Excel
-            </Button>
-            {extraActions}
-            {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
-              <Link to={`${basePath}/new`}>
-                <Button variant="create"><FiPlus /> Add New</Button>
-              </Link>
-            )}
-          </>
-        }
-      />
+    <div className="lms-page w-full min-w-0">
+      {!embedded ? (
+        <>
+          <Breadcrumb items={breadcrumb || [{ label: title }]} />
+          <PageHeader title={title} subtitle={subtitle} actions={headerActions} />
+        </>
+      ) : (
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-2">{headerActions}</div>
+      )}
 
       <Card padding={false} className="relative p-4 lms-form-card">
         {isFetching && !isLoading && (
