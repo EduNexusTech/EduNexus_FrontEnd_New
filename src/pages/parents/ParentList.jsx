@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import Button from '@/components/ui/Button'
 import { SelectField } from '@/components/ui/Input'
 import { Avatar } from '@/components/ui/Feedback'
-import toast from 'react-hot-toast'
 import { parentService } from '@/api/services'
 import { PARENT_STATUS_OPTIONS } from '@/config/constants'
 import { downloadBlob, resolveMediaUrl } from '@/utils/format'
@@ -23,23 +24,27 @@ export default function ParentList() {
         <Avatar name={row.original.full_name} src={resolveMediaUrl(row.original.photo_url)} size="sm" />
       ),
     },
-    { accessorKey: 'parent_code', header: 'Parent Code' },
+    { accessorKey: 'parent_code', header: 'Code' },
     { accessorKey: 'full_name', header: 'Name' },
+    { accessorKey: 'mobile_number', header: 'Mobile' },
+    { accessorKey: 'email', header: 'Email' },
     { accessorKey: 'occupation', header: 'Occupation' },
-    { accessorKey: 'education', header: 'Education' },
+    {
+      accessorKey: 'linked_students_count',
+      header: 'Students',
+      cell: ({ getValue }) => getValue() ?? 0,
+    },
     {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ getValue }) => STATUS_LABELS[getValue()] || getValue(),
     },
-    { accessorKey: 'linked_students_count', header: 'Students' },
-    { accessorKey: 'mobile_number', header: 'Mobile' },
   ]
 
   return (
     <ResourceListPage
-      title="Parents"
-      subtitle="Parent profiles, linked students, and portal access"
+      title="Guardian Roster"
+      subtitle="Parents & guardians — family relationships reference SIS students only"
       queryKey="parents"
       listFn={parentService.list}
       listParams={listParams}
@@ -55,16 +60,19 @@ export default function ParentList() {
         />
       }
       extraActions={
-        <Button
-          variant="excel"
-          onClick={async () => {
-            const blob = await parentService.export({})
-            downloadBlob(blob, 'parents-export.csv')
-            toast.success('Export downloaded')
-          }}
-        >
-          Export Excel
-        </Button>
+        <>
+          <Link to="/parents"><Button variant="outline">Family Hub</Button></Link>
+          <Button
+            variant="excel"
+            onClick={async () => {
+              const blob = await parentService.export({})
+              downloadBlob(blob, 'guardians-export.csv')
+              toast.success('Export downloaded')
+            }}
+          >
+            Export
+          </Button>
+        </>
       }
     />
   )

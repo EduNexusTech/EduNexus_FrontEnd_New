@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { masterServices, staffService } from '@/api/services'
-import { STAFF_ROLE_OPTIONS, STAFF_STATUS_OPTIONS } from '@/config/constants'
+import { EMPLOYMENT_TYPE_OPTIONS, STAFF_ROLE_OPTIONS, STAFF_STATUS_OPTIONS } from '@/config/constants'
 import { unwrapData } from '@/api/client'
 
 export default function StaffForm() {
@@ -30,7 +30,8 @@ export default function StaffForm() {
     { name: 'last_name', label: 'Last Name', type: 'text' },
     { name: 'email', label: 'Email', type: 'email' },
     { name: 'mobile_number', label: 'Mobile', type: 'text', required: true },
-    { name: 'employee_id', label: 'Employee ID', type: 'text', help: 'Leave blank to auto-generate' },
+    { name: 'employee_id', label: 'Employee Code', type: 'text', help: 'Leave blank to auto-generate' },
+    { name: 'payroll_code', label: 'Payroll Code', type: 'text' },
     {
       name: 'staff_role_code',
       label: 'Staff Role',
@@ -38,9 +39,16 @@ export default function StaffForm() {
       options: STAFF_ROLE_OPTIONS,
       required: true,
     },
+    {
+      name: 'employment_type',
+      label: 'Employment Type',
+      type: 'select',
+      options: EMPLOYMENT_TYPE_OPTIONS,
+    },
     { name: 'department', label: 'Department', type: 'select', options: departmentOptions },
     { name: 'designation', label: 'Designation', type: 'select', options: designationOptions },
     { name: 'joining_date', label: 'Joining Date', type: 'date' },
+    { name: 'confirmation_date', label: 'Confirmation Date', type: 'date' },
     { name: 'date_of_birth', label: 'Date of Birth', type: 'date' },
     {
       name: 'gender',
@@ -52,20 +60,24 @@ export default function StaffForm() {
         { label: 'Other', value: 'other' },
       ],
     },
+    { name: 'blood_group', label: 'Blood Group', type: 'text' },
     { name: 'address', label: 'Address', type: 'textarea', fullWidth: true },
     { name: 'city', label: 'City', type: 'text' },
+    { name: 'state', label: 'State', type: 'text' },
     { name: 'pincode', label: 'Pincode', type: 'text' },
+    { name: 'pan_number', label: 'PAN', type: 'text' },
+    { name: 'aadhaar_number', label: 'Aadhaar', type: 'text' },
     { name: 'emergency_contact_name', label: 'Emergency Contact', type: 'text' },
     { name: 'emergency_contact_phone', label: 'Emergency Phone', type: 'text' },
-    { name: 'emergency_contact_relation', label: 'Emergency Relation', type: 'text' },
-    { name: 'status', label: 'Status', type: 'select', options: STAFF_STATUS_OPTIONS },
+    { name: 'emergency_contact_relation', label: 'Relation', type: 'text' },
+    { name: 'status', label: 'Lifecycle Status', type: 'select', options: STAFF_STATUS_OPTIONS },
     { name: 'notes', label: 'Notes', type: 'textarea', fullWidth: true },
     { name: 'send_credentials', label: 'Send login credentials on create', type: 'checkbox' },
   ], [departmentOptions, designationOptions])
 
   return (
     <ResourceFormPage
-      title="Staff Member"
+      title="Employee"
       queryKey="staff"
       getFn={staffService.get}
       createFn={staffService.create}
@@ -78,15 +90,22 @@ export default function StaffForm() {
         email: item.email || '',
         mobile_number: item.mobile_number || '',
         employee_id: item.employee_id || '',
+        payroll_code: item.payroll_code || '',
         staff_role_code: item.staff_role_code || 'staff',
+        employment_type: item.employment_type || 'permanent',
         department: item.department || '',
         designation: item.designation || '',
         joining_date: item.joining_date || '',
+        confirmation_date: item.confirmation_date || '',
         date_of_birth: item.date_of_birth || '',
         gender: item.gender || '',
+        blood_group: item.blood_group || '',
         address: item.address || '',
         city: item.city || '',
+        state: item.state || '',
         pincode: item.pincode || '',
+        pan_number: item.pan_number || '',
+        aadhaar_number: item.aadhaar_number || '',
         emergency_contact_name: item.emergency_contact_name || '',
         emergency_contact_phone: item.emergency_contact_phone || '',
         emergency_contact_relation: item.emergency_contact_relation || '',

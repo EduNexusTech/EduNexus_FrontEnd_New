@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import Button from '@/components/ui/Button'
 import { SelectField } from '@/components/ui/Input'
@@ -30,13 +31,14 @@ export default function StaffList() {
         <Avatar name={row.original.full_name} src={resolveMediaUrl(row.original.photo_url)} size="sm" />
       ),
     },
-    { accessorKey: 'employee_id', header: 'Employee ID' },
+    { accessorKey: 'employee_id', header: 'Employee Code' },
     { accessorKey: 'full_name', header: 'Name' },
     {
       accessorKey: 'staff_role_code',
       header: 'Role',
       cell: ({ getValue }) => ROLE_LABELS[getValue()] || getValue(),
     },
+    { accessorKey: 'employment_type', header: 'Type' },
     { accessorKey: 'department_name', header: 'Department' },
     { accessorKey: 'designation_name', header: 'Designation' },
     {
@@ -44,13 +46,18 @@ export default function StaffList() {
       header: 'Status',
       cell: ({ getValue }) => STATUS_LABELS[getValue()] || getValue(),
     },
+    {
+      id: 'academic',
+      header: 'Academic',
+      cell: ({ row }) => (row.original.is_academic_staff ? 'Yes' : '—'),
+    },
     { accessorKey: 'mobile_number', header: 'Mobile' },
   ]
 
   return (
     <ResourceListPage
-      title="Staff"
-      subtitle="Non-teaching staff profiles, attendance, payroll, and credentials"
+      title="Employee Roster"
+      subtitle="HRMS employee master — includes academic staff linked from Teachers"
       queryKey="staff"
       listFn={staffService.list}
       listParams={listParams}
@@ -74,16 +81,19 @@ export default function StaffList() {
         </>
       }
       extraActions={
-        <Button
-          variant="excel"
-          onClick={async () => {
-            const blob = await staffService.export({})
-            downloadBlob(blob, 'staff-export.csv')
-            toast.success('Export downloaded')
-          }}
-        >
-          Export Excel
-        </Button>
+        <>
+          <Link to="/staff"><Button variant="outline">HRMS Hub</Button></Link>
+          <Button
+            variant="excel"
+            onClick={async () => {
+              const blob = await staffService.export({})
+              downloadBlob(blob, 'employees-export.csv')
+              toast.success('Export downloaded')
+            }}
+          >
+            Export Excel
+          </Button>
+        </>
       }
     />
   )

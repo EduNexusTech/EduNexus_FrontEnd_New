@@ -83,19 +83,45 @@ export const LEAD_SOURCE_OPTIONS = [
 export const STUDENT_STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
+  { label: 'Promoted', value: 'promoted' },
   { label: 'Transferred', value: 'transferred' },
+  { label: 'Graduated', value: 'graduated' },
   { label: 'Alumni', value: 'alumni' },
+  { label: 'Archived', value: 'archived' },
 ]
 
 export const STAFF_STATUS_OPTIONS = [
+  { label: 'Candidate', value: 'candidate' },
+  { label: 'Interview', value: 'interview' },
+  { label: 'Selected', value: 'selected' },
+  { label: 'Offer Released', value: 'offer_released' },
+  { label: 'Offer Accepted', value: 'offer_accepted' },
+  { label: 'Onboarding', value: 'onboarding' },
   { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
+  { label: 'Probation', value: 'probation' },
+  { label: 'Confirmed', value: 'confirmed' },
+  { label: 'Transferred', value: 'transferred' },
+  { label: 'Promoted', value: 'promoted' },
   { label: 'On Leave', value: 'on_leave' },
+  { label: 'Inactive', value: 'inactive' },
   { label: 'Resigned', value: 'resigned' },
+  { label: 'Retired', value: 'retired' },
+  { label: 'Terminated', value: 'terminated' },
+  { label: 'Alumni', value: 'alumni' },
+]
+
+export const EMPLOYMENT_TYPE_OPTIONS = [
+  { label: 'Permanent', value: 'permanent' },
+  { label: 'Contract', value: 'contract' },
+  { label: 'Temporary', value: 'temporary' },
+  { label: 'Consultant', value: 'consultant' },
+  { label: 'Intern', value: 'intern' },
+  { label: 'Visiting Faculty', value: 'visiting_faculty' },
+  { label: 'Volunteer', value: 'volunteer' },
 ]
 
 export const STAFF_ROLE_OPTIONS = SCHOOL_STAFF_ROLES.filter(
-  (r) => !['teacher', 'parent', 'student'].includes(r.value),
+  (r) => !['parent', 'student'].includes(r.value),
 )
 
 export const STAFF_SKILL_LEVEL_OPTIONS = [
@@ -109,7 +135,31 @@ export const TEACHER_STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
   { label: 'On Leave', value: 'on_leave' },
+  { label: 'Transferred', value: 'transferred' },
   { label: 'Resigned', value: 'resigned' },
+  { label: 'Archived', value: 'archived' },
+]
+
+export const ACADEMIC_STAFF_ROLE_OPTIONS = [
+  { label: 'Principal', value: 'principal' },
+  { label: 'Vice Principal', value: 'vice_principal' },
+  { label: 'Academic Director', value: 'academic_director' },
+  { label: 'Dean', value: 'dean' },
+  { label: 'Academic Coordinator', value: 'academic_coordinator' },
+  { label: 'Head Of Department', value: 'hod' },
+  { label: 'Senior Teacher', value: 'senior_teacher' },
+  { label: 'Teacher', value: 'teacher' },
+  { label: 'Assistant Teacher', value: 'assistant_teacher' },
+  { label: 'Special Educator', value: 'special_educator' },
+  { label: 'Lab Instructor', value: 'lab_instructor' },
+  { label: 'Sports Coach', value: 'sports_coach' },
+  { label: 'Music Teacher', value: 'music_teacher' },
+  { label: 'Dance Teacher', value: 'dance_teacher' },
+  { label: 'Art Teacher', value: 'art_teacher' },
+  { label: 'Librarian', value: 'librarian' },
+  { label: 'Counsellor', value: 'counsellor' },
+  { label: 'Wellness Officer', value: 'wellness_officer' },
+  { label: 'Custom Role', value: 'custom' },
 ]
 
 export const TEACHER_LEAVE_TYPE_OPTIONS = [
@@ -125,6 +175,7 @@ export const TEACHER_LEAVE_TYPE_OPTIONS = [
 export const PARENT_STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
+  { label: 'Archived', value: 'archived' },
 ]
 
 export const PARENT_INCOME_RANGE_OPTIONS = [

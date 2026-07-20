@@ -1,16 +1,30 @@
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { teacherService } from '@/api/services'
-import { TEACHER_STATUS_OPTIONS } from '@/config/constants'
+import { ACADEMIC_STAFF_ROLE_OPTIONS, TEACHER_STATUS_OPTIONS } from '@/config/constants'
 
 const fields = [
   { name: 'first_name', label: 'First Name', type: 'text', required: true },
+  { name: 'middle_name', label: 'Middle Name', type: 'text' },
   { name: 'last_name', label: 'Last Name', type: 'text' },
+  { name: 'preferred_name', label: 'Preferred Name', type: 'text' },
   { name: 'email', label: 'Email', type: 'email' },
   { name: 'mobile_number', label: 'Mobile', type: 'text', required: true },
   { name: 'employee_id', label: 'Employee ID', type: 'text', help: 'Leave blank to auto-generate' },
+  { name: 'teacher_code', label: 'Teacher Code', type: 'text', help: 'Leave blank to auto-generate' },
+  {
+    name: 'academic_role',
+    label: 'Academic Role',
+    type: 'select',
+    options: ACADEMIC_STAFF_ROLE_OPTIONS,
+  },
+  { name: 'custom_role_label', label: 'Custom Role Label', type: 'text', help: 'Used when role is Custom' },
   { name: 'designation', label: 'Designation', type: 'text' },
   { name: 'department', label: 'Department', type: 'text' },
+  { name: 'specialization', label: 'Specialization', type: 'text' },
+  { name: 'qualification_summary', label: 'Qualification Summary', type: 'text' },
+  { name: 'total_experience_years', label: 'Experience (Years)', type: 'number' },
   { name: 'joining_date', label: 'Joining Date', type: 'date' },
+  { name: 'confirmation_date', label: 'Confirmation Date', type: 'date' },
   { name: 'date_of_birth', label: 'Date of Birth', type: 'date' },
   {
     name: 'gender',
@@ -22,13 +36,20 @@ const fields = [
       { label: 'Other', value: 'other' },
     ],
   },
+  { name: 'blood_group', label: 'Blood Group', type: 'text' },
+  { name: 'nationality', label: 'Nationality', type: 'text' },
+  { name: 'religion', label: 'Religion', type: 'text' },
+  { name: 'languages_known', label: 'Languages Known', type: 'text', help: 'Comma-separated' },
   { name: 'address', label: 'Address', type: 'textarea', fullWidth: true },
   { name: 'city', label: 'City', type: 'text' },
+  { name: 'state', label: 'State', type: 'text' },
   { name: 'pincode', label: 'Pincode', type: 'text' },
   { name: 'bio', label: 'Bio', type: 'textarea', fullWidth: true },
   { name: 'emergency_contact_name', label: 'Emergency Contact', type: 'text' },
   { name: 'emergency_contact_phone', label: 'Emergency Phone', type: 'text' },
   { name: 'status', label: 'Status', type: 'select', options: TEACHER_STATUS_OPTIONS },
+  { name: 'portal_access', label: 'Portal Access', type: 'checkbox' },
+  { name: 'mobile_app_access', label: 'Mobile App Access', type: 'checkbox' },
   { name: 'notes', label: 'Notes', type: 'textarea', fullWidth: true },
   { name: 'send_credentials', label: 'Send login credentials on create', type: 'checkbox' },
 ]
@@ -36,7 +57,7 @@ const fields = [
 export default function TeacherForm() {
   return (
     <ResourceFormPage
-      title="Teacher"
+      title="Academic Staff"
       queryKey="teachers"
       getFn={teacherService.get}
       createFn={teacherService.create}
@@ -44,28 +65,52 @@ export default function TeacherForm() {
       basePath="/teachers"
       fields={fields}
       transformLoad={(item) => ({
-        first_name: item.full_name?.split(' ')[0] || '',
-        last_name: item.full_name?.split(' ').slice(1).join(' ') || '',
+        first_name: item.first_name || item.full_name?.split(' ')[0] || '',
+        middle_name: item.middle_name || '',
+        last_name: item.last_name || item.full_name?.split(' ').slice(1).join(' ') || '',
+        preferred_name: item.preferred_name || '',
         email: item.email || '',
         mobile_number: item.mobile_number || '',
         employee_id: item.employee_id || '',
+        teacher_code: item.teacher_code || '',
+        academic_role: item.academic_role || 'teacher',
+        custom_role_label: item.custom_role_label || '',
         designation: item.designation || '',
         department: item.department || '',
+        specialization: item.specialization || '',
+        qualification_summary: item.qualification_summary || '',
+        total_experience_years: item.total_experience_years ?? '',
         joining_date: item.joining_date || '',
+        confirmation_date: item.confirmation_date || '',
         date_of_birth: item.date_of_birth || '',
         gender: item.gender || '',
+        blood_group: item.blood_group || '',
+        nationality: item.nationality || '',
+        religion: item.religion || '',
+        languages_known: Array.isArray(item.languages_known)
+          ? item.languages_known.join(', ')
+          : (item.languages_known || ''),
         address: item.address || '',
         city: item.city || '',
+        state: item.state || '',
         pincode: item.pincode || '',
         bio: item.bio || '',
         emergency_contact_name: item.emergency_contact_name || '',
         emergency_contact_phone: item.emergency_contact_phone || '',
         status: item.status || 'active',
+        portal_access: Boolean(item.portal_access ?? true),
+        mobile_app_access: Boolean(item.mobile_app_access ?? true),
         notes: item.notes || '',
       })}
       transformSubmit={(values) => ({
         ...values,
+        languages_known: typeof values.languages_known === 'string'
+          ? values.languages_known.split(',').map((s) => s.trim()).filter(Boolean)
+          : values.languages_known,
+        total_experience_years: values.total_experience_years === '' ? null : values.total_experience_years,
         send_credentials: Boolean(values.send_credentials),
+        portal_access: Boolean(values.portal_access),
+        mobile_app_access: Boolean(values.mobile_app_access),
       })}
     />
   )

@@ -10,6 +10,8 @@ import SchoolDocumentsModal, { SchoolDocumentsList } from './SchoolDocumentsModa
 const columns = [
   { accessorKey: 'school_name', header: 'Name' },
   { accessorKey: 'school_code', header: 'Code' },
+  { accessorKey: 'short_name', header: 'Short' },
+  { accessorKey: 'school_type_display', header: 'Type' },
   { accessorKey: 'email', header: 'Email' },
   { accessorKey: 'organization_name', header: 'Organization' },
   {
@@ -28,6 +30,10 @@ const columns = [
 const DETAIL_FIELDS = [
   { key: 'school_name', label: 'Name' },
   { key: 'school_code', label: 'Code' },
+  { key: 'short_name', label: 'Short Name' },
+  { key: 'legal_name', label: 'Legal Name' },
+  { key: 'school_type_display', label: 'Type' },
+  { key: 'medium_display', label: 'Medium' },
   { key: 'email', label: 'Email' },
   { key: 'phone', label: 'Phone' },
   { key: 'website', label: 'Website' },

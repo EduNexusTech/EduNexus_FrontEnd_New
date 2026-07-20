@@ -199,7 +199,7 @@ const schoolAdminNav = [
       { id: 'school-profile', label: 'School Profile', path: '/school-profile', icon: FiBook },
       { id: 'school-settings', label: 'School Settings', path: '/school-settings', icon: FiSettings },
       { id: 'school-masters', label: 'School Masters', path: '/school-masters', icon: FiDatabase },
-      { id: 'staff', label: 'Staff', path: '/staff', icon: FiUserCheck },
+      { id: 'staff', label: 'HRMS', path: '/staff', icon: FiUserCheck },
       { id: 'communications', label: 'Communications', path: '/communications', icon: FiMail },
       { id: 'school-users', label: 'School Users', path: '/school-users', icon: FiUsers },
     ],

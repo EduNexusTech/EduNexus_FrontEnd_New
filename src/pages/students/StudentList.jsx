@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import ResourceListPage from '@/components/crud/ResourceListPage'
@@ -100,8 +101,8 @@ export default function StudentList() {
   return (
     <>
       <ResourceListPage
-        title="Students"
-        subtitle="Student profiles, academic records, and lifecycle management"
+        title="Student Roster"
+        subtitle="Profiles, enrollments, and lifecycle — SIS source of truth"
         queryKey="students"
         listFn={studentService.list}
         listParams={listParams}
@@ -118,6 +119,7 @@ export default function StudentList() {
         }
         extraActions={
           <>
+            <Link to="/students"><Button variant="outline">SIS Hub</Button></Link>
             <Button variant="upload" onClick={() => setBulkOpen(true)}>Bulk Import</Button>
             <Button
               variant="excel"
