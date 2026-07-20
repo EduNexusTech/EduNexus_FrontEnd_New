@@ -53,9 +53,15 @@ export function useAdmissions(options = {}) {
   const [page, setPage] = useState(1)
   const [selectedLead, setSelectedLead] = useState(null)
 
+  const yearFilterId = currentYear?.academicYearId || null
+
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['admission-leads', 'crm', currentYear?.label],
-    queryFn: () => admissionService.leads.list({ page_size: 500 }),
+    queryKey: ['admission-leads', 'crm', yearFilterId, currentYear?.label],
+    queryFn: () =>
+      admissionService.leads.list({
+        page_size: 500,
+        ...(yearFilterId ? { academic_year: yearFilterId } : {}),
+      }),
   })
 
   const list = unwrapList(data)
@@ -63,11 +69,13 @@ export function useAdmissions(options = {}) {
 
   const leads = useMemo(() => {
     const mapped = rawRows.map(apiLeadToUi).filter(Boolean)
-    if (!currentYear?.label) return mapped
-    return mapped.filter(
-      (l) => l.academicYear === '—' || l.academicYear === currentYear.label || !l.academicYear,
-    )
-  }, [rawRows, currentYear?.label])
+    if (!yearFilterId && !currentYear?.label) return mapped
+    return mapped.filter((l) => {
+      if (yearFilterId && l.academicYearId) return String(l.academicYearId) === String(yearFilterId)
+      if (!currentYear?.label) return true
+      return l.academicYear === '—' || l.academicYear === currentYear.label || !l.academicYear
+    })
+  }, [rawRows, yearFilterId, currentYear?.label])
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
@@ -95,7 +103,12 @@ export function useAdmissions(options = {}) {
   const resetFilters = useCallback(() => setFilters({ ...DEFAULT_FILTERS }), [])
 
   const createMutation = useMutation({
-    mutationFn: (values) => admissionService.leads.create(enquiryFormToApi(values)),
+    mutationFn: (values) =>
+      admissionService.leads.create(
+        enquiryFormToApi(values, {
+          academicYearId: currentYear?.academicYearId || values.academicYearId,
+        }),
+      ),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['admission-leads'] })
       const created = apiLeadToUi(res?.data || res)

@@ -71,6 +71,9 @@ export const API_ENDPOINTS = {
     STAFF_ROLES: '/api/v1/school-users/staff-roles/',
   },
   ADMISSIONS: {
+    SETUP: '/api/v1/admissions/setup/',
+    SETUP_DETAIL: (id) => `/api/v1/admissions/setup/${id}/`,
+    SETUP_EMAIL: '/api/v1/admissions/setup/email-settings/',
     LEADS: '/api/v1/admissions/leads/',
     LEAD_DETAIL: (id) => `/api/v1/admissions/leads/${id}/`,
     LEAD_CONVERT: (id) => `/api/v1/admissions/leads/${id}/convert/`,

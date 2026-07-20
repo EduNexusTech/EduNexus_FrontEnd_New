@@ -4,7 +4,7 @@ import { Drawer } from '@/components/ui/Modal'
 export function Sheet({ open, onClose, title, description, children, maxWidth = 'xl' }) {
   return (
     <Drawer open={open} onClose={onClose} title={title} maxWidth={maxWidth}>
-      {description ? <p className="mb-4 -mt-2 text-sm text-muted-foreground">{description}</p> : null}
+      {description ? <p className="page-description mb-4 -mt-2 text-sm font-bold text-black">{description}</p> : null}
       {children}
     </Drawer>
   )

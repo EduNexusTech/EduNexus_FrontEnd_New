@@ -76,10 +76,10 @@
   --clay-sidebar: rgba(255, 255, 255, 0.78);
   --clay-sidebar-mid: rgba(248, 250, 252, 0.85);
   --clay-sidebar-deep: rgba(241, 245, 249, 0.9);
-  --clay-primary: #0f172a;
-  --clay-primary-soft: #475569;
+  --clay-primary: #000000;
+  --clay-primary-soft: #000000;
   --clay-text-bright: #ffffff;
-  --clay-text-sharp: #0f172a;
+  --clay-text-sharp: #000000;
   --clay-accent: #3b82f6;
   --clay-accent-bright: #60a5fa;
   --clay-teal: #2563eb;
@@ -623,6 +623,18 @@
   min-width: 0;
   width: 100%;
   max-width: 100%;
+  color: #000000;
+}
+
+.lms-page h1,
+.lms-page h2,
+.lms-page h3,
+.lms-page h4,
+.lms-page .page-title,
+.lms-page .page-description,
+.lms-page label {
+  color: #000000 !important;
+  font-weight: 700;
 }
 
 .clay-scroll-hidden::-webkit-scrollbar {
@@ -636,8 +648,8 @@
 
 /* Forms — frosted glass */
 .lms-field label {
-  color: var(--clay-text-sharp);
-  font-weight: 600;
+  color: #000000;
+  font-weight: 700;
   letter-spacing: 0.01em;
 }
 

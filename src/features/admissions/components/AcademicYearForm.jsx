@@ -45,10 +45,10 @@ export function AcademicYearForm({ open, onClose, onSubmit, initial }) {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.label.trim() || !form.startDate || !form.endDate) return
-    onSubmit(form)
+    await onSubmit(form)
     onClose()
   }
 
