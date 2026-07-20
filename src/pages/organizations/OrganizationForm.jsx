@@ -38,28 +38,61 @@ const LOGO_MAX_BYTES = 2 * 1024 * 1024
 const LOGO_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif'
 
 const STEPS = [
-  { id: 'identity', label: 'Identity', icon: FiHome, description: 'Name, code, and logo' },
+  { id: 'identity', label: 'Identity', icon: FiHome, description: 'Name, code, type, and logo' },
   { id: 'contact', label: 'Contact', icon: FiMail, description: 'How to reach the organization' },
-  { id: 'location', label: 'Location', icon: FiMapPin, description: 'Physical address details' },
+  { id: 'location', label: 'Location', icon: FiMapPin, description: 'Address and locale details' },
   { id: 'review', label: 'Review', icon: FiCheck, description: 'Confirm and create' },
 ]
 
 const STEP_FIELDS = {
-  identity: ['organization_name', 'organization_code'],
-  contact: ['email', 'phone', 'website'],
-  location: ['address', 'city', 'state', 'country'],
+  identity: ['organization_name', 'organization_code', 'short_name', 'legal_name', 'org_type'],
+  contact: ['email', 'phone', 'website', 'support_email', 'billing_email'],
+  location: ['address', 'address_line2', 'city', 'district', 'state', 'country', 'postal_code', 'timezone_name', 'currency', 'language'],
 }
+
+const ORG_TYPE_OPTIONS = [
+  { value: 'single_school', label: 'Single School' },
+  { value: 'school_group', label: 'School Group' },
+  { value: 'private_school_group', label: 'Private School Group' },
+  { value: 'public_institution', label: 'Public Institution' },
+  { value: 'trust', label: 'Trust' },
+  { value: 'ngo', label: 'NGO' },
+  { value: 'university_group', label: 'University Group' },
+  { value: 'training_institute', label: 'Training Institute' },
+  { value: 'coaching_center', label: 'Coaching Center' },
+  { value: 'international_schools', label: 'International Schools' },
+  { value: 'corporate_schools', label: 'Corporate Schools' },
+  { value: 'district', label: 'District' },
+]
 
 const DEFAULT_VALUES = {
   organization_name: '',
   organization_code: '',
+  short_name: '',
+  legal_name: '',
+  org_type: 'single_school',
   email: '',
   phone: '',
   website: '',
+  support_email: '',
+  support_phone: '',
+  billing_email: '',
+  billing_phone: '',
   address: '',
+  address_line2: '',
   city: '',
+  district: '',
   state: '',
   country: '',
+  postal_code: '',
+  registration_number: '',
+  gst_number: '',
+  pan_number: '',
+  tax_number: '',
+  timezone_name: 'Asia/Kolkata',
+  currency: 'INR',
+  language: 'en',
+  academic_calendar: '',
 }
 
 function buildOrganizationPayload(values, logoFile) {
@@ -543,13 +576,31 @@ export default function OrganizationForm() {
       reset({
         organization_name: item.organization_name || '',
         organization_code: item.organization_code || '',
+        short_name: item.short_name || '',
+        legal_name: item.legal_name || '',
+        org_type: item.org_type || 'single_school',
         email: item.email || '',
         phone: item.phone || '',
         website: item.website || '',
+        support_email: item.support_email || '',
+        support_phone: item.support_phone || '',
+        billing_email: item.billing_email || '',
+        billing_phone: item.billing_phone || '',
         address: item.address || '',
+        address_line2: item.address_line2 || '',
         city: item.city || '',
+        district: item.district || '',
         state: item.state || '',
         country: item.country || '',
+        postal_code: item.postal_code || '',
+        registration_number: item.registration_number || '',
+        gst_number: item.gst_number || '',
+        pan_number: item.pan_number || '',
+        tax_number: item.tax_number || '',
+        timezone_name: item.timezone_name || 'Asia/Kolkata',
+        currency: item.currency || 'INR',
+        language: item.language || 'en',
+        academic_calendar: item.academic_calendar || '',
       })
       setCodeTouched(true)
       setExistingLogoUrl(logoUrl)
@@ -738,6 +789,25 @@ export default function OrganizationForm() {
             error={errors.organization_code?.message}
             {...register('organization_code', fieldRules.organization_code)}
           />
+          <Input label="Short Name" {...register('short_name')} />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text">Organization Type</label>
+            <select
+              className="w-full rounded-xl border border-border bg-white px-3 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              {...register('org_type')}
+            >
+              {ORG_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <Input label="Legal Name" {...register('legal_name')} />
+          </div>
+          <Input label="GST Number" {...register('gst_number')} />
+          <Input label="PAN Number" {...register('pan_number')} />
+          <Input label="Registration Number" {...register('registration_number')} />
+          <Input label="Tax Number" {...register('tax_number')} />
         </div>
         <div className="mt-5">
           <LogoUpload
@@ -773,22 +843,35 @@ export default function OrganizationForm() {
               {...register('website')}
             />
           </div>
+          <Input label="Support Email" type="email" {...register('support_email')} />
+          <Input label="Support Phone" {...register('support_phone')} />
+          <Input label="Billing Email" type="email" {...register('billing_email')} />
+          <Input label="Billing Phone" {...register('billing_phone')} />
         </div>
       </SectionCard>
 
-      <SectionCard title="Location" subtitle="Where the organization is based" icon={FiMapPin}>
+      <SectionCard title="Location & Locale" subtitle="Where the organization is based" icon={FiMapPin}>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Textarea
-              label="Street Address"
+              label="Primary Address"
               placeholder="Building, street, area"
               error={errors.address?.message}
               {...register('address')}
             />
           </div>
+          <div className="sm:col-span-2">
+            <Textarea label="Secondary Address" {...register('address_line2')} />
+          </div>
           <Input label="City" placeholder="Mumbai" error={errors.city?.message} {...register('city')} />
+          <Input label="District" {...register('district')} />
           <Input label="State" placeholder="Maharashtra" error={errors.state?.message} {...register('state')} />
           <Input label="Country" placeholder="India" error={errors.country?.message} {...register('country')} />
+          <Input label="Postal Code" {...register('postal_code')} />
+          <Input label="Timezone" {...register('timezone_name')} />
+          <Input label="Currency" {...register('currency')} />
+          <Input label="Language" {...register('language')} />
+          <Input label="Academic Calendar" {...register('academic_calendar')} />
         </div>
       </SectionCard>
 
@@ -868,11 +951,43 @@ export default function OrganizationForm() {
                   required
                   hint="Auto-generated from name. Lowercase, underscores only."
                   error={errors.organization_code?.message}
+                  disabled={isEdit}
                   {...register('organization_code', {
                     ...fieldRules.organization_code,
                     onChange: () => setCodeTouched(true),
                   })}
                 />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Input
+                    label="Short Name"
+                    placeholder="Greenwood"
+                    error={errors.short_name?.message}
+                    {...register('short_name')}
+                  />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium text-text">Organization Type</label>
+                    <select
+                      className="w-full rounded-xl border border-border bg-white px-3 py-2.5 text-sm text-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      {...register('org_type')}
+                    >
+                      {ORG_TYPE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <Input
+                  label="Legal Name"
+                  placeholder="Greenwood Education Trust"
+                  error={errors.legal_name?.message}
+                  {...register('legal_name')}
+                />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Input label="GST Number" placeholder="29AAAAA0000A1Z5" {...register('gst_number')} />
+                  <Input label="PAN Number" placeholder="AAAAA0000A" {...register('pan_number')} />
+                  <Input label="Registration Number" {...register('registration_number')} />
+                  <Input label="Tax Number" {...register('tax_number')} />
+                </div>
                 <LogoUpload
                   previewUrl={logoPreview}
                   onSelect={handleLogoSelect}
@@ -911,6 +1026,10 @@ export default function OrganizationForm() {
                     error={errors.website?.message}
                     {...register('website')}
                   />
+                  <Input label="Support Email" type="email" {...register('support_email')} />
+                  <Input label="Support Phone" {...register('support_phone')} />
+                  <Input label="Billing Email" type="email" {...register('billing_email')} />
+                  <Input label="Billing Phone" {...register('billing_phone')} />
                 </div>
               </div>
             )}
@@ -918,21 +1037,32 @@ export default function OrganizationForm() {
             {step === 'location' && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-semibold text-text">Location</h2>
+                  <h2 className="text-xl font-semibold text-text">Location & locale</h2>
                   <p className="mt-1 text-sm text-muted">
-                    Optional address information for reports and records.
+                    Address, timezone, currency, and language settings.
                   </p>
                 </div>
                 <Textarea
-                  label="Street Address"
+                  label="Primary Address"
                   placeholder="Building, street, area"
                   error={errors.address?.message}
                   {...register('address')}
                 />
+                <Textarea
+                  label="Secondary Address"
+                  placeholder="Optional secondary address"
+                  {...register('address_line2')}
+                />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Input label="City" placeholder="Mumbai" error={errors.city?.message} {...register('city')} />
+                  <Input label="District" placeholder="Mumbai Suburban" {...register('district')} />
                   <Input label="State" placeholder="Maharashtra" error={errors.state?.message} {...register('state')} />
                   <Input label="Country" placeholder="India" error={errors.country?.message} {...register('country')} />
+                  <Input label="Postal Code" placeholder="400001" {...register('postal_code')} />
+                  <Input label="Timezone" placeholder="Asia/Kolkata" {...register('timezone_name')} />
+                  <Input label="Currency" placeholder="INR" {...register('currency')} />
+                  <Input label="Language" placeholder="en" {...register('language')} />
+                  <Input label="Academic Calendar" placeholder="April–March" {...register('academic_calendar')} />
                 </div>
               </div>
             )}
@@ -948,6 +1078,9 @@ export default function OrganizationForm() {
                 <dl className="rounded-xl border border-border bg-slate-50/50 px-4">
                   <ReviewRow label="Name" value={values.organization_name} />
                   <ReviewRow label="Code" value={values.organization_code} />
+                  <ReviewRow label="Type" value={ORG_TYPE_OPTIONS.find((o) => o.value === values.org_type)?.label || values.org_type} />
+                  <ReviewRow label="Legal Name" value={values.legal_name} />
+                  <ReviewRow label="GST" value={values.gst_number} />
                   <ReviewRow label="Logo" value={logoFile ? logoFile.name : logoPreview ? 'Uploaded' : '—'} />
                   <ReviewRow label="Email" value={values.email} />
                   <ReviewRow label="Phone" value={values.phone} />
@@ -955,22 +1088,23 @@ export default function OrganizationForm() {
                   <ReviewRow label="Address" value={values.address} />
                   <ReviewRow
                     label="Location"
-                    value={[values.city, values.state, values.country].filter(Boolean).join(', ')}
+                    value={[values.city, values.district, values.state, values.country].filter(Boolean).join(', ')}
                   />
+                  <ReviewRow label="Timezone" value={values.timezone_name} />
+                  <ReviewRow label="Currency" value={values.currency} />
                 </dl>
-
                 <SchoolMatchToggle
                   enabled={createMatchingSchool}
-                  onToggle={() => setCreateMatchingSchool((prev) => !prev)}
+                  onToggle={() => setCreateMatchingSchool((v) => !v)}
                   values={values}
                   isEdit={false}
                   hasExistingSchool={false}
                 />
               </div>
             )}
-        </motion.div>
-      </AnimatePresence>
-    </Card>
+          </motion.div>
+        </AnimatePresence>
+      </Card>
   )
 
   return (

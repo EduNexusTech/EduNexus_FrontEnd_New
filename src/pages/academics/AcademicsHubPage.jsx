@@ -15,13 +15,28 @@ const groupIcons = {
 export default function AcademicsHubPage() {
   return (
     <HubPageShell>
-      <Breadcrumb items={[{ label: 'Academic Structure' }]} />
+      <Breadcrumb items={[{ label: 'Academic Foundation' }]} />
       <PageHeader
-        title="Academic Structure"
-        subtitle="Manage academic years, curriculum, class sections, calendar, and timetable"
+        title="Academic Foundation"
+        subtitle="Enterprise academic years, curriculum, class structure, calendar, and assessment foundations"
+        actions={
+          <Link to="/mdm">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-slate-50">
+              <FiLayers className="h-4 w-4" /> Master Data (MDM)
+            </span>
+          </Link>
+        }
       />
 
       <div className="space-y-8">
+        <div>
+          <HubSectionTitle icon={FiLayers} title="Master Data Management" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <HubTileCard to="/mdm" icon={FiLayers} label="MDM Catalog & Adopt" />
+            <HubTileCard to="/masters/boards" icon={FiBook} label="Org Boards" />
+            <HubTileCard to="/masters/subjects" icon={FiBook} label="Org Subjects" />
+          </div>
+        </div>
         {ACADEMIC_HUB_GROUPS.map((group) => {
           const Icon = groupIcons[group.title] || FiGrid
           return (

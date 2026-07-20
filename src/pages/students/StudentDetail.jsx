@@ -164,14 +164,40 @@ export default function StudentDetail() {
             <Field label="Username" value={student.username} />
             <Field label="Email" value={student.email} />
             <Field label="Mobile" value={student.mobile_number} />
+            <Field label="Student Code" value={student.student_code} />
+            <Field label="RFID" value={student.rfid_card_number} />
             <Field label="Date of Birth" value={student.date_of_birth} />
+            <Field label="Age" value={student.age} />
             <Field label="Gender" value={student.gender} />
             <Field label="Blood Group" value={student.blood_group} />
+            <Field label="EMIS" value={student.emis_number} />
+            <Field label="Aadhaar" value={student.aadhaar_number} />
             <Field label="Address" value={student.address} />
             <Field label="City" value={student.city} />
             <Field label="Previous School" value={student.previous_school} />
+            <Field label="From Admission" value={student.originated_from_admission ? 'Yes' : 'No'} />
             <Field label="Emergency Contact" value={`${student.emergency_contact_name || ''} ${student.emergency_contact_phone || ''}`} />
           </dl>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => studentService.generateRfid(id).then(() => { invalidate(); toast.success('RFID generated') }).catch((e) => toast.error(getErrorMessage(e)))}
+            >
+              Generate RFID
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => studentService.graduate(id, {}).then(() => { invalidate(); toast.success('Graduated') }).catch((e) => toast.error(getErrorMessage(e)))}
+            >
+              Graduate
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => studentService.alumni(id, { passing_year: String(new Date().getFullYear()) }).then(() => { invalidate(); toast.success('Alumni converted') }).catch((e) => toast.error(getErrorMessage(e)))}
+            >
+              Convert to Alumni
+            </Button>
+          </div>
         </Card>
       )}
 

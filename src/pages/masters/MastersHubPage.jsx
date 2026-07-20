@@ -44,7 +44,17 @@ export default function MastersHubPage() {
   return (
     <HubPageShell>
       <Breadcrumb items={[{ label: 'Masters' }]} />
-      <PageHeader title="Master Data" subtitle="Manage reference data for your organization" />
+      <PageHeader
+        title="Master Data"
+        subtitle="Organization reference data — adopt platform boards via MDM, then manage local catalogs"
+      />
+
+      <div className="mb-8">
+        <HubSectionTitle title="MDM" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <HubTileCard to="/mdm" icon={FiLayers} label="Platform Catalog & Adopt" />
+        </div>
+      </div>
 
       <div className="space-y-8">
         {masterGroups.map((group) => (

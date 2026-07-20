@@ -26,15 +26,20 @@ import SchoolUserDetail from '@/pages/school-users/SchoolUserDetail'
 import StudentList from '@/pages/students/StudentList'
 import StudentForm from '@/pages/students/StudentForm'
 import StudentDetail from '@/pages/students/StudentDetail'
+import StudentsHubPage from '@/pages/students/StudentsHubPage'
 import TeacherList from '@/pages/teachers/TeacherList'
 import TeacherForm from '@/pages/teachers/TeacherForm'
 import TeacherDetail from '@/pages/teachers/TeacherDetail'
+import TeachersHubPage from '@/pages/teachers/TeachersHubPage'
 import ParentList from '@/pages/parents/ParentList'
 import ParentForm from '@/pages/parents/ParentForm'
 import ParentDetail from '@/pages/parents/ParentDetail'
+import ParentsHubPage from '@/pages/parents/ParentsHubPage'
+import HouseholdsPage from '@/pages/parents/HouseholdsPage'
 import StaffList from '@/pages/staff/StaffList'
 import StaffForm from '@/pages/staff/StaffForm'
 import StaffDetail from '@/pages/staff/StaffDetail'
+import StaffHubPage from '@/pages/staff/StaffHubPage'
 import CommunicationsHubPage from '@/pages/communications/CommunicationsHubPage'
 import CommunicationTemplateList from '@/pages/communications/CommunicationTemplateList'
 import CommunicationTemplateForm from '@/pages/communications/CommunicationTemplateForm'
@@ -58,18 +63,28 @@ import {
   AdmissionsApplicationsRedirect,
 } from '@/pages/admissions/AdmissionsLmsPages'
 import {
-  AttendancePage,
-  TimetablePage,
   HomeworkPage,
   AnnouncementsPage,
   ExaminationsPage,
-  FeesPage,
   TransportPage,
   LibraryPage,
   ReportsPage,
   LmsCoursesPage,
   LmsAssignmentsPage,
 } from '@/pages/school-ops/SchoolOpsPages'
+import AttendanceHubPage, {
+  AttendanceMarkPage,
+  AttendanceReportsPage,
+} from '@/pages/attendance/AttendanceHubPage'
+import TimetableHubPage, {
+  TimetableBuilderPage,
+  TimetableSubstitutionsPage,
+} from '@/pages/timetable/TimetableHubPage'
+import FeesHubPage, {
+  FeesCollectPage,
+  FeesAssignPage,
+  FeesDefaultersPage,
+} from '@/pages/fees/FeesHubPage'
 
 import UserList from '@/pages/users/UserList'
 import UserForm from '@/pages/users/UserForm'
@@ -102,6 +117,7 @@ import SchoolMasterForm from '@/pages/school-masters/SchoolMasterForm'
 
 import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
 import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
+import MdmHubPage from '@/pages/mdm/MdmHubPage'
 
 import AuditLogList from '@/pages/audit-logs/AuditLogList'
 import AuditLogDetail from '@/pages/audit-logs/AuditLogDetail'
@@ -162,22 +178,27 @@ export default function AppRoutes() {
           <Route path="/school-settings" element={<SchoolSettingsPage />} />
           <Route path="/school-settings/:section" element={<SchoolSettingsPage />} />
 
-          <Route path="/students" element={<StudentList />} />
+          <Route path="/students" element={<StudentsHubPage />} />
+          <Route path="/students/roster" element={<StudentList />} />
           <Route path="/students/new" element={<StudentForm />} />
           <Route path="/students/:id" element={<StudentDetail />} />
           <Route path="/students/:id/edit" element={<StudentForm />} />
 
-          <Route path="/teachers" element={<TeacherList />} />
+          <Route path="/teachers" element={<TeachersHubPage />} />
+          <Route path="/teachers/roster" element={<TeacherList />} />
           <Route path="/teachers/new" element={<TeacherForm />} />
           <Route path="/teachers/:id" element={<TeacherDetail />} />
           <Route path="/teachers/:id/edit" element={<TeacherForm />} />
 
-          <Route path="/parents" element={<ParentList />} />
+          <Route path="/parents" element={<ParentsHubPage />} />
+          <Route path="/parents/roster" element={<ParentList />} />
+          <Route path="/parents/households" element={<HouseholdsPage />} />
           <Route path="/parents/new" element={<ParentForm />} />
           <Route path="/parents/:id" element={<ParentDetail />} />
           <Route path="/parents/:id/edit" element={<ParentForm />} />
 
-          <Route path="/staff" element={<StaffList />} />
+          <Route path="/staff" element={<StaffHubPage />} />
+          <Route path="/staff/roster" element={<StaffList />} />
           <Route path="/staff/new" element={<StaffForm />} />
           <Route path="/staff/:id" element={<StaffDetail />} />
           <Route path="/staff/:id/edit" element={<StaffForm />} />
@@ -210,12 +231,19 @@ export default function AppRoutes() {
           <Route path="/lms" element={<Navigate to="/lms/courses" replace />} />
           <Route path="/lms/courses" element={<LmsCoursesPage />} />
           <Route path="/lms/assignments" element={<LmsAssignmentsPage />} />
-          <Route path="/attendance" element={<AttendancePage />} />
-          <Route path="/timetable" element={<TimetablePage />} />
+          <Route path="/attendance" element={<AttendanceHubPage />} />
+          <Route path="/attendance/mark" element={<AttendanceMarkPage />} />
+          <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
+          <Route path="/timetable" element={<TimetableHubPage />} />
+          <Route path="/timetable/builder" element={<TimetableBuilderPage />} />
+          <Route path="/timetable/substitutions" element={<TimetableSubstitutionsPage />} />
           <Route path="/homework" element={<HomeworkPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/examinations" element={<ExaminationsPage />} />
-          <Route path="/fees" element={<FeesPage />} />
+          <Route path="/fees" element={<FeesHubPage />} />
+          <Route path="/fees/collect" element={<FeesCollectPage />} />
+          <Route path="/fees/assign" element={<FeesAssignPage />} />
+          <Route path="/fees/defaulters" element={<FeesDefaultersPage />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
@@ -270,6 +298,8 @@ export default function AppRoutes() {
           <Route path="/academics/:entityKey" element={<AcademicList />} />
           <Route path="/academics/:entityKey/new" element={<AcademicForm />} />
           <Route path="/academics/:entityKey/:id/edit" element={<AcademicForm />} />
+
+          <Route path="/mdm" element={<MdmHubPage />} />
 
           <Route path="/audit-logs" element={<AuditLogList />} />
           <Route path="/audit-logs/:id" element={<AuditLogDetail />} />

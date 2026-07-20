@@ -18,10 +18,9 @@ const TABS = [
   { key: 'qualifications', label: 'Qualifications' },
   { key: 'experience', label: 'Experience' },
   { key: 'subjects', label: 'Subjects' },
+  { key: 'assignments', label: 'Assignments' },
+  { key: 'workload', label: 'Workload' },
   { key: 'classTeacher', label: 'Class Teacher' },
-  { key: 'attendance', label: 'Attendance' },
-  { key: 'leave', label: 'Leave' },
-  { key: 'payroll', label: 'Payroll' },
   { key: 'documents', label: 'Documents' },
   { key: 'certificates', label: 'Certificates' },
   { key: 'credentials', label: 'Credentials' },
@@ -29,7 +28,7 @@ const TABS = [
   { key: 'lessonPlans', label: 'Lesson Plans' },
   { key: 'homework', label: 'Homework' },
   { key: 'onlineClasses', label: 'Online Classes' },
-  { key: 'reviews', label: 'Performance' },
+  { key: 'reviews', label: 'Performance Foundation' },
 ]
 
 function Field({ label, value }) {
@@ -49,6 +48,15 @@ export default function TeacherDetail() {
   const [qualForm, setQualForm] = useState({ degree: '', institution: '', year_completed: '' })
   const [expForm, setExpForm] = useState({ organization_name: '', role: '', start_date: '' })
   const [subjectForm, setSubjectForm] = useState({ academic_year: '', subject: '', class_section: '' })
+  const [assignForm, setAssignForm] = useState({
+    assignment_type: 'subject',
+    academic_year_id: '',
+    subject_id: '',
+    class_section_id: '',
+    periods_per_week: 5,
+    title: '',
+  })
+  const [workloadYear, setWorkloadYear] = useState('')
   const [classTeacherForm, setClassTeacherForm] = useState({ academic_year_id: '', class_section_id: '' })
   const [attendanceForm, setAttendanceForm] = useState({ date: '', status: 'present' })
   const [leaveForm, setLeaveForm] = useState({ leave_type: 'casual', start_date: '', end_date: '', reason: '' })
@@ -64,6 +72,12 @@ export default function TeacherDetail() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['teachers', id],
     queryFn: () => teacherService.get(id),
+  })
+
+  const workloadQuery = useQuery({
+    queryKey: ['teachers', id, 'workload', workloadYear],
+    queryFn: () => teacherService.workload(id, { academic_year: workloadYear }),
+    enabled: Boolean(workloadYear),
   })
 
   const invalidate = () => {
@@ -84,6 +98,30 @@ export default function TeacherDetail() {
   const subjectMut = useMutation({
     mutationFn: () => teacherService.assignSubject(id, subjectForm),
     onSuccess: () => { invalidate(); toast.success('Subject assigned') },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+  const assignMut = useMutation({
+    mutationFn: () => teacherService.academicAssign(id, {
+      assignment_type: assignForm.assignment_type,
+      academic_year_id: assignForm.academic_year_id,
+      subject_id: assignForm.subject_id || undefined,
+      class_section_id: assignForm.class_section_id || undefined,
+      periods_per_week: Number(assignForm.periods_per_week) || 0,
+      remarks: assignForm.title || '',
+    }),
+    onSuccess: () => {
+      invalidate()
+      queryClient.invalidateQueries({ queryKey: ['teachers', id, 'workload'] })
+      toast.success('Academic assignment added')
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+  const workloadMut = useMutation({
+    mutationFn: () => teacherService.recalculateWorkload(id, { academic_year_id: workloadYear }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teachers', id, 'workload'] })
+      toast.success('Workload recalculated')
+    },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
   const classTeacherMut = useMutation({
@@ -168,7 +206,7 @@ export default function TeacherDetail() {
       ]} />
       <PageHeader
         title={teacher.full_name}
-        subtitle={[teacher.employee_id, teacher.designation, teacher.department].filter(Boolean).join(' · ')}
+        subtitle={[teacher.teacher_code || teacher.employee_id, teacher.academic_role, teacher.designation, teacher.department].filter(Boolean).join(' · ')}
         actions={
           <>
             <Link to={`/teachers/${id}/edit`}><Button variant="edit">Edit</Button></Link>
@@ -202,17 +240,83 @@ export default function TeacherDetail() {
             </div>
           </div>
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Employee ID" value={teacher.employee_id} />
+            <Field label="Teacher Code" value={teacher.teacher_code} />
+            <Field label="Academic Role" value={teacher.academic_role_display || teacher.academic_role} />
             <Field label="Username" value={teacher.username} />
             <Field label="Email" value={teacher.email} />
             <Field label="Mobile" value={teacher.mobile_number} />
+            <Field label="Specialization" value={teacher.specialization} />
+            <Field label="Qualification" value={teacher.qualification_summary} />
+            <Field label="Experience (Years)" value={teacher.total_experience_years} />
             <Field label="Joining Date" value={teacher.joining_date} />
+            <Field label="Confirmation Date" value={teacher.confirmation_date} />
             <Field label="Date of Birth" value={teacher.date_of_birth} />
             <Field label="Gender" value={teacher.gender} />
+            <Field label="Blood Group" value={teacher.blood_group} />
+            <Field label="Nationality" value={teacher.nationality} />
+            <Field label="Languages" value={Array.isArray(teacher.languages_known) ? teacher.languages_known.join(', ') : teacher.languages_known} />
             <Field label="Address" value={teacher.address} />
             <Field label="City" value={teacher.city} />
+            <Field label="State" value={teacher.state} />
+            <Field label="Portal Access" value={teacher.portal_access ? 'Yes' : 'No'} />
+            <Field label="Mobile App" value={teacher.mobile_app_access ? 'Yes' : 'No'} />
             <Field label="Bio" value={teacher.bio} />
             <Field label="Emergency Contact" value={`${teacher.emergency_contact_name || ''} ${teacher.emergency_contact_phone || ''}`} />
           </dl>
+        </Card>
+      )}
+
+      {tab === 'assignments' && (
+        <Card>
+          <p className="mb-3 text-xs text-muted">Unified academic duties (subject, mentor, exam duty, coordinators, etc.).</p>
+          <div className="mb-4 grid gap-2 sm:grid-cols-2 max-w-3xl">
+            <Input placeholder="Assignment type (e.g. mentor)" value={assignForm.assignment_type} onChange={(e) => setAssignForm((p) => ({ ...p, assignment_type: e.target.value }))} />
+            <Input placeholder="Academic Year UUID" value={assignForm.academic_year_id} onChange={(e) => setAssignForm((p) => ({ ...p, academic_year_id: e.target.value }))} />
+            <Input placeholder="Subject UUID (optional)" value={assignForm.subject_id} onChange={(e) => setAssignForm((p) => ({ ...p, subject_id: e.target.value }))} />
+            <Input placeholder="Class Section UUID (optional)" value={assignForm.class_section_id} onChange={(e) => setAssignForm((p) => ({ ...p, class_section_id: e.target.value }))} />
+            <Input placeholder="Periods / week" type="number" value={assignForm.periods_per_week} onChange={(e) => setAssignForm((p) => ({ ...p, periods_per_week: e.target.value }))} />
+            <Input placeholder="Title / notes" value={assignForm.title} onChange={(e) => setAssignForm((p) => ({ ...p, title: e.target.value }))} />
+          </div>
+          <Button loading={assignMut.isPending} onClick={() => assignMut.mutate()}>Add Academic Assignment</Button>
+          <ul className="mt-4 space-y-2 text-sm">
+            {(teacher.academic_assignments || []).map((a) => (
+              <li key={a.assignment_id || a.id} className="rounded-lg border px-3 py-2">
+                {a.assignment_type} — {a.subject_name || a.title || a.class_section_name || '—'}
+                {a.periods_per_week ? ` · ${a.periods_per_week} periods` : ''}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {tab === 'workload' && (
+        <Card>
+          <div className="mb-4 flex flex-wrap items-end gap-2">
+            <Input
+              label="Academic Year UUID"
+              className="min-w-[280px]"
+              value={workloadYear}
+              onChange={(e) => setWorkloadYear(e.target.value)}
+            />
+            <Button loading={workloadMut.isPending} onClick={() => workloadMut.mutate()}>
+              Recalculate Workload
+            </Button>
+          </div>
+          {workloadQuery.data ? (
+            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Field label="Periods / Week" value={unwrapData(workloadQuery.data)?.periods_per_week} />
+              <Field label="Subjects" value={unwrapData(workloadQuery.data)?.subject_count} />
+              <Field label="Sections" value={unwrapData(workloadQuery.data)?.section_count} />
+              <Field label="Teaching Hours" value={unwrapData(workloadQuery.data)?.teaching_hours} />
+              <Field label="Assessment Load" value={unwrapData(workloadQuery.data)?.assessment_load} />
+              <Field label="Mentoring Load" value={unwrapData(workloadQuery.data)?.mentoring_load} />
+              <Field label="Extra Activities" value={unwrapData(workloadQuery.data)?.extra_activities} />
+              <Field label="Class Strength" value={unwrapData(workloadQuery.data)?.class_strength} />
+            </dl>
+          ) : (
+            <p className="text-sm text-muted">Enter academic year and recalculate to view workload snapshot.</p>
+          )}
         </Card>
       )}
 

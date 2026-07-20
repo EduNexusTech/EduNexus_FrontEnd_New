@@ -31,18 +31,19 @@ export function AttendancePage() {
 }
 
 export function TimetablePage() {
+  // Legacy placeholder — use TimetableHubPage at /timetable
   return (
     <ModulePage
       title="Timetable"
-      description="Class schedules, periods, and teacher allocations"
+      description="Redirect: open /timetable for the Enterprise Scheduling Engine"
       searchPlaceholder="Search by class or teacher..."
       stats={[
         { title: 'Classes Scheduled', value: '—', icon: FiCalendar },
         { title: 'Periods Today', value: '—', icon: FiLayers },
         { title: 'Teachers Assigned', value: '—', icon: FiUsers },
       ]}
-      emptyTitle="Timetable module ready"
-      emptyDescription="Build weekly class timetables using periods and class sections."
+      emptyTitle="Use /timetable"
+      emptyDescription="Enterprise Timetable & Scheduling Engine is live at /timetable."
     />
   )
 }
@@ -102,15 +103,15 @@ export function FeesPage() {
   return (
     <ModulePage
       title="Fees"
-      description="Fee structures, invoices, collections, and receipts"
+      description="Redirect: open /fees for the Enterprise Fee & Billing Engine"
       searchPlaceholder="Search invoices or students..."
       stats={[
         { title: 'Collected', value: '—', icon: FiCreditCard, color: 'success' },
         { title: 'Pending', value: '—', icon: FiClipboard, color: 'warning' },
         { title: 'Overdue', value: '—', icon: FiFileText, color: 'accent' },
       ]}
-      emptyTitle="Fees module ready"
-      emptyDescription="Configure fee structures and track payments for the academic year."
+      emptyTitle="Use /fees"
+      emptyDescription="Enterprise Fee Management & Billing Engine is live at /fees."
     />
   )
 }
