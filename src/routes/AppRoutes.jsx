@@ -63,14 +63,9 @@ import {
   AdmissionsApplicationsRedirect,
 } from '@/pages/admissions/AdmissionsLmsPages'
 import {
-  HomeworkPage,
   AnnouncementsPage,
-  ExaminationsPage,
   TransportPage,
   LibraryPage,
-  ReportsPage,
-  LmsCoursesPage,
-  LmsAssignmentsPage,
 } from '@/pages/school-ops/SchoolOpsPages'
 import AttendanceHubPage, {
   AttendanceMarkPage,
@@ -85,6 +80,22 @@ import FeesHubPage, {
   FeesAssignPage,
   FeesDefaultersPage,
 } from '@/pages/fees/FeesHubPage'
+import AssessmentsHubPage, {
+  AssessmentsMarksPage,
+  AssessmentsResultsPage,
+} from '@/pages/assessments/AssessmentsHubPage'
+import DocumentsHubPage, {
+  DocumentDesignerPage,
+  DocumentGeneratePage,
+  DocumentCertificatesPage,
+  DocumentVerifyPage,
+} from '@/pages/documents/DocumentsHubPage'
+import LmsHubPage, {
+  LmsCoursesPage,
+  LmsAssignmentsPage,
+  LmsLessonPlansPage,
+  LmsQuizzesPage,
+} from '@/pages/lms/LmsHubPage'
 
 import UserList from '@/pages/users/UserList'
 import UserForm from '@/pages/users/UserForm'
@@ -228,25 +239,34 @@ export default function AppRoutes() {
           <Route path="/admissions/applications/:id" element={<AdmissionApplicationDetail />} />
           <Route path="/admissions/applications/:id/edit" element={<AdmissionApplicationForm />} />
 
-          <Route path="/lms" element={<Navigate to="/lms/courses" replace />} />
+          <Route path="/lms" element={<LmsHubPage />} />
           <Route path="/lms/courses" element={<LmsCoursesPage />} />
           <Route path="/lms/assignments" element={<LmsAssignmentsPage />} />
+          <Route path="/lms/lesson-plans" element={<LmsLessonPlansPage />} />
+          <Route path="/lms/quizzes" element={<LmsQuizzesPage />} />
           <Route path="/attendance" element={<AttendanceHubPage />} />
           <Route path="/attendance/mark" element={<AttendanceMarkPage />} />
           <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
           <Route path="/timetable" element={<TimetableHubPage />} />
           <Route path="/timetable/builder" element={<TimetableBuilderPage />} />
           <Route path="/timetable/substitutions" element={<TimetableSubstitutionsPage />} />
-          <Route path="/homework" element={<HomeworkPage />} />
+          <Route path="/homework" element={<Navigate to="/lms/assignments?kind=homework" replace />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
-          <Route path="/examinations" element={<ExaminationsPage />} />
+          <Route path="/examinations" element={<AssessmentsHubPage />} />
+          <Route path="/examinations/marks" element={<AssessmentsMarksPage />} />
+          <Route path="/examinations/results" element={<AssessmentsResultsPage />} />
+          <Route path="/documents" element={<DocumentsHubPage />} />
+          <Route path="/documents/designer" element={<DocumentDesignerPage />} />
+          <Route path="/documents/generate" element={<DocumentGeneratePage />} />
+          <Route path="/documents/certificates" element={<DocumentCertificatesPage />} />
+          <Route path="/documents/verify" element={<DocumentVerifyPage />} />
           <Route path="/fees" element={<FeesHubPage />} />
           <Route path="/fees/collect" element={<FeesCollectPage />} />
           <Route path="/fees/assign" element={<FeesAssignPage />} />
           <Route path="/fees/defaulters" element={<FeesDefaultersPage />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/library" element={<LibraryPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports" element={<DocumentsHubPage />} />
 
           <Route path="/school-users" element={<SchoolUserList />} />
           <Route path="/school-users/new" element={<SchoolUserForm />} />
