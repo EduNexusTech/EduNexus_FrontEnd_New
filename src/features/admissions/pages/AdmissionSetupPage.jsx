@@ -37,11 +37,11 @@ export default function AdmissionSetupPage() {
     setFormOpen(true)
   }
 
-  const handleSubmit = (input) => {
+  const handleSubmit = async (input) => {
     if (editingYear) {
-      updateAcademicYear(editingYear.id, input)
+      await updateAcademicYear(editingYear.id, input)
     } else {
-      addAcademicYear(input)
+      await addAcademicYear(input)
     }
   }
 

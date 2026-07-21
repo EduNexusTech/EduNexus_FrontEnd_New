@@ -23,7 +23,7 @@ export function PasswordInput({
   return (
     <div className={cn(fieldWrap, containerClassName)}>
       {label && (
-        <label className="block text-sm font-medium">
+        <label className="block text-sm font-bold text-black">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
@@ -39,15 +39,15 @@ export function PasswordInput({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition hover:bg-[var(--clay-mint-light,#f4f8f6)] hover:text-text"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-black transition hover:bg-[var(--clay-mint-light,#f4f8f6)]"
           title={visible ? 'Hide password' : 'Show password'}
           tabIndex={-1}
         >
           {visible ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
         </button>
       </div>
-      {error && <p className="text-xs text-danger">{error}</p>}
-      {hint && !error && <p className="text-xs text-muted">{hint}</p>}
+      {error && <p className="text-xs font-bold text-danger">{error}</p>}
+      {hint && !error && <p className="text-xs font-bold text-black">{hint}</p>}
     </div>
   )
 }
@@ -64,14 +64,14 @@ export default function Input({
   return (
     <div className={cn(fieldWrap, containerClassName)}>
       {label && (
-        <label className="block text-sm font-medium">
+        <label className="block text-sm font-bold text-black">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       <input className={cn(inputClass, error && errorClass, className)} {...props} />
-      {error && <p className="text-xs text-danger">{error}</p>}
-      {hint && !error && <p className="text-xs text-muted">{hint}</p>}
+      {error && <p className="text-xs font-bold text-danger">{error}</p>}
+      {hint && !error && <p className="text-xs font-bold text-black">{hint}</p>}
     </div>
   )
 }
@@ -80,13 +80,13 @@ export function Textarea({ label, error, className, required, ...props }) {
   return (
     <div className={fieldWrap}>
       {label && (
-        <label className="block text-sm font-medium">
+        <label className="block text-sm font-bold text-black">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       <textarea className={cn('lms-textarea', error && errorClass, className)} {...props} />
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <p className="text-xs font-bold text-danger">{error}</p>}
     </div>
   )
 }
@@ -95,7 +95,7 @@ export function SelectField({ label, error, options = [], required, className, p
   return (
     <div className={fieldWrap}>
       {label && (
-        <label className="block text-sm font-medium">
+        <label className="block text-sm font-bold text-black">
           {label}
           {required && <span className="text-danger ml-1">*</span>}
         </label>
@@ -108,7 +108,7 @@ export function SelectField({ label, error, options = [], required, className, p
           </option>
         ))}
       </select>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <p className="text-xs font-bold text-danger">{error}</p>}
     </div>
   )
 }
@@ -121,8 +121,8 @@ export function CheckboxField({ label, error, ...props }) {
         className="h-4 w-4 rounded border-[var(--clay-border,#e2ebe6)] text-[var(--clay-sidebar,#8fb5a0)] focus:ring-[var(--clay-sidebar,#8fb5a0)]/20"
         {...props}
       />
-      <span className="text-sm text-text">{label}</span>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      <span className="text-sm font-bold text-black">{label}</span>
+      {error && <p className="text-xs font-bold text-danger">{error}</p>}
     </label>
   )
 }

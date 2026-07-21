@@ -23,11 +23,19 @@ export const CardHeader = forwardRef(function CardHeader({ className, ...props }
 })
 
 export const CardTitle = forwardRef(function CardTitle({ className, ...props }, ref) {
-  return <h3 ref={ref} className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
+  return (
+    <h3
+      ref={ref}
+      className={cn('card-title text-lg font-bold leading-none tracking-tight text-black', className)}
+      {...props}
+    />
+  )
 })
 
 export const CardDescription = forwardRef(function CardDescription({ className, ...props }, ref) {
-  return <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+  return (
+    <p ref={ref} className={cn('card-description text-sm font-bold text-black', className)} {...props} />
+  )
 })
 
 export const CardContent = forwardRef(function CardContent({ className, ...props }, ref) {
@@ -48,9 +56,9 @@ export function StatCard({ title, value, change, icon: Icon, color = 'primary' }
     <Card hover className="relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
-          {change ? <p className="text-xs font-medium text-muted-foreground">{change}</p> : null}
+          <p className="text-sm font-bold text-black">{title}</p>
+          <p className="text-3xl font-bold tracking-tight text-black">{value}</p>
+          {change ? <p className="text-xs font-bold text-black">{change}</p> : null}
         </div>
         {Icon ? (
           <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', iconBg[color])}>

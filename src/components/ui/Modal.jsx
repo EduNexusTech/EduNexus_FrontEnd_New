@@ -50,7 +50,7 @@ export default function Modal({ open, onClose, title, children, size = 'md', foo
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-border px-6 py-4 pr-14">
-              <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+              <h2 className="page-title text-lg font-bold text-black">{title}</h2>
               <button
                 type="button"
                 onClick={(e) => {
@@ -109,7 +109,7 @@ export function Drawer({ open, onClose, title, children, side = 'right', maxWidt
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative flex items-center justify-between border-b border-border px-6 py-4 pr-14">
-              <h2 className="text-lg font-semibold">{title}</h2>
+              <h2 className="page-title text-lg font-bold text-black">{title}</h2>
               <button
                 type="button"
                 onClick={(e) => {

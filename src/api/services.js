@@ -155,6 +155,15 @@ export const schoolUserService = {
 }
 
 export const admissionService = {
+  setup: {
+    list: (params) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP, params),
+    get: (id) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.ADMISSIONS.SETUP, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id)),
+    getEmailSettings: () => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL),
+    updateEmailSettings: (data) => apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL, data),
+  },
   leads: {
     list: (params) => apiGetPaginated(API_ENDPOINTS.ADMISSIONS.LEADS, params),
     get: (id) => apiGet(API_ENDPOINTS.ADMISSIONS.LEAD_DETAIL(id)),

@@ -17,8 +17,10 @@ export function apiLeadToUi(row) {
     city: row.city || '',
     state: row.state || '',
     currentSchool: row.current_school || '',
-    gradeApplying: row.grade_applying || row.class_name || row.applied_class_name || '—',
-    academicYear: row.academic_year || row.academic_year_label || '—',
+    gradeApplying:
+      row.grade_applying || row.class_name || row.interested_class_name || row.applied_class_name || '—',
+    academicYear: row.academic_year_name || row.academic_year_label || row.academic_year || '—',
+    academicYearId: row.academic_year_id || null,
     source: row.source || 'other',
     enquiryStatus: row.status || 'new',
     stage: apiStatusToStage(row.status || row.pipeline_stage || 'new'),
@@ -60,29 +62,31 @@ function buildActivities(row) {
   return items
 }
 
-export function enquiryFormToApi(values) {
-  const notes = [
-    values.currentSchool ? `Current school: ${values.currentSchool}` : null,
-    values.city || values.state ? `Location: ${[values.city, values.state].filter(Boolean).join(', ')}` : null,
-    values.dateOfBirth ? `DOB: ${values.dateOfBirth}` : null,
-    values.gender ? `Gender: ${values.gender}` : null,
-    values.gradeApplying ? `Grade: ${values.gradeApplying}` : null,
-    values.academicYear ? `Academic year: ${values.academicYear}` : null,
-    values.assignedTo ? `Assigned: ${values.assignedTo}` : null,
-  ]
-    .filter(Boolean)
-    .join('\n')
-
-  return {
+export function enquiryFormToApi(values, options = {}) {
+  const academicYearId = options.academicYearId || values.academicYearId || null
+  const payload = {
     student_name: values.studentName.trim(),
     parent_name: values.parentName.trim(),
+    parent_relationship: values.parentRelationship || 'father',
     email: values.email?.trim() || '',
     mobile_number: values.phone.trim(),
+    date_of_birth: values.dateOfBirth || null,
+    gender: values.gender || '',
+    city: values.city?.trim() || '',
+    state: values.state || '',
+    current_school: values.currentSchool?.trim() || '',
+    grade_applying: values.gradeApplying || '',
     source: values.source || 'website',
     status: stageToApiStatus(enquiryStatusToStage(values.enquiryStatus || 'new')),
-    notes: notes || undefined,
+    priority: values.priority || 'medium',
+    assigned_to: values.assignedTo || '',
     enquiry_date: dayjs().format('YYYY-MM-DD'),
+    notes: values.notes?.trim?.() || '',
   }
+  if (academicYearId) {
+    payload.academic_year_id = academicYearId
+  }
+  return payload
 }
 
 function enquiryStatusToStage(status) {
@@ -99,4 +103,34 @@ function enquiryStatusToStage(status) {
 
 export function stageChangeToApi(stage) {
   return { status: stageToApiStatus(stage) }
+}
+
+export function apiSetupToUi(row) {
+  if (!row) return null
+  // Lazy import avoided — features defaults filled by caller hook when needed
+  const features = { ...(row.features || {}) }
+  return {
+    id: String(row.setup_id ?? row.id ?? ''),
+    academicYearId: row.academic_year_id ? String(row.academic_year_id) : null,
+    label: row.label || row.name || '',
+    startDate: row.start_date || '',
+    endDate: row.end_date || '',
+    status: row.status || (row.is_active ? 'active' : 'inactive'),
+    isCurrent: Boolean(row.is_current),
+    features,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    _raw: row,
+  }
+}
+
+export function setupFormToApi(values) {
+  return {
+    label: values.label?.trim(),
+    start_date: values.startDate,
+    end_date: values.endDate,
+    is_current: Boolean(values.isCurrent),
+    status: values.status || 'inactive',
+    features: values.features || {},
+  }
 }
