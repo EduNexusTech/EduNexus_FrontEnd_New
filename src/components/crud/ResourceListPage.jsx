@@ -34,6 +34,7 @@ export default function ResourceListPage({
   filters,
   listParams = {},
   onView,
+  createPath,
   deleteSuccessMessage = 'Deleted successfully',
   deleteBehavior = 'remove',
   /** When true, hide breadcrumb + page header (used inside LMS module shells) */
@@ -175,7 +176,7 @@ export default function ResourceListPage({
       </Button>
       {extraActions}
       {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
-        <Link to={`${basePath}/new`}>
+        <Link to={createPath || `${basePath}/new`}>
           <Button variant="create"><FiPlus /> Add New</Button>
         </Link>
       )}

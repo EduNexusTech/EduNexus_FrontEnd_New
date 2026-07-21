@@ -63,10 +63,11 @@ import {
   AdmissionsApplicationsRedirect,
 } from '@/pages/admissions/AdmissionsLmsPages'
 import {
-  AnnouncementsPage,
   TransportPage,
-  LibraryPage,
 } from '@/pages/school-ops/SchoolOpsPages'
+import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage'
+import LibraryPage from '@/pages/library/LibraryPage'
+import LibraryBookForm from '@/pages/library/LibraryBookForm'
 import AttendanceHubPage, {
   AttendanceMarkPage,
   AttendanceReportsPage,
@@ -266,6 +267,8 @@ export default function AppRoutes() {
           <Route path="/fees/defaulters" element={<FeesDefaultersPage />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/library" element={<LibraryPage />} />
+          <Route path="/library/new" element={<LibraryBookForm />} />
+          <Route path="/library/:id/edit" element={<LibraryBookForm />} />
           <Route path="/reports" element={<DocumentsHubPage />} />
 
           <Route path="/school-users" element={<SchoolUserList />} />

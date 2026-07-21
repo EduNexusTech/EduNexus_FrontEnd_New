@@ -345,6 +345,10 @@ export const API_ENDPOINTS = {
     VERIFY: (code) => `/api/v1/documents/verify/${code}/`,
     PREVIEW: '/api/v1/documents/preview/',
   },
+  LIBRARY: {
+    BOOKS: '/api/v1/library/books/',
+    BOOK_DETAIL: (id) => `/api/v1/library/books/${id}/`,
+  },
   LMS: {
     DASHBOARD: '/api/v1/lms/dashboard/',
     STUDENT_DASHBOARD: '/api/v1/lms/dashboard/student/',

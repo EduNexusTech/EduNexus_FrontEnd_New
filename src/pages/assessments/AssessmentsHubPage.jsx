@@ -25,6 +25,18 @@ function unwrap(res) {
   return res?.data?.data ?? res?.data ?? res ?? {}
 }
 
+function normalizeList(payload) {
+  const d = unwrap(payload)
+  if (Array.isArray(d)) return d
+  if (Array.isArray(d?.results)) return d.results
+  return []
+}
+
+function normalizeYears(payload) {
+  const raw = payload?.data?.results ?? payload?.results ?? normalizeList(payload)
+  return Array.isArray(raw) ? raw : []
+}
+
 const QUICK_LINKS = [
   { to: '/examinations/marks', label: 'Marks Entry', icon: FiClipboard, desc: 'Enter & approve marks' },
   { to: '/examinations/results', label: 'Results', icon: FiAward, desc: 'Process & publish snapshots' },
@@ -59,15 +71,8 @@ export default function AssessmentsHubPage() {
   })
 
   const dash = useMemo(() => unwrap(dashQuery.data), [dashQuery.data])
-  const exams = useMemo(() => {
-    const d = unwrap(examsQuery.data)
-    return d.results || d || []
-  }, [examsQuery.data])
-  const years = useMemo(() => {
-    const d = unwrap(yearsQuery.data)
-    const list = d.results || d || []
-    return Array.isArray(list) ? list : []
-  }, [yearsQuery.data])
+  const exams = useMemo(() => normalizeList(examsQuery.data), [examsQuery.data])
+  const years = useMemo(() => normalizeYears(yearsQuery.data), [yearsQuery.data])
 
   const createMut = useMutation({
     mutationFn: () => assessmentsService.createExam({
@@ -146,12 +151,13 @@ export default function AssessmentsHubPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Term 1 Examination" />
           <Input label="Code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="TERM1" />
-          <SelectField label="Academic Year" value={yearId} onChange={(e) => setYearId(e.target.value)}>
-            <option value="">Select year</option>
-            {years.map((y) => (
-              <option key={y.id} value={y.id}>{y.name}</option>
-            ))}
-          </SelectField>
+          <SelectField
+            label="Academic Year"
+            value={yearId}
+            onChange={(e) => setYearId(e.target.value)}
+            placeholder="Select year"
+            options={years.map((y) => ({ value: y.id, label: y.name }))}
+          />
           <div className="flex items-end">
             <Button
               variant="primary"
@@ -196,7 +202,7 @@ export function AssessmentsMarksPage() {
     queryFn: () => assessmentsService.exams(schoolId ? { school: schoolId } : {}),
     enabled: Boolean(schoolId),
   })
-  const exams = useMemo(() => unwrap(examsQuery.data).results || [], [examsQuery.data])
+  const exams = useMemo(() => normalizeList(examsQuery.data), [examsQuery.data])
 
   const enterMut = useMutation({
     mutationFn: () => assessmentsService.enterMarks({
@@ -221,12 +227,13 @@ export function AssessmentsMarksPage() {
         actions={<Link to="/examinations"><Button variant="secondary">Back to Hub</Button></Link>}
       />
       <Card className="p-4 space-y-4 max-w-xl">
-        <SelectField label="Exam" value={examId} onChange={(e) => setExamId(e.target.value)}>
-          <option value="">Select exam</option>
-          {exams.map((ex) => (
-            <option key={ex.id} value={ex.id}>{ex.name}</option>
-          ))}
-        </SelectField>
+        <SelectField
+          label="Exam"
+          value={examId}
+          onChange={(e) => setExamId(e.target.value)}
+          placeholder="Select exam"
+          options={exams.map((ex) => ({ value: ex.id, label: ex.name }))}
+        />
         <Input label="Student ID (UUID)" value={studentId} onChange={(e) => setStudentId(e.target.value)} />
         <Input label="Subject ID (UUID)" value={subjectId} onChange={(e) => setSubjectId(e.target.value)} />
         <Input label="Marks Obtained" type="number" value={marks} onChange={(e) => setMarks(e.target.value)} />
@@ -252,7 +259,7 @@ export function AssessmentsResultsPage() {
     queryFn: () => assessmentsService.exams(schoolId ? { school: schoolId } : {}),
     enabled: Boolean(schoolId),
   })
-  const exams = useMemo(() => unwrap(examsQuery.data).results || [], [examsQuery.data])
+  const exams = useMemo(() => normalizeList(examsQuery.data), [examsQuery.data])
 
   const processMut = useMutation({
     mutationFn: () => assessmentsService.processResults(examId, schoolId ? { school_id: schoolId } : {}),
@@ -277,7 +284,7 @@ export function AssessmentsResultsPage() {
     queryFn: () => assessmentsService.publishedSnapshots({ school: schoolId, exam: examId }),
     enabled: Boolean(schoolId && examId),
   })
-  const snapshots = useMemo(() => unwrap(snapshotsQuery.data).results || [], [snapshotsQuery.data])
+  const snapshots = useMemo(() => normalizeList(snapshotsQuery.data), [snapshotsQuery.data])
 
   return (
     <div className="space-y-6">
@@ -287,12 +294,16 @@ export function AssessmentsResultsPage() {
         actions={<Link to="/examinations"><Button variant="secondary">Back to Hub</Button></Link>}
       />
       <Card className="p-4 space-y-4 max-w-xl">
-        <SelectField label="Exam" value={examId} onChange={(e) => setExamId(e.target.value)}>
-          <option value="">Select exam</option>
-          {exams.map((ex) => (
-            <option key={ex.id} value={ex.id}>{ex.name} ({ex.status})</option>
-          ))}
-        </SelectField>
+        <SelectField
+          label="Exam"
+          value={examId}
+          onChange={(e) => setExamId(e.target.value)}
+          placeholder="Select exam"
+          options={exams.map((ex) => ({
+            value: ex.id,
+            label: `${ex.name} (${ex.status})`,
+          }))}
+        />
         <div className="flex flex-wrap gap-2">
           <Button variant="primary" disabled={!examId || processMut.isPending} onClick={() => processMut.mutate()}>
             Process Results

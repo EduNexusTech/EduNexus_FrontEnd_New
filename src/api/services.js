@@ -479,6 +479,16 @@ export const documentsService = {
   preview: (data) => apiPost(API_ENDPOINTS.DOCUMENTS.PREVIEW, data),
 }
 
+export const libraryService = {
+  books: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.BOOKS, params),
+    get: (id) => apiGet(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.LIBRARY.BOOKS, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
+  },
+}
+
 export const lmsService = {
   dashboard: (params) => apiGet(API_ENDPOINTS.LMS.DASHBOARD, params),
   studentDashboard: (params) => apiGet(API_ENDPOINTS.LMS.STUDENT_DASHBOARD, params),
