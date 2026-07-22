@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { admissionService } from '@/api/services'
-import { unwrapList, getErrorMessage } from '@/api/client'
+import { unwrapList, unwrapData, getErrorMessage } from '@/api/client'
 import { useAdmissionSetup } from './useAdmissionSetup'
 import { apiLeadToUi, enquiryFormToApi, stageChangeToApi } from '../utils/leadMapper'
 
@@ -129,10 +129,37 @@ export function useAdmissions(options = {}) {
 
   const convertMutation = useMutation({
     mutationFn: (id) => admissionService.leads.convert(id),
-    onSuccess: () => {
+    onSuccess: (res, leadId) => {
+      const application = unwrapData(res) || res?.data || res
+      const appId = application?.application_id || application?.id
+      if (appId && application) {
+        // Seed detail cache so the form opens with enquiry-prefilled form_draft immediately
+        queryClient.setQueryData(['admission-applications', String(appId)], application)
+      }
       queryClient.invalidateQueries({ queryKey: ['admission-leads'] })
       queryClient.invalidateQueries({ queryKey: ['admission-applications'] })
-      toast.success('Lead converted to application')
+      toast.success(
+        appId
+          ? 'Application ready — enquiry details prefilled on the form'
+          : 'Lead converted to application',
+      )
+      setSelectedLead((prev) =>
+        prev?.id === leadId
+          ? {
+              ...prev,
+              stage: 'application',
+              convertedApplicationId: appId ? String(appId) : prev.convertedApplicationId,
+              applicationFormStatus:
+                application?.is_draft === false ||
+                (application?.status && !['lead', 'enquiry'].includes(application.status))
+                  ? 'filled'
+                  : 'draft',
+              convertedApplicationIsDraft: application?.is_draft,
+              convertedApplicationStatus: application?.status || null,
+              convertedApplicationNumber: application?.application_number || null,
+            }
+          : prev,
+      )
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
@@ -146,15 +173,18 @@ export function useAdmissions(options = {}) {
   )
 
   const updateLeadStage = useCallback(
-    (leadId, stage) => {
-      stageMutation.mutate({ id: leadId, stage })
+    async (leadId, stage) => {
+      await stageMutation.mutateAsync({ id: leadId, stage })
       setSelectedLead((prev) => (prev?.id === leadId ? { ...prev, stage } : prev))
     },
     [stageMutation],
   )
 
   const convertLead = useCallback(
-    (leadId) => convertMutation.mutate(leadId),
+    async (leadId) => {
+      const res = await convertMutation.mutateAsync(leadId)
+      return unwrapData(res) || res?.data || res
+    },
     [convertMutation],
   )
 
@@ -163,6 +193,7 @@ export function useAdmissions(options = {}) {
     onCloseLead: () => setSelectedLead(null),
     onStageChange: updateLeadStage,
     onConvertLead: convertLead,
+    converting: convertMutation.isPending,
     setSelectedLead,
   }
 

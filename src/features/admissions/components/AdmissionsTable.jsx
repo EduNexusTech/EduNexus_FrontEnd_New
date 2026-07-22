@@ -27,6 +27,7 @@ export function AdmissionsTable({ leads, loading, onLeadClick }) {
             <th className="hidden px-4 py-3 lg:table-cell">Grade</th>
             <th className="hidden px-4 py-3 sm:table-cell">Source</th>
             <th className="px-4 py-3">Stage</th>
+            <th className="px-4 py-3">Application</th>
             <th className="hidden px-4 py-3 md:table-cell">Priority</th>
             <th className="hidden px-4 py-3 lg:table-cell">Assigned</th>
             <th className="hidden px-4 py-3 xl:table-cell">Created</th>
@@ -55,6 +56,19 @@ export function AdmissionsTable({ leads, loading, onLeadClick }) {
               </td>
               <td className="px-4 py-3">
                 <StageBadge stage={lead.stage} />
+              </td>
+              <td className="px-4 py-3">
+                {lead.applicationFormStatus === 'filled' ? (
+                  <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                    Application filled
+                  </span>
+                ) : lead.applicationFormStatus === 'draft' ? (
+                  <span className="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    Draft
+                  </span>
+                ) : (
+                  <span className="text-xs font-normal text-muted-foreground">Not started</span>
+                )}
               </td>
               <td className="hidden px-4 py-3 md:table-cell">
                 <PriorityBadge priority={lead.priority} />

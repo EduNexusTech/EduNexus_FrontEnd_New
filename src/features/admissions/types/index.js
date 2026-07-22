@@ -1,11 +1,10 @@
 export const PIPELINE_STAGES = [
   { id: 'enquiry', label: 'Enquiry', color: 'bg-blue-500' },
-  { id: 'contacted', label: 'Contacted', color: 'bg-cyan-500' },
-  { id: 'qualified', label: 'Follow-up', color: 'bg-indigo-500' },
-  { id: 'application', label: 'Application', color: 'bg-amber-500' },
-  { id: 'interview', label: 'Visit', color: 'bg-purple-500' },
+  { id: 'counselling', label: 'Counselling', color: 'bg-cyan-500' },
+  { id: 'campus_visit', label: 'Campus Visit', color: 'bg-indigo-500' },
+  { id: 'application', label: 'Application Form', color: 'bg-amber-500' },
   { id: 'accepted', label: 'Fee / Review', color: 'bg-emerald-500' },
-  { id: 'enrolled', label: 'Enrolled', color: 'bg-green-600' },
+  { id: 'enrolled', label: 'Student Activated', color: 'bg-green-600' },
   { id: 'lost', label: 'Closed', color: 'bg-slate-400' },
 ]
 
@@ -19,17 +18,16 @@ export const PRIORITY_LABELS = {
 }
 
 export const ENQUIRY_SOURCE_LABELS = {
-  website: 'Website',
-  google: 'Google Search',
-  facebook: 'Facebook',
-  instagram: 'Instagram',
-  newspaper: 'Newspaper',
-  existing_parent: 'Existing Parent',
-  friend_relative: 'Friend / Relative',
   walk_in: 'Walk-in',
+  website: 'Website',
+  mobile_app: 'Mobile App',
+  phone: 'Phone',
+  email: 'Email',
   referral: 'Referral',
   campaign: 'Campaign',
-  phone: 'Phone',
+  education_fair: 'Education Fair',
+  social_media: 'Social Media / Google',
+  import: 'Imported',
   other: 'Other',
 }
 
@@ -75,8 +73,6 @@ export const GRADES = [
   'Grade 12',
 ]
 
-export const ASSIGNEES = ['Admissions Team', 'Counsellor A', 'Counsellor B', 'Front Desk']
-
 export const INDIAN_STATES = [
   'Andhra Pradesh',
   'Karnataka',
@@ -92,9 +88,11 @@ export const INDIAN_STATES = [
 
 export function enquiryStatusToStage(status) {
   const map = {
-    contacted: 'contacted',
-    follow_up: 'qualified',
-    visit_scheduled: 'interview',
+    contacted: 'counselling',
+    counselling: 'counselling',
+    follow_up: 'counselling',
+    visit_scheduled: 'campus_visit',
+    campus_visit: 'campus_visit',
     application_sent: 'application',
     converted: 'accepted',
     closed: 'lost',
@@ -102,28 +100,38 @@ export function enquiryStatusToStage(status) {
   return map[status] || 'enquiry'
 }
 
+/** UI pipeline stage → API lead.status */
 export function stageToApiStatus(stage) {
   const map = {
     enquiry: 'new',
-    contacted: 'contacted',
-    qualified: 'qualified',
-    application: 'qualified',
-    interview: 'qualified',
+    counselling: 'counselling',
+    campus_visit: 'campus_visit',
+    application: 'application',
+    // legacy UI ids
+    contacted: 'counselling',
+    qualified: 'counselling',
+    interview: 'campus_visit',
     accepted: 'converted',
-    enrolled: 'converted',
+    enrolled: 'enrolled',
     lost: 'lost',
   }
   return map[stage] || 'new'
 }
 
+/** API lead.status → UI pipeline stage */
 export function apiStatusToStage(status) {
   const map = {
     new: 'enquiry',
-    contacted: 'contacted',
-    qualified: 'qualified',
+    counselling: 'counselling',
+    campus_visit: 'campus_visit',
+    application: 'application',
+    contacted: 'counselling',
+    qualified: 'counselling',
+    interview: 'campus_visit',
     converted: 'accepted',
+    enrolled: 'enrolled',
     lost: 'lost',
-    lead: 'contacted',
+    lead: 'counselling',
     enquiry: 'enquiry',
   }
   return map[status] || 'enquiry'

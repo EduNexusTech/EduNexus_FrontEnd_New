@@ -43,7 +43,7 @@ export function PageHeader({ title, description, subtitle, actions, className })
         {title ? (
           <h1 className="page-title text-2xl font-bold tracking-tight text-black sm:text-3xl">{title}</h1>
         ) : null}
-        {desc ? <p className="page-description mt-1 text-sm font-bold text-black">{desc}</p> : null}
+        {desc ? <p className="page-description mt-1 text-sm font-normal text-black">{desc}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>

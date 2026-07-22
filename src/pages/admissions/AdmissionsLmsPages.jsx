@@ -8,6 +8,7 @@ import { AcademicYearSelector } from '@/features/admissions/components/AcademicY
 import { AdmissionsPageShell } from '@/features/admissions/components/AdmissionsPageShell'
 import { AdmissionsToolbar } from '@/features/admissions/components/AdmissionsToolbar'
 import { AdmissionsFiltersPanel } from '@/features/admissions/components/AdmissionsFilters'
+import { ApplicationsListView } from '@/features/admissions/components/ApplicationsListView'
 import { LeadsView } from '@/features/admissions/components/LeadsView'
 import { EnquiryFormSheet } from '@/features/admissions/components/EnquiryFormSheet'
 import { useAdmissions } from '@/features/admissions/hooks/useAdmissions'
@@ -96,8 +97,6 @@ export function EnquiriesPage() {
             viewMode={admissions.viewMode}
             onViewModeChange={admissions.setViewMode}
             resultCount={admissions.filteredLeads.length}
-            addLabel="Add Enquiry"
-            onAddNew={canAddEnquiry ? () => setEnquiryFormOpen(true) : undefined}
           />
           <AdmissionsFiltersPanel
             filters={admissions.filters}
@@ -142,7 +141,7 @@ export function PipelinePage() {
   return (
     <AdmissionsPageShell
       title="Lead Pipeline"
-      description="Visual kanban pipeline from enquiry to enrollment"
+      description="Enquiry → Counselling → Campus Visit → Application Form"
       {...admissions.leadSheetProps}
     >
       <AdmissionFeatureGuard feature="enquiry">
@@ -170,7 +169,7 @@ export function PipelinePage() {
             onLeadClick={admissions.setSelectedLead}
             onPageChange={admissions.setPage}
             onStageChange={admissions.updateLeadStage}
-            kanbanStages={['enquiry', 'contacted', 'qualified', 'application', 'interview', 'accepted', 'enrolled']}
+            kanbanStages={['enquiry', 'counselling', 'campus_visit', 'application', 'accepted', 'enrolled']}
             emptyTitle="Pipeline is empty"
             emptyDescription="No leads in the pipeline. Add enquiries to start building your funnel."
           />
@@ -203,15 +202,10 @@ export function FollowUpsPage() {
 }
 
 export function InternalApplicationsPage() {
-  const admissions = useAdmissions({
-    initialApplicationType: 'internal',
-    excludeStages: ['lost'],
-  })
-
   return (
     <AdmissionsPageShell
-      title="Internal Applications"
-      description="In-house student application processing"
+      title="Applications"
+      description="All filled application forms — draft and submitted"
       actions={
         <Link to="/admissions/applications/new">
           <Button variant="create">
@@ -220,70 +214,47 @@ export function InternalApplicationsPage() {
           </Button>
         </Link>
       }
-      {...admissions.leadSheetProps}
     >
       <AdmissionFeatureGuard feature="internalApplication">
-        <div className="space-y-4">
-          <AdmissionsToolbar
-            search={admissions.filters.search}
-            onSearchChange={(v) => admissions.updateFilters({ search: v })}
-            viewMode={admissions.viewMode === 'kanban' ? 'table' : admissions.viewMode}
-            onViewModeChange={admissions.setViewMode}
-            resultCount={admissions.filteredLeads.length}
-            viewModes={['table', 'timeline']}
-          />
-          <LeadsView
-            paginatedLeads={admissions.paginatedLeads}
-            allFilteredLeads={admissions.filteredLeads}
-            loading={admissions.loading}
-            viewMode={admissions.viewMode === 'kanban' ? 'table' : admissions.viewMode}
-            page={admissions.page}
-            totalPages={admissions.totalPages}
-            pageSize={admissions.pageSize}
-            onLeadClick={admissions.setSelectedLead}
-            onPageChange={admissions.setPage}
-            emptyTitle="No internal applications"
-            emptyDescription="Open a lead from enquiries and use Convert to Application, or create a new application."
-          />
-        </div>
+        <ApplicationsListView
+          applicationType="internal"
+          emptyTitle="No applications yet"
+          emptyDescription="After you fill an application from an enquiry, it will show in this list. Use View to open the workflow or Edit to continue the form."
+        />
       </AdmissionFeatureGuard>
     </AdmissionsPageShell>
   )
 }
 
 export function ExternalApplicationsPage() {
-  const admissions = useAdmissions({ excludeStages: ['enrolled', 'lost'] })
-
   return (
     <AdmissionsPageShell
       title="External Applications"
-      description="Online and transfer student applications"
-      {...admissions.leadSheetProps}
+      description="Online and transfer student application forms"
     >
       <AdmissionFeatureGuard feature="externalApplication">
-        <div className="space-y-4">
-          <AdmissionsToolbar
-            search={admissions.filters.search}
-            onSearchChange={(v) => admissions.updateFilters({ search: v })}
-            viewMode={admissions.viewMode === 'kanban' ? 'table' : admissions.viewMode}
-            onViewModeChange={admissions.setViewMode}
-            resultCount={admissions.filteredLeads.length}
-            viewModes={['table', 'timeline']}
-          />
-          <LeadsView
-            paginatedLeads={admissions.paginatedLeads}
-            allFilteredLeads={admissions.filteredLeads}
-            loading={admissions.loading}
-            viewMode={admissions.viewMode === 'kanban' ? 'table' : admissions.viewMode}
-            page={admissions.page}
-            totalPages={admissions.totalPages}
-            pageSize={admissions.pageSize}
-            onLeadClick={admissions.setSelectedLead}
-            onPageChange={admissions.setPage}
-            emptyTitle="No external applications"
-            emptyDescription="Public online applications for the selected academic year will appear here."
-          />
-        </div>
+        <ApplicationsListView
+          applicationType="external"
+          emptyTitle="No external applications"
+          emptyDescription="Public / transfer applications for the selected academic year will appear here."
+        />
+      </AdmissionFeatureGuard>
+    </AdmissionsPageShell>
+  )
+}
+
+export function ConfirmedApplicationsPage() {
+  return (
+    <AdmissionsPageShell
+      title="Confirmed Admissions"
+      description="Track admissions after confirmation — class allocation and student activation"
+    >
+      <AdmissionFeatureGuard feature="internalApplication">
+        <ApplicationsListView
+          mode="confirmed"
+          emptyTitle="No confirmed admissions yet"
+          emptyDescription="After you confirm an application in the admission workflow, it will appear here for easy tracking."
+        />
       </AdmissionFeatureGuard>
     </AdmissionsPageShell>
   )
@@ -291,7 +262,9 @@ export function ExternalApplicationsPage() {
 
 export function ConversionPage() {
   const admissions = useAdmissions({ excludeStages: ['lost'] })
-  const ready = admissions.filteredLeads.filter((l) => ['accepted', 'enrolled', 'application'].includes(l.stage))
+  const ready = admissions.filteredLeads.filter((l) =>
+    ['application', 'accepted', 'enrolled'].includes(l.stage),
+  )
 
   return (
     <AdmissionsPageShell

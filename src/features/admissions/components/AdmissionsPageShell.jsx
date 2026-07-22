@@ -12,6 +12,7 @@ export function AdmissionsPageShell({
   onCloseLead,
   onStageChange,
   onConvertLead,
+  converting,
 }) {
   return (
     <div className="space-y-6">
@@ -33,6 +34,7 @@ export function AdmissionsPageShell({
         onClose={onCloseLead}
         onStageChange={onStageChange}
         onConvertLead={onConvertLead}
+        converting={converting}
       />
     </div>
   )

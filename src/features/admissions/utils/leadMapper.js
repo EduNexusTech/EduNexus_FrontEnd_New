@@ -27,7 +27,8 @@ export function apiLeadToUi(row) {
     applicationType: row.application_type || null,
     applicationStatus: row.application_status || 'not_started',
     priority: row.priority || 'medium',
-    assignedTo: row.assigned_to_name || row.assigned_to || 'Admissions Team',
+    assignedTo: row.assigned_to_name || 'Unassigned',
+    assignedToId: row.assigned_to ? String(row.assigned_to) : null,
     createdAt: row.created_at || row.enquiry_date || new Date().toISOString(),
     updatedAt: row.updated_at || row.created_at,
     nextFollowUp: row.next_follow_up,
@@ -35,6 +36,20 @@ export function apiLeadToUi(row) {
     activities: buildActivities(row),
     tags: row.tags || [],
     convertedStudentId: row.converted_student_id,
+    convertedApplicationId: row.converted_application_id
+      ? String(row.converted_application_id)
+      : null,
+    applicationFormStatus: row.application_form_status || (
+      row.converted_application_id
+        ? (row.converted_application_is_draft === false ||
+          (row.converted_application_status && !['lead', 'enquiry'].includes(row.converted_application_status))
+          ? 'filled'
+          : 'draft')
+        : 'not_started'
+    ),
+    convertedApplicationIsDraft: row.converted_application_is_draft,
+    convertedApplicationStatus: row.converted_application_status || null,
+    convertedApplicationNumber: row.converted_application_number || null,
     _raw: row,
   }
 }
@@ -79,12 +94,16 @@ export function enquiryFormToApi(values, options = {}) {
     source: values.source || 'website',
     status: stageToApiStatus(enquiryStatusToStage(values.enquiryStatus || 'new')),
     priority: values.priority || 'medium',
-    assigned_to: values.assignedTo || '',
+    application_type: values.applicationType || 'internal',
     enquiry_date: dayjs().format('YYYY-MM-DD'),
     notes: values.notes?.trim?.() || '',
   }
   if (academicYearId) {
     payload.academic_year_id = academicYearId
+  }
+  // Backend expects a user UUID (or omit); never send display names.
+  if (values.assignedTo) {
+    payload.assigned_to = values.assignedTo
   }
   return payload
 }

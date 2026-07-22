@@ -115,7 +115,7 @@
     color: inherit;
   }
 
-  /* Layout content: titles + descriptions stay bold black on light surfaces */
+  /* Layout content: titles bold; body/descriptions normal weight */
   main,
   .lms-page,
   .bg-card,
@@ -132,11 +132,15 @@
   .lms-page h3,
   .lms-page h4,
   .page-title,
-  .page-description,
-  .card-title,
-  .card-description {
+  .card-title {
     color: #000000 !important;
     font-weight: 700 !important;
+  }
+
+  .page-description,
+  .card-description {
+    color: #000000 !important;
+    font-weight: 400 !important;
   }
 }
 
@@ -148,7 +152,7 @@
   .text-card-foreground,
   .text-text {
     color: #000000 !important;
-    font-weight: 700;
+    font-weight: inherit;
   }
 
   .text-white {
@@ -287,8 +291,12 @@
   color: #000000;
 }
 
-.lms-page .page-title,
-.lms-page .page-description {
+.lms-page .page-title {
   color: #000000 !important;
   font-weight: 700 !important;
+}
+
+.lms-page .page-description {
+  color: #000000 !important;
+  font-weight: 400 !important;
 }

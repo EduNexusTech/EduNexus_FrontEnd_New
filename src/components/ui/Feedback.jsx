@@ -102,8 +102,14 @@ export function StatusBadge({ active, status, label }) {
   )
 }
 
-export function Avatar({ name, src, size = 'md' }) {
-  const sizes = { sm: 'h-8 w-8 text-xs', md: 'h-10 w-10 text-sm', lg: 'h-12 w-12 text-base' }
+export function Avatar({ name, src, size = 'md', className = '' }) {
+  const sizes = {
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-10 w-10 text-sm',
+    lg: 'h-12 w-12 text-base',
+    xl: 'h-20 w-20 text-xl',
+    '2xl': 'h-28 w-28 text-2xl',
+  }
   const initials = name
     ?.split(' ')
     .map((n) => n[0])
@@ -112,11 +118,22 @@ export function Avatar({ name, src, size = 'md' }) {
     .toUpperCase()
 
   if (src) {
-    return <img src={src} alt={name} className={`rounded-full object-cover ${sizes[size]}`} />
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={cn(`rounded-full object-cover ring-2 ring-white shadow-sm ${sizes[size]}`, className)}
+      />
+    )
   }
 
   return (
-    <div className={`rounded-full lms-btn-primary flex items-center justify-center text-white font-semibold ${sizes[size]}`}>
+    <div
+      className={cn(
+        `rounded-full lms-btn-primary flex items-center justify-center text-white font-semibold ring-2 ring-white shadow-sm ${sizes[size]}`,
+        className,
+      )}
+    >
       {initials || '?'}
     </div>
   )

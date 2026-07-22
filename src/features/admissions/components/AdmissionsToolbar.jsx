@@ -26,7 +26,7 @@ export function AdmissionsToolbar({
             className="lms-input w-full pl-9"
           />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm font-normal text-muted-foreground">
           <span className="font-medium text-foreground">{resultCount}</span> results
         </p>
       </div>

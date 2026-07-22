@@ -8,6 +8,7 @@ import {
   FiGlobe,
   FiUserCheck,
   FiSettings,
+  FiCheckCircle,
 } from 'react-icons/fi'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
@@ -27,7 +28,7 @@ const LINKS = [
   { to: '/admissions/follow-ups', label: 'Follow-ups', icon: FiClock, feature: 'followUps' },
   {
     to: '/admissions/applications/internal',
-    label: 'Internal Apps',
+    label: 'Applications',
     icon: FiFileText,
     feature: 'internalApplication',
   },
@@ -36,6 +37,12 @@ const LINKS = [
     label: 'External Apps',
     icon: FiGlobe,
     feature: 'externalApplication',
+  },
+  {
+    to: '/admissions/confirmed',
+    label: 'Confirmed',
+    icon: FiCheckCircle,
+    feature: 'internalApplication',
   },
   { to: '/admissions/conversion', label: 'Conversion', icon: FiUserCheck, feature: 'conversion' },
 ]

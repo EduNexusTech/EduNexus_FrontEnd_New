@@ -3,13 +3,16 @@ import { STAGE_LABELS } from '../types'
 
 const STAGE_VARIANT = {
   enquiry: 'default',
-  contacted: 'secondary',
-  qualified: 'default',
+  counselling: 'secondary',
+  campus_visit: 'default',
   application: 'warning',
-  interview: 'default',
   accepted: 'success',
   enrolled: 'success',
   lost: 'destructive',
+  // legacy
+  contacted: 'secondary',
+  qualified: 'default',
+  interview: 'default',
 }
 
 export function StageBadge({ stage }) {

@@ -31,6 +31,7 @@ import {
   FiClock,
   FiGlobe,
   FiLayout,
+  FiCheckCircle,
 } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
@@ -164,8 +165,9 @@ const schoolAdminNav = [
       { id: 'adm-enquiries', label: 'Enquiries', path: '/admissions/enquiries', icon: FiMessageSquare },
       { id: 'adm-pipeline', label: 'Pipeline', path: '/admissions/pipeline', icon: FiGitBranch },
       { id: 'adm-followups', label: 'Follow-ups', path: '/admissions/follow-ups', icon: FiClock },
-      { id: 'adm-internal', label: 'Internal Apps', path: '/admissions/applications/internal', icon: FiFileText },
+      { id: 'adm-internal', label: 'Applications', path: '/admissions/applications/internal', icon: FiFileText },
       { id: 'adm-external', label: 'External Apps', path: '/admissions/applications/external', icon: FiGlobe },
+      { id: 'adm-confirmed', label: 'Confirmed', path: '/admissions/confirmed', icon: FiCheckCircle },
       { id: 'adm-conversion', label: 'Conversion', path: '/admissions/conversion', icon: FiUserCheck },
       { id: 'adm-forms', label: 'Form Builder', path: '/form-builder', icon: FiLayout },
     ],

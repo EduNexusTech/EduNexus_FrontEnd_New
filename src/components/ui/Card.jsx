@@ -34,7 +34,7 @@ export const CardTitle = forwardRef(function CardTitle({ className, ...props }, 
 
 export const CardDescription = forwardRef(function CardDescription({ className, ...props }, ref) {
   return (
-    <p ref={ref} className={cn('card-description text-sm font-bold text-black', className)} {...props} />
+    <p ref={ref} className={cn('card-description text-sm font-normal text-black', className)} {...props} />
   )
 })
 
@@ -56,9 +56,9 @@ export function StatCard({ title, value, change, icon: Icon, color = 'primary' }
     <Card hover className="relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-bold text-black">{title}</p>
+          <p className="text-sm font-normal text-black">{title}</p>
           <p className="text-3xl font-bold tracking-tight text-black">{value}</p>
-          {change ? <p className="text-xs font-bold text-black">{change}</p> : null}
+          {change ? <p className="text-xs font-normal text-black">{change}</p> : null}
         </div>
         {Icon ? (
           <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', iconBg[color])}>

@@ -58,25 +58,32 @@ export const SCHOOL_STAFF_ROLES = [
 
 export const ADMISSION_STATUS_OPTIONS = [
   { label: 'Enquiry', value: 'enquiry' },
-  { label: 'Lead', value: 'lead' },
-  { label: 'Application', value: 'application' },
-  { label: 'Documents', value: 'documents' },
+  { label: 'Application Draft', value: 'lead' },
+  { label: 'Application Submitted', value: 'application' },
+  { label: 'Document Verification', value: 'documents' },
   { label: 'Entrance Test', value: 'entrance_test' },
   { label: 'Interview', value: 'interview' },
   { label: 'Pending Approval', value: 'approval' },
-  { label: 'Fee Collection', value: 'fee' },
-  { label: 'Confirmed', value: 'confirmed' },
-  { label: 'Enrolled', value: 'enrolled' },
+  { label: 'Fee Payment', value: 'fee' },
+  { label: 'Admission Confirmed', value: 'confirmed' },
+  { label: 'Ready for SIS', value: 'ready_for_sis' },
+  { label: 'Student Activated', value: 'enrolled' },
   { label: 'Rejected', value: 'rejected' },
   { label: 'Withdrawn', value: 'withdrawn' },
+  { label: 'Cancelled', value: 'cancelled' },
 ]
 
 export const LEAD_SOURCE_OPTIONS = [
   { label: 'Walk-in', value: 'walk_in' },
   { label: 'Website', value: 'website' },
+  { label: 'Mobile App', value: 'mobile_app' },
+  { label: 'Phone', value: 'phone' },
+  { label: 'Email', value: 'email' },
   { label: 'Referral', value: 'referral' },
   { label: 'Campaign', value: 'campaign' },
-  { label: 'Phone', value: 'phone' },
+  { label: 'Education Fair', value: 'education_fair' },
+  { label: 'Social Media / Google', value: 'social_media' },
+  { label: 'Imported', value: 'import' },
   { label: 'Other', value: 'other' },
 ]
 

@@ -58,6 +58,7 @@ import {
   FollowUpsPage,
   InternalApplicationsPage,
   ExternalApplicationsPage,
+  ConfirmedApplicationsPage,
   ConversionPage,
   AdmissionsLeadsRedirect,
   AdmissionsApplicationsRedirect,
@@ -231,6 +232,7 @@ export default function AppRoutes() {
           <Route path="/admissions/follow-ups" element={<FollowUpsPage />} />
           <Route path="/admissions/applications/internal" element={<InternalApplicationsPage />} />
           <Route path="/admissions/applications/external" element={<ExternalApplicationsPage />} />
+          <Route path="/admissions/confirmed" element={<ConfirmedApplicationsPage />} />
           <Route path="/admissions/conversion" element={<ConversionPage />} />
           <Route path="/admissions/leads" element={<AdmissionsLeadsRedirect />} />
           <Route path="/admissions/leads/new" element={<AdmissionLeadForm />} />

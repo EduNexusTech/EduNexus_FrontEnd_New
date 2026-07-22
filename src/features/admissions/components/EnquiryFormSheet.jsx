@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { FiMessageSquare } from 'react-icons/fi'
 import { Sheet } from '@/components/ui/Sheet'
-import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import { schoolUserService } from '@/api/services'
+import { unwrapList } from '@/api/client'
+import { resolveRecordId } from '@/utils/record'
 import {
-  ASSIGNEES,
   ENQUIRY_SOURCE_LABELS,
   ENQUIRY_STATUS_LABELS,
   GENDERS,
@@ -14,6 +16,16 @@ import {
   INDIAN_STATES,
   PARENT_RELATIONSHIP_LABELS,
 } from '../types'
+
+function counsellorLabel(user) {
+  return (
+    user?.full_name ||
+    `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
+    user?.username ||
+    user?.email ||
+    'User'
+  )
+}
 
 const emptyForm = (academicYear) => ({
   studentName: '',
@@ -29,7 +41,7 @@ const emptyForm = (academicYear) => ({
   state: '',
   currentSchool: '',
   source: 'website',
-  assignedTo: ASSIGNEES[0],
+  assignedTo: '',
 })
 
 export function EnquiryFormSheet({
@@ -42,6 +54,20 @@ export function EnquiryFormSheet({
 }) {
   const [form, setForm] = useState(() => emptyForm(defaultAcademicYear))
   const [trackingStatus, setTrackingStatus] = useState('new')
+
+  const counsellorsQuery = useQuery({
+    queryKey: ['admission-counsellors'],
+    queryFn: () => schoolUserService.list({ page_size: 100, is_active: true }),
+    enabled: open,
+  })
+
+  const counsellors = useMemo(() => {
+    const list = unwrapList(counsellorsQuery.data)
+    return (list.results || []).map((u) => ({
+      id: String(resolveRecordId(u) || u.id || ''),
+      label: counsellorLabel(u),
+    })).filter((u) => u.id)
+  }, [counsellorsQuery.data])
 
   useEffect(() => {
     if (open) {
@@ -177,9 +203,15 @@ export function EnquiryFormSheet({
               <input className="lms-input w-full bg-muted font-mono text-xs" value="Auto on save" readOnly />
             </Field>
             <Field label="Counsellor Assigned">
-              <select className="lms-select w-full" value={form.assignedTo} onChange={(e) => update({ assignedTo: e.target.value })}>
-                {ASSIGNEES.map((a) => (
-                  <option key={a} value={a}>{a}</option>
+              <select
+                className="lms-select w-full"
+                value={form.assignedTo}
+                onChange={(e) => update({ assignedTo: e.target.value })}
+                disabled={counsellorsQuery.isLoading}
+              >
+                <option value="">Unassigned</option>
+                {counsellors.map((c) => (
+                  <option key={c.id} value={c.id}>{c.label}</option>
                 ))}
               </select>
             </Field>

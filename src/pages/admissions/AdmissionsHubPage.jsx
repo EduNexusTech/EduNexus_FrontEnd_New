@@ -110,7 +110,7 @@ export default function AdmissionsHubPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{label}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+                  <p className="mt-0.5 text-xs font-normal text-muted-foreground">{desc}</p>
                 </div>
               </div>
             </Card>

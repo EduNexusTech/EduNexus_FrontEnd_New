@@ -69,7 +69,7 @@ export default function ModulePage({
                   className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 />
               </div>
-              <p className="text-sm font-bold text-black">0 results</p>
+              <p className="text-sm font-normal text-black">0 results</p>
             </div>
           ) : null}
 
@@ -79,7 +79,7 @@ export default function ModulePage({
                 <FiFileText className="h-6 w-6" />
               </div>
               <h3 className="page-title text-base font-bold text-black">{emptyTitle}</h3>
-              <p className="page-description mt-1 max-w-md text-sm font-bold text-black">{emptyDescription}</p>
+              <p className="page-description mt-1 max-w-md text-sm font-normal text-black">{emptyDescription}</p>
             </div>
           )}
         </CardContent>
