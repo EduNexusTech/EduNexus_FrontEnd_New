@@ -1,4 +1,5 @@
 import axiosInstance from './axios'
+import { API_BASE_URL } from '@/config/constants'
 
 export function buildQuery(params = {}) {
   const query = {}
@@ -132,7 +133,8 @@ export function getErrorMessage(error, fallback = 'Something went wrong') {
   }
 
   if (error?.code === 'ERR_NETWORK' || error?.message === 'Network Error') {
-    return 'Cannot reach the backend API. Start Django on port 8000 or use the deployed Railway URL in .env.'
+    const target = API_BASE_URL || 'http://127.0.0.1:8000'
+    return `Cannot reach the backend API at ${target}. Start Django (python manage.py runserver) or update VITE_API_BASE_URL in .env and restart npm run dev.`
   }
 
   if (typeof data === 'object' && data !== null) {

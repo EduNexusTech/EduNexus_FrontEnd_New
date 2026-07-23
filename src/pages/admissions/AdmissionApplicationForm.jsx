@@ -21,6 +21,7 @@ import {
   hydrateDraftFromApplication,
 } from '@/features/admissions/utils/applicationFormDraft'
 import { cn } from '@/lib/utils'
+import PhotoUploadField from '@/components/common/PhotoUploadField'
 
 function Field({ label, required, children, className }) {
   return (
@@ -99,6 +100,7 @@ export default function AdmissionApplicationForm() {
       status: app?.status_display || app?.status || '',
       academicYearName: app?.academic_year_name || '',
       admissionNumber: app?.admission_number || '',
+      schoolId: app?.school || app?.school_id || '',
     })
   }, [data, isEdit])
 
@@ -318,8 +320,24 @@ export default function AdmissionApplicationForm() {
               <Field label="Aadhaar Number">
                 <input className="lms-input w-full" value={draft.student.aadhaar_number} onChange={(e) => update('student.aadhaar_number', e.target.value)} />
               </Field>
-              <Field label="Student Photo URL" className="sm:col-span-2">
-                <input className="lms-input w-full" placeholder="Upload on Documents step, or paste link" value={draft.student.photo_url} onChange={(e) => update('student.photo_url', e.target.value)} />
+              <Field label="Student Photo" className="sm:col-span-2">
+                <PhotoUploadField
+                  label=""
+                  currentUrl={draft.student.photo_url}
+                  folder="admission_photo"
+                  subfolder="student"
+                  schoolId={meta.schoolId}
+                  onUploaded={({ url, path }) => {
+                    update('student.photo_url', url)
+                    update('student.photo_path', path)
+                    update('documents_checklist.student_photograph', true)
+                  }}
+                  onClear={() => {
+                    update('student.photo_url', '')
+                    update('student.photo_path', '')
+                    update('documents_checklist.student_photograph', false)
+                  }}
+                />
               </Field>
             </Grid>
           </Section>
@@ -334,6 +352,23 @@ export default function AdmissionApplicationForm() {
               <Field label="Annual Income"><input className="lms-input w-full" value={draft.father.annual_income} onChange={(e) => update('father.annual_income', e.target.value)} /></Field>
               <Field label="Mobile Number"><input className="lms-input w-full" value={draft.father.mobile} onChange={(e) => update('father.mobile', e.target.value)} /></Field>
               <Field label="Email"><input className="lms-input w-full" type="email" value={draft.father.email} onChange={(e) => update('father.email', e.target.value)} /></Field>
+              <Field label="Father Photo" className="sm:col-span-2">
+                <PhotoUploadField
+                  label=""
+                  currentUrl={draft.father.photo_url}
+                  folder="admission_photo"
+                  subfolder="father"
+                  schoolId={meta.schoolId}
+                  onUploaded={({ url, path }) => {
+                    update('father.photo_url', url)
+                    update('father.photo_path', path)
+                  }}
+                  onClear={() => {
+                    update('father.photo_url', '')
+                    update('father.photo_path', '')
+                  }}
+                />
+              </Field>
             </Grid>
 
             <SubHeading className="pt-4">Mother</SubHeading>
@@ -345,6 +380,23 @@ export default function AdmissionApplicationForm() {
               <Field label="Annual Income"><input className="lms-input w-full" value={draft.mother.annual_income} onChange={(e) => update('mother.annual_income', e.target.value)} /></Field>
               <Field label="Mobile Number"><input className="lms-input w-full" value={draft.mother.mobile} onChange={(e) => update('mother.mobile', e.target.value)} /></Field>
               <Field label="Email"><input className="lms-input w-full" type="email" value={draft.mother.email} onChange={(e) => update('mother.email', e.target.value)} /></Field>
+              <Field label="Mother Photo" className="sm:col-span-2">
+                <PhotoUploadField
+                  label=""
+                  currentUrl={draft.mother.photo_url}
+                  folder="admission_photo"
+                  subfolder="mother"
+                  schoolId={meta.schoolId}
+                  onUploaded={({ url, path }) => {
+                    update('mother.photo_url', url)
+                    update('mother.photo_path', path)
+                  }}
+                  onClear={() => {
+                    update('mother.photo_url', '')
+                    update('mother.photo_path', '')
+                  }}
+                />
+              </Field>
             </Grid>
 
             <div className="flex items-center gap-2 pt-4">
@@ -361,6 +413,23 @@ export default function AdmissionApplicationForm() {
                 <Field label="Name"><input className="lms-input w-full" value={draft.guardian.name} onChange={(e) => update('guardian.name', e.target.value)} /></Field>
                 <Field label="Relationship"><input className="lms-input w-full" value={draft.guardian.relationship} onChange={(e) => update('guardian.relationship', e.target.value)} /></Field>
                 <Field label="Mobile Number"><input className="lms-input w-full" value={draft.guardian.mobile} onChange={(e) => update('guardian.mobile', e.target.value)} /></Field>
+                <Field label="Guardian Photo" className="sm:col-span-2">
+                  <PhotoUploadField
+                    label=""
+                    currentUrl={draft.guardian.photo_url}
+                    folder="admission_photo"
+                    subfolder="guardian"
+                    schoolId={meta.schoolId}
+                    onUploaded={({ url, path }) => {
+                      update('guardian.photo_url', url)
+                      update('guardian.photo_path', path)
+                    }}
+                    onClear={() => {
+                      update('guardian.photo_url', '')
+                      update('guardian.photo_path', '')
+                    }}
+                  />
+                </Field>
               </Grid>
             ) : null}
           </Section>

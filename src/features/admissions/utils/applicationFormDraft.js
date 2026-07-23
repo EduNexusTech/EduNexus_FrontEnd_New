@@ -16,6 +16,7 @@ export function emptyApplicationFormDraft() {
       caste_category: '',
       aadhaar_number: '',
       photo_url: '',
+      photo_path: '',
     },
     father: {
       name: '',
@@ -25,6 +26,8 @@ export function emptyApplicationFormDraft() {
       annual_income: '',
       mobile: '',
       email: '',
+      photo_url: '',
+      photo_path: '',
     },
     mother: {
       name: '',
@@ -34,12 +37,16 @@ export function emptyApplicationFormDraft() {
       annual_income: '',
       mobile: '',
       email: '',
+      photo_url: '',
+      photo_path: '',
     },
     guardian: {
       applicable: false,
       name: '',
       relationship: '',
       mobile: '',
+      photo_url: '',
+      photo_path: '',
     },
     address: {
       door_no: '',

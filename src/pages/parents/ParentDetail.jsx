@@ -94,8 +94,30 @@ export default function ParentDetail() {
       />
 
       <Card>
-        <div className="mb-6 flex items-center gap-4">
+        <div className="mb-6 flex flex-wrap items-center gap-4">
           <Avatar name={parent.full_name} src={resolveMediaUrl(parent.photo_url)} size="lg" />
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text">Profile photo</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="block w-full max-w-xs text-xs text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const fd = new FormData()
+                fd.append('file', file)
+                parentService.uploadPhoto(id, fd)
+                  .then(() => {
+                    toast.success('Photo uploaded')
+                    invalidate()
+                  })
+                  .catch((err) => toast.error(getErrorMessage(err)))
+                  .finally(() => { e.target.value = '' })
+              }}
+            />
+            <p className="text-xs text-muted">Stored on R2 · JPG/PNG · max 5 MB</p>
+          </div>
           <SelectField
             label="Status"
             value={parent.status}

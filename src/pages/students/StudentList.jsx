@@ -5,14 +5,12 @@ import toast from 'react-hot-toast'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import Button from '@/components/ui/Button'
 import { StatusBadge } from '@/components/ui/Feedback'
-import Modal from '@/components/ui/Modal'
-import { SelectField } from '@/components/ui/Input'
-import { Avatar } from '@/components/ui/Feedback'
 import { studentService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import { downloadBlob } from '@/utils/format'
-import { resolveMediaUrl } from '@/utils/format'
+import Modal from '@/components/ui/Modal'
+import { SelectField } from '@/components/ui/Input'
 
 const STATUS_LABELS = Object.fromEntries(STUDENT_STATUS_OPTIONS.map((o) => [o.value, o.label]))
 
@@ -77,14 +75,6 @@ export default function StudentList() {
   const listParams = useMemo(() => (statusFilter ? { status: statusFilter } : {}), [statusFilter])
 
   const columns = [
-    {
-      id: 'photo',
-      header: 'Photo',
-      enableSorting: false,
-      cell: ({ row }) => (
-        <Avatar name={row.original.full_name} src={resolveMediaUrl(row.original.photo_url)} size="sm" />
-      ),
-    },
     { accessorKey: 'admission_number', header: 'Adm. No.' },
     { accessorKey: 'full_name', header: 'Name' },
     { accessorKey: 'roll_number', header: 'Roll No.' },
