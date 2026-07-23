@@ -835,3 +835,25 @@ Object.assign(admissionService, {
   feeIntents: createAcademicService(API_ENDPOINTS.ADMISSIONS.FEE_INTENTS),
   numberSequences: createAcademicService(API_ENDPOINTS.ADMISSIONS.NUMBER_SEQUENCES),
 })
+
+/**
+ * Shared media upload to Cloudflare R2 (via backend).
+ *
+ * @param {File|Blob} file
+ * @param {string} folder - STORAGE_FOLDERS key, e.g. STORAGE_FOLDERS.STUDENT_PROFILE
+ * @param {{ subfolder?: string, schoolId?: string }} [options]
+ */
+export const storageService = {
+  listFolders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
+
+  upload: (file, folder, options = {}) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+    if (options.subfolder) formData.append('subfolder', options.subfolder)
+    if (options.schoolId) formData.append('school', options.schoolId)
+    return apiPostForm(API_ENDPOINTS.STORAGE.UPLOAD, formData)
+  },
+
+  delete: (path) => apiDelete(API_ENDPOINTS.STORAGE.DELETE, { data: { path } }),
+}

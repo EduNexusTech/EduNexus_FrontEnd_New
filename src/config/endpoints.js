@@ -567,4 +567,9 @@ export const API_ENDPOINTS = {
   NEXUS_MAIL: {
     SEND: '/api/v1/nexus-mail/send/',
   },
+  STORAGE: {
+    FOLDERS: '/api/v1/storage/folders/',
+    UPLOAD: '/api/v1/storage/upload/',
+    DELETE: '/api/v1/storage/delete/',
+  },
 }
