@@ -55,10 +55,8 @@ export default function PhotoUploadField({
       }
       const objectUrl = URL.createObjectURL(uploadFile)
       setPreview(objectUrl)
-      const response = await storageService.upload({
-        file: uploadFile,
-        folder,
-        school: schoolId,
+      const response = await storageService.upload(uploadFile, folder, {
+        schoolId,
         subfolder,
       })
       const data = unwrapData(response) || {}

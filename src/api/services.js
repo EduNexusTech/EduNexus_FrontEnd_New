@@ -561,19 +561,6 @@ export const parentService = {
   uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.PARENTS.UPLOAD_PHOTO(id), formData),
 }
 
-export const storageService = {
-  folders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
-  upload: ({ file, folder, subfolder, school }) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('folder', folder)
-    if (subfolder) formData.append('subfolder', subfolder)
-    if (school) formData.append('school', school)
-    return apiPostForm(API_ENDPOINTS.STORAGE.UPLOAD, formData)
-  },
-  delete: (path) => apiDelete(API_ENDPOINTS.STORAGE.DELETE, { data: { path } }),
-}
-
 export const householdService = {
   list: (params) => apiGet(API_ENDPOINTS.HOUSEHOLDS.LIST, params),
   get: (id) => apiGet(API_ENDPOINTS.HOUSEHOLDS.DETAIL(id)),
@@ -860,13 +847,14 @@ Object.assign(admissionService, {
  */
 export const storageService = {
   listFolders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
+  folders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
 
   upload: (file, folder, options = {}) => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('folder', folder)
     if (options.subfolder) formData.append('subfolder', options.subfolder)
-    if (options.schoolId) formData.append('school', options.schoolId)
+    if (options.schoolId || options.school) formData.append('school', options.schoolId || options.school)
     return apiPostForm(API_ENDPOINTS.STORAGE.UPLOAD, formData)
   },
 
