@@ -22,6 +22,8 @@ import { getErrorMessage, unwrapData } from '@/api/client'
 import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import { resolveMediaUrl } from '@/utils/format'
 import { cn } from '@/lib/utils'
+import ProfilePhotoFrame from '@/components/common/ProfilePhotoFrame'
+import { compressImageFile } from '@/utils/imageCompress'
 
 const PRIMARY_TABS = [
   { key: 'overview', label: 'Profile' },
@@ -283,6 +285,15 @@ export default function StudentDetail() {
     onError: (e) => toast.error(getErrorMessage(e)),
   })
 
+  const photoMut = useMutation({
+    mutationFn: (fd) => studentService.uploadPhoto(id, fd),
+    onSuccess: () => {
+      invalidate()
+      toast.success('Photo uploaded')
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+
   const student = unwrapData(data)
   const parentLinks = useMemo(() => student?.parent_links || [], [student?.parent_links])
   const admission = student?.admission_details
@@ -338,14 +349,48 @@ export default function StudentDetail() {
         <div className="h-28 bg-gradient-to-r from-sky-100 via-cyan-50 to-teal-50 sm:h-32" />
         <div className="relative px-5 pb-5 sm:px-8 sm:pb-6">
           <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <Avatar
-                name={student.full_name}
-                src={studentPhoto}
-                size="2xl"
-                className="ring-4 ring-white shadow-md shadow-sky-100"
-              />
-              <div className="min-w-0 space-y-2 pb-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="relative shrink-0">
+                <ProfilePhotoFrame
+                  src={studentPhoto}
+                  alt={student.full_name}
+                  frameClassName="ring-4 ring-white shadow-md shadow-sky-100"
+                />
+                <label className="absolute bottom-2 right-2 cursor-pointer rounded bg-sky-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow hover:bg-sky-700">
+                  {photoMut.isPending ? 'Uploading…' : 'Change photo'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={photoMut.isPending}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      if (file.size > 15 * 1024 * 1024) {
+                        toast.error('Image must be 15 MB or smaller')
+                        e.target.value = ''
+                        return
+                      }
+                      let uploadFile = file
+                      try {
+                        uploadFile = await compressImageFile(file)
+                        if (!uploadFile) {
+                          toast.error('Could not process this image. Try a JPG or PNG under 15 MB.')
+                          e.target.value = ''
+                          return
+                        }
+                      } catch {
+                        uploadFile = file
+                      }
+                      const fd = new FormData()
+                      fd.append('file', uploadFile)
+                      photoMut.mutate(fd)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="min-w-0 space-y-2 pb-1 sm:pt-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-2xl font-bold tracking-tight text-slate-800 sm:text-3xl">
                     {student.full_name}

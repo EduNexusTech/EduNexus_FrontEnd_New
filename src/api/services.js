@@ -225,6 +225,7 @@ export const studentService = {
   updateHostel: (id, data) => apiPatch(API_ENDPOINTS.STUDENTS.HOSTEL(id), data),
   updateMedical: (id, data) => apiPatch(API_ENDPOINTS.STUDENTS.MEDICAL(id), data),
   uploadDocument: (id, formData) => apiPostForm(API_ENDPOINTS.STUDENTS.UPLOAD_DOCUMENT(id), formData),
+  uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.STUDENTS.UPLOAD_PHOTO(id), formData),
   verifyDocument: (id, data) => apiPost(API_ENDPOINTS.STUDENTS.VERIFY_DOCUMENT(id), data),
   addAchievement: (id, data) => apiPost(API_ENDPOINTS.STUDENTS.ACHIEVEMENTS(id), data),
   addDiscipline: (id, data) => apiPost(API_ENDPOINTS.STUDENTS.DISCIPLINE(id), data),
@@ -557,6 +558,7 @@ export const parentService = {
   updateEmergencyContact: (id, data) => apiPatch(API_ENDPOINTS.PARENTS.EMERGENCY_CONTACT(id), data),
   updateGuardian: (id, data) => apiPatch(API_ENDPOINTS.PARENTS.GUARDIAN(id), data),
   setMobileAppAccess: (id, data) => apiPost(API_ENDPOINTS.PARENTS.MOBILE_APP_ACCESS(id), data),
+  uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.PARENTS.UPLOAD_PHOTO(id), formData),
 }
 
 export const householdService = {
@@ -845,13 +847,14 @@ Object.assign(admissionService, {
  */
 export const storageService = {
   listFolders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
+  folders: () => apiGet(API_ENDPOINTS.STORAGE.FOLDERS),
 
   upload: (file, folder, options = {}) => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('folder', folder)
     if (options.subfolder) formData.append('subfolder', options.subfolder)
-    if (options.schoolId) formData.append('school', options.schoolId)
+    if (options.schoolId || options.school) formData.append('school', options.schoolId || options.school)
     return apiPostForm(API_ENDPOINTS.STORAGE.UPLOAD, formData)
   },
 

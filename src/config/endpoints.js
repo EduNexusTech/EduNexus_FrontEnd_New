@@ -196,6 +196,7 @@ export const API_ENDPOINTS = {
     HOSTEL: (id) => `/api/v1/students/${id}/hostel/`,
     MEDICAL: (id) => `/api/v1/students/${id}/medical/`,
     UPLOAD_DOCUMENT: (id) => `/api/v1/students/${id}/upload-document/`,
+    UPLOAD_PHOTO: (id) => `/api/v1/students/${id}/upload-photo/`,
     VERIFY_DOCUMENT: (id) => `/api/v1/students/${id}/verify-document/`,
     ACHIEVEMENTS: (id) => `/api/v1/students/${id}/achievements/`,
     DISCIPLINE: (id) => `/api/v1/students/${id}/discipline/`,
@@ -459,6 +460,7 @@ export const API_ENDPOINTS = {
     EMERGENCY_CONTACT: (id) => `/api/v1/parents/${id}/emergency-contact/`,
     GUARDIAN: (id) => `/api/v1/parents/${id}/guardian/`,
     MOBILE_APP_ACCESS: (id) => `/api/v1/parents/${id}/mobile-app-access/`,
+    UPLOAD_PHOTO: (id) => `/api/v1/parents/${id}/upload-photo/`,
   },
   HOUSEHOLDS: {
     LIST: '/api/v1/households/',
