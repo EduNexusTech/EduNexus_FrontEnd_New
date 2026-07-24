@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
-import { unwrapData, getErrorMessage } from '@/api/client'
-import { PageLoader, ErrorState } from '@/components/ui/Feedback'
+import { unwrapData } from '@/api/client'
+import { PageLoader } from '@/components/ui/Feedback'
 import { formatNumber } from '@/utils/format'
 import {
   ClayInsightBanner,
@@ -23,14 +23,16 @@ import '@/styles/dashboard-clay.css'
 
 export default function SchoolDashboardView() {
   const { user } = useAuth()
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['dashboard', 'school-admin'],
     queryFn: () => dashboardService.schoolAdmin({ limit: 10 }),
     refetchInterval: 60000,
+    // Empty / failed API → still render dashboard with zeros
+    retry: 1,
+    throwOnError: false,
   })
 
   if (isLoading) return <PageLoader />
-  if (error) return <ErrorState message={getErrorMessage(error)} onRetry={refetch} />
 
   const dashboard = unwrapData(data) || {}
   const school = dashboard.school || {}
@@ -59,9 +61,9 @@ export default function SchoolDashboardView() {
     },
     {
       title: 'Classes',
-      value: formatStatValue(statistics.total_classes ?? statistics.total_class_sections ?? '—'),
+      value: formatStatValue(statistics.total_classes ?? statistics.total_class_sections ?? 0),
       icon: FiLayers,
-      hint: statistics.total_classes == null ? 'Set up academics' : null,
+      hint: statistics.total_classes == null && statistics.total_class_sections == null ? 'Set up academics' : null,
     },
     {
       title: 'Admissions',
@@ -72,8 +74,7 @@ export default function SchoolDashboardView() {
   ]
 
   const barData = mapSchoolEnrollment(statistics)
-  const donutData = barData.length ? barData : [{ label: 'Students', value: 1 }]
-
+  // Only show chart series that have values; empty → "No data yet" in chart panels
   const lineData = [
     { label: 'Students', value: statistics.total_students ?? 0 },
     { label: 'Teachers', value: statistics.total_teachers ?? 0 },
@@ -105,7 +106,7 @@ export default function SchoolDashboardView() {
       <ClayAnalyticsSection title="Analytics">
         <div className="lms-grid-charts">
           <ClayBarChartPanel title="Enrollment by Role" data={barData} />
-          <ClayDonutPanel title="Population Mix" data={donutData} />
+          <ClayDonutPanel title="Population Mix" data={barData} />
           <ClayLineChartPanel title="Headcount Summary" data={lineData} />
         </div>
       </ClayAnalyticsSection>
@@ -113,7 +114,7 @@ export default function SchoolDashboardView() {
       <ClayRecentList
         title="Recent Activity"
         items={recentItems}
-        emptyMessage="No recent school activity"
+        emptyMessage="No data found"
       />
     </div>
   )

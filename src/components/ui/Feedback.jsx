@@ -33,7 +33,12 @@ export function TableSkeleton({ rows = 5, cols = 5 }) {
   )
 }
 
-export function EmptyState({ title = 'No data found', description, action, icon: Icon = FiInbox }) {
+export function EmptyState({
+  title = 'No data found',
+  description = 'There is no data to display yet.',
+  action,
+  icon: Icon = FiInbox,
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="clay-icon-3d mb-4 flex h-14 w-14 items-center justify-center">

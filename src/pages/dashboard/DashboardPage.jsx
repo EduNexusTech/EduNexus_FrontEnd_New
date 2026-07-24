@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
-import { unwrapData, getErrorMessage } from '@/api/client'
-import { PageLoader, ErrorState } from '@/components/ui/Feedback'
+import { unwrapData } from '@/api/client'
+import { PageLoader } from '@/components/ui/Feedback'
+import { Card, PageHeader } from '@/components/ui/Card'
 import { formatNumber } from '@/utils/format'
 import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
 import {
@@ -21,18 +22,19 @@ import {
   FiUsers,
   FiFileText,
 } from '@/components/dashboard/clay/ClayWidgets'
-import { PageHeader } from '@/components/ui/Card'
 
 function SuperAdminDashboardView() {
   const { user } = useAuth()
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['dashboard', 'super-admin'],
     queryFn: () => dashboardService.superAdmin({ limit: 10, months: 6 }),
     refetchInterval: 60000,
+    // Empty / failed API → still render dashboard with zeros
+    retry: 1,
+    throwOnError: false,
   })
 
   if (isLoading) return <PageLoader />
-  if (error) return <ErrorState message={getErrorMessage(error)} onRetry={refetch} />
 
   const dashboard = unwrapData(data) || {}
   const statistics = dashboard.statistics || {}
@@ -86,12 +88,6 @@ function SuperAdminDashboardView() {
 
   const growthData = mapGrowthChart(charts)
   const donutData = mapDistribution(charts)
-  const distributionFallback = donutData.length
-    ? donutData
-    : [
-        { label: 'Users', value: statistics.total_users ?? 1 },
-        { label: 'Schools', value: statistics.total_schools ?? 1 },
-      ]
 
   const platformBarData = [
     { label: 'Orgs', value: statistics.total_organizations ?? 0 },
@@ -116,12 +112,12 @@ function SuperAdminDashboardView() {
             title="Platform Snapshot"
             data={platformBarData.length ? platformBarData : growthData}
           />
-          <ClayDonutPanel title="User Distribution" data={distributionFallback} />
+          <ClayDonutPanel title="User Distribution" data={donutData} />
           <ClayLineChartPanel title="Growth Trend" data={growthData} />
         </div>
       </ClayAnalyticsSection>
 
-      <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No recent platform activity" />
+      <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No data found" />
     </div>
   )
 }

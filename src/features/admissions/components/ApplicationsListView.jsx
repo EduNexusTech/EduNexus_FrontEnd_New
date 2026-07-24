@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import IconActionButton from '@/components/ui/IconActionButton'
 import { SelectField } from '@/components/ui/Input'
-import { ErrorState, StatusBadge } from '@/components/ui/Feedback'
+import { StatusBadge } from '@/components/ui/Feedback'
 import { admissionService } from '@/api/services'
 import { unwrapList, getErrorMessage } from '@/api/client'
 import { usePagination, useDebounce } from '@/hooks/usePagination'
@@ -28,8 +28,8 @@ function draftLabel(row) {
 export function ApplicationsListView({
   applicationType,
   mode = 'default',
-  emptyTitle = 'No applications yet',
-  emptyDescription = 'Filled application forms will appear here after you convert an enquiry or create an application.',
+  emptyTitle = 'No data found',
+  emptyDescription = 'There is no data to display yet. Filled forms will appear here after you convert an enquiry or create an application.',
 }) {
   const isConfirmedMode = mode === 'confirmed'
   const { currentYear } = useAdmissionSetup()
@@ -219,12 +219,18 @@ export function ApplicationsListView({
     [isConfirmedMode],
   )
 
-  if (error) {
-    return <ErrorState message={getErrorMessage(error, 'Failed to load applications')} onRetry={refetch} />
-  }
-
   return (
     <div className="space-y-4">
+      {error && !isLoading ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <span className="min-w-0 break-words">
+            Could not load data. Showing empty list. {getErrorMessage(error, 'Failed to load applications')}
+          </span>
+          <button type="button" className="shrink-0 font-semibold underline" onClick={() => refetch()}>
+            Retry
+          </button>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchBox
           value={pagination.search}

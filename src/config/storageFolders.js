@@ -21,7 +21,9 @@ export const STORAGE_FOLDERS = {
   SCHOOL_BRANDING: 'school_branding',
   SCHOOL_DOCUMENT: 'school_document',
   ORGANIZATION_LOGO: 'organization_logo',
+  /** R2 path: {env}/Org_Docs/{organization_id}/… */
   ORGANIZATION_DOCUMENT: 'organization_document',
+  ORG_DOCS: 'org_docs',
   LMS_CONTENT: 'lms_content',
   LMS_ASSIGNMENT: 'lms_assignment',
   LMS_SUBMISSION: 'lms_submission',
@@ -36,4 +38,6 @@ export const STORAGE_FOLDER_LABELS = {
   [STORAGE_FOLDERS.ANNOUNCEMENTS]: 'Announcements & attachments',
   [STORAGE_FOLDERS.ADMISSIONS]: 'Admission documents',
   [STORAGE_FOLDERS.STUDENT_DOCUMENT]: 'Student documents',
+  [STORAGE_FOLDERS.ORGANIZATION_DOCUMENT]: 'Organization documents (Org_Docs)',
+  [STORAGE_FOLDERS.ORG_DOCS]: 'Organization documents (Org_Docs)',
 }

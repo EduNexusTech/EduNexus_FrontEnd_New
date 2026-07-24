@@ -12,6 +12,8 @@ const queryClient = new QueryClient({
       staleTime: 30000,
       retry: 1,
       refetchOnWindowFocus: true,
+      // Prefer empty UI over hard crash screens for failed list/dashboard loads
+      throwOnError: false,
     },
   },
 })

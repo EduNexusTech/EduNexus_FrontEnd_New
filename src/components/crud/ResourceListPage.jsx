@@ -8,7 +8,6 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import IconActionButton from '@/components/ui/IconActionButton'
-import { ErrorState } from '@/components/ui/Feedback'
 import { StatusBadge } from '@/components/ui/Feedback'
 import { usePagination, useDebounce } from '@/hooks/usePagination'
 import { unwrapList, getErrorMessage } from '@/api/client'
@@ -72,6 +71,9 @@ export default function ResourceListPage({
         ...listParams,
       }),
     placeholderData: keepPreviousData,
+    // Soft-fail: empty / failed load → show "No data found" table, not a hard error page
+    retry: 1,
+    throwOnError: false,
   })
 
   const deleteMutation = useMutation({
@@ -164,8 +166,6 @@ export default function ResourceListPage({
     toast.success('Export downloaded')
   }
 
-  if (error) return <ErrorState message={getErrorMessage(error, 'Failed to load data')} onRetry={refetch} />
-
   const headerActions = (
     <>
       <Button variant="refresh" onClick={() => refetch()} loading={isFetching}>
@@ -200,6 +200,16 @@ export default function ResourceListPage({
             <div className="h-full w-1/3 animate-pulse bg-[var(--clay-accent)]" />
           </div>
         )}
+        {error && !isLoading ? (
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <span className="min-w-0 break-words">
+              Could not load data. Showing empty list. {getErrorMessage(error)}
+            </span>
+            <Button variant="refresh" className="shrink-0" onClick={() => refetch()}>
+              <FiRefreshCw /> Retry
+            </Button>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <SearchBox value={pagination.search} onChange={pagination.setSearch} />
           {filters}

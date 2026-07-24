@@ -152,7 +152,7 @@ export function ClayBarChartPanel({ title, data = [], dataKey = 'value', labelKe
         {title}
       </h3>
       {data.length === 0 ? (
-        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data yet</p>
+        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data found</p>
       ) : (
         <div className="chart-3d-stage">
           <ResponsiveContainer width="100%" height={250}>
@@ -185,7 +185,7 @@ export function ClayLineChartPanel({ title, data = [], dataKey = 'value', labelK
         {title}
       </h3>
       {data.length === 0 ? (
-        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data yet</p>
+        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data found</p>
       ) : (
         <div className="chart-3d-stage">
           <ResponsiveContainer width="100%" height={250}>
@@ -233,7 +233,7 @@ export function ClayDonutPanel({ title, data = [] }) {
         {title}
       </h3>
       {data.length === 0 ? (
-        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data yet</p>
+        <p className="py-14 text-center text-sm text-[var(--clay-primary-soft)]">No data found</p>
       ) : (
         <div className="flex flex-col items-center gap-4 md:flex-row">
           <div className="chart-donut-3d relative w-full">
@@ -299,7 +299,7 @@ export function ClayRecentList({ title, items = [], emptyMessage }) {
         {title}
       </h3>
       {items.length === 0 ? (
-        <p className="py-10 text-center text-sm text-[var(--clay-primary-soft)]">{emptyMessage || 'Nothing here yet'}</p>
+        <p className="py-10 text-center text-sm text-[var(--clay-primary-soft)]">{emptyMessage || 'No data found'}</p>
       ) : (
         <div className="space-y-2">
           {items.slice(0, 8).map((item) => {

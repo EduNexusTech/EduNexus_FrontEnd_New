@@ -56,7 +56,14 @@ export default function DataTable({
 
   if (loading) return <TableSkeleton />
 
-  if (!data.length) return <EmptyState title="No records found" description="Try adjusting your search or filters." />
+  if (!data.length) {
+    return (
+      <EmptyState
+        title="No data found"
+        description="There is no data to display yet. Try adjusting your search or filters, or add a new record."
+      />
+    )
+  }
 
   return (
     <div className="lms-table-wrap">
