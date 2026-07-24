@@ -5,6 +5,7 @@ import FieldRenderer from '../components/FieldRenderer'
 import RichTextContent from '../components/RichTextContent'
 import { getFormBySlug, saveSubmission } from '../services/formStorage'
 import { isInputField } from '../utils/fieldFactory'
+import { getErrorMessage } from '@/api/client'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 function buildInitialValues(fields) {
@@ -24,19 +25,60 @@ function buildInitialValues(fields) {
   return initial
 }
 
+function resolvePublicFormSlug(params) {
+  const fromParams = params?.slug
+  if (fromParams) return decodeURIComponent(String(fromParams))
+
+  if (typeof window === 'undefined') return ''
+
+  const parts = window.location.pathname.split('/').filter(Boolean)
+  if (parts[0] === 'f' && parts[1]) return decodeURIComponent(parts[1])
+  return ''
+}
+
 export default function PublicFormPage() {
-  const { slug } = useParams()
-  const form = getFormBySlug(slug)
-  const initialValues = useMemo(() => (form ? buildInitialValues(form.fields) : {}), [form?.id])
-  const [values, setValues] = useState(initialValues)
+  const params = useParams()
+  const slug = resolvePublicFormSlug(params)
+  const [form, setForm] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [values, setValues] = useState({})
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      setLoading(true)
+      const row = await getFormBySlug(slug)
+      if (active) {
+        setForm(row)
+        setLoading(false)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [slug])
+
+  const initialValues = useMemo(
+    () => (form ? buildInitialValues(form.fields) : {}),
+    [form?.id, form?.fields],
+  )
 
   useEffect(() => {
     setValues(initialValues)
     setErrors({})
     setSubmitted(false)
   }, [initialValues])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm text-muted-foreground">
+        Loading form…
+      </div>
+    )
+  }
 
   if (!form) return <NotFoundPage />
 
@@ -59,17 +101,24 @@ export default function PublicFormPage() {
     return Object.keys(next).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!validate()) return
+    if (!validate() || submitting) return
     const payload = { ...buildInitialValues(form.fields), ...values }
     form.fields
       .filter((f) => f.type === 'hidden')
       .forEach((f) => {
         payload[f.id] = f.defaultValue ?? values[f.id] ?? ''
       })
-    saveSubmission(form.id, payload)
-    setSubmitted(true)
+    setSubmitting(true)
+    try {
+      await saveSubmission(form.id, payload, form.slug)
+      setSubmitted(true)
+    } catch (error) {
+      setErrors({ _form: getErrorMessage(error, 'Submission failed. Please try again.') })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -93,6 +142,9 @@ export default function PublicFormPage() {
     <div className="min-h-screen bg-[#f8fafc] py-8 px-4">
       <div className="mx-auto max-w-xl">
         <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+          {errors._form ? (
+            <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errors._form}</p>
+          ) : null}
           <div className="space-y-5">
             {form.fields.map((field) => {
               if (field.type === 'submit') {
@@ -147,9 +199,10 @@ export default function PublicFormPage() {
           {!form.fields.some((f) => f.type === 'submit') ? (
             <button
               type="submit"
-              className="mt-6 w-full rounded-lg bg-brand-600 py-3 text-sm font-medium text-white hover:bg-brand-700"
+              disabled={submitting}
+              className="mt-6 w-full rounded-lg bg-brand-600 py-3 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             >
-              {form.settings?.submitLabel || 'Submit'}
+              {submitting ? 'Submitting…' : (form.settings?.submitLabel || 'Submit')}
             </button>
           ) : null}
         </form>

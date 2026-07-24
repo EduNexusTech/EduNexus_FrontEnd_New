@@ -1,24 +1,37 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiPlus, FiEdit2, FiTrash2, FiEye, FiLink, FiCpu, FiFileText, FiCopy, FiSearch, FiInbox } from 'react-icons/fi'
 import { PageHeader } from '@/components/common/PageHeader'
 import Card from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import CreateFormModal from '../components/CreateFormModal'
-import { createEmptyForm, deleteForm, duplicateForm, getPublicFormUrl, listForms, listSubmissions, saveForm } from '../services/formStorage'
+import { createEmptyForm, deleteForm, duplicateForm, getPublicFormUrl, listForms } from '../services/formStorage'
+import { getErrorMessage } from '@/api/client'
 import toast from 'react-hot-toast'
 
 export default function FormBuilderListPage() {
   const navigate = useNavigate()
-  const [forms, setForms] = useState(() => listForms())
+  const [forms, setForms] = useState([])
+  const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const refresh = () => setForms(listForms())
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    try {
+      const rows = await listForms()
+      setForms(Array.isArray(rows) ? rows : [])
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not load forms'))
+      setForms([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     refresh()
-  }, [])
+  }, [refresh])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -33,37 +46,48 @@ export default function FormBuilderListPage() {
     total: forms.length,
     published: forms.filter((f) => f.status === 'published').length,
     draft: forms.filter((f) => f.status === 'draft').length,
-    submissions: forms.reduce((sum, f) => sum + listSubmissions(f.id).length, 0),
+    submissions: forms.reduce((sum, f) => sum + (f.submissionCount || 0), 0),
   }), [forms])
 
-  const handleCreate = (title, { method = 'manual' } = {}) => {
-    const form = createEmptyForm({ title, formName: title })
-    const saved = saveForm(form)
-    if (!saved) {
-      toast.error('Could not create form')
-      return
+  const handleCreate = async (title, { method = 'manual' } = {}) => {
+    try {
+      const saved = await createEmptyForm({ title, formName: title })
+      if (!saved?.id) {
+        toast.error('Could not create form')
+        return
+      }
+      setCreateOpen(false)
+      toast.success(`"${title}" created`)
+      navigate(`/form-builder/${saved.id}/edit${method === 'ai' ? '?mode=ai' : ''}`)
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not create form'))
     }
-    setCreateOpen(false)
-    toast.success(`"${title}" created`)
-    navigate(`/form-builder/${saved.id}/edit${method === 'ai' ? '?mode=ai' : ''}`)
   }
 
-  const handleDelete = (id, title) => {
+  const handleDelete = async (id, title) => {
     if (!window.confirm(`Delete "${title}"?`)) return
-    deleteForm(id)
-    refresh()
-    toast.success('Form deleted')
+    try {
+      await deleteForm(id)
+      await refresh()
+      toast.success('Form deleted')
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not delete form'))
+    }
   }
 
-  const handleDuplicate = (id, name) => {
-    const copy = duplicateForm(id)
-    if (!copy) {
-      toast.error('Could not duplicate form')
-      return
+  const handleDuplicate = async (id, name) => {
+    try {
+      const copy = await duplicateForm(id)
+      if (!copy?.id) {
+        toast.error('Could not duplicate form')
+        return
+      }
+      await refresh()
+      toast.success(`"${name}" duplicated`)
+      navigate(`/form-builder/${copy.id}/edit`)
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not duplicate form'))
     }
-    refresh()
-    toast.success(`"${name}" duplicated`)
-    navigate(`/form-builder/${copy.id}/edit`)
   }
 
   const copyUrl = async (slug) => {
@@ -74,6 +98,14 @@ export default function FormBuilderListPage() {
     } catch {
       toast.error('Could not copy URL')
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+        Loading forms…
+      </div>
+    )
   }
 
   return (
@@ -154,14 +186,14 @@ export default function FormBuilderListPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((form) => {
             const displayName = form.formName || form.title || 'Untitled Form'
-            const responseCount = listSubmissions(form.id).length
+            const responseCount = form.submissionCount || 0
             return (
             <Card key={form.id} hover className="flex flex-col !p-5">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="truncate font-semibold">{displayName}</h3>
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                    {form.description || `${form.fields.length} fields`}
+                    {form.description || `${form.fields?.length || 0} fields`}
                   </p>
                 </div>
                 <Badge variant={form.status === 'published' ? 'success' : 'warning'}>
@@ -174,9 +206,19 @@ export default function FormBuilderListPage() {
                     <FiCpu className="h-3 w-3" /> AI generated
                   </span>
                 ) : null}
-                <span className="inline-flex items-center gap-1">
-                  <FiInbox className="h-3 w-3" /> {responseCount} response{responseCount !== 1 ? 's' : ''}
-                </span>
+                {responseCount > 0 ? (
+                  <Link
+                    to={`/form-builder/${form.id}/responses`}
+                    className="inline-flex items-center gap-1 rounded-md px-1 py-0.5 font-medium text-brand-600 hover:bg-brand-50 hover:underline"
+                    title="View response report"
+                  >
+                    <FiInbox className="h-3 w-3" /> {responseCount} response{responseCount !== 1 ? 's' : ''}
+                  </Link>
+                ) : (
+                  <span className="inline-flex items-center gap-1">
+                    <FiInbox className="h-3 w-3" /> 0 responses
+                  </span>
+                )}
               </div>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
                 <Link
@@ -191,6 +233,14 @@ export default function FormBuilderListPage() {
                 >
                   <FiEye className="h-3.5 w-3.5" /> Preview
                 </Link>
+                {responseCount > 0 ? (
+                  <Link
+                    to={`/form-builder/${form.id}/responses`}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
+                  >
+                    <FiInbox className="h-3.5 w-3.5" /> Responses
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => handleDuplicate(form.id, displayName)}

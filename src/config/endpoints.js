@@ -574,4 +574,14 @@ export const API_ENDPOINTS = {
     UPLOAD: '/api/v1/storage/upload/',
     DELETE: '/api/v1/storage/delete/',
   },
+  FORMS: {
+    LIST: '/api/v1/forms/',
+    DETAIL: (id) => `/api/v1/forms/${id}/`,
+    PUBLISH: (id) => `/api/v1/forms/${id}/publish/`,
+    UNPUBLISH: (id) => `/api/v1/forms/${id}/unpublish/`,
+    DUPLICATE: (id) => `/api/v1/forms/${id}/duplicate/`,
+    SUBMISSIONS: (id) => `/api/v1/forms/${id}/submissions/`,
+    PUBLIC: (slug) => `/api/v1/public/forms/${slug}/`,
+    PUBLIC_SUBMIT: (slug) => `/api/v1/public/forms/${slug}/submissions/`,
+  },
 }

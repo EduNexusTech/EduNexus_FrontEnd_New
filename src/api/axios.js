@@ -33,7 +33,7 @@ function processRefreshQueue(token) {
   refreshQueue = []
 }
 
-const PUBLIC_PATHS = ['/api/auth/login/', '/api/auth/refresh/']
+const PUBLIC_PATHS = ['/api/auth/login/', '/api/auth/refresh/', '/api/v1/public/forms/']
 
 function isPublicAuthRequest(url) {
   return PUBLIC_PATHS.some((path) => url?.includes(path))

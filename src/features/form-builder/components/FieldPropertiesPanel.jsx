@@ -1,6 +1,8 @@
 import { FiPlus, FiTrash2 } from 'react-icons/fi'
 import { getPaletteItem } from '../constants/fieldPalette'
 import RichTextEditor from './RichTextEditor'
+import ImageUrlUpload from './ImageUrlUpload'
+import { STORAGE_FOLDERS } from '@/config/storageFolders'
 
 export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
   if (!field) {
@@ -86,15 +88,13 @@ export default function FieldPropertiesPanel({ field, onUpdate, onDelete }) {
         ) : null}
 
         {hasImage ? (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Image URL</label>
-            <input
-              value={field.imageUrl || ''}
-              onChange={(e) => update({ imageUrl: e.target.value })}
-              placeholder="https://..."
-              className="w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500/30"
-            />
-          </div>
+          <ImageUrlUpload
+            label={field.type === 'image' ? 'Banner image' : 'Logo image'}
+            value={field.imageUrl || ''}
+            onChange={(url) => update({ imageUrl: url })}
+            storageFolder={field.type === 'logo' ? STORAGE_FOLDERS.SCHOOL_LOGO : STORAGE_FOLDERS.SCHOOL_BRANDING}
+            subfolder={field.type === 'logo' ? 'form-logos' : 'form-banners'}
+          />
         ) : null}
 
         {field.type === 'file' ? (

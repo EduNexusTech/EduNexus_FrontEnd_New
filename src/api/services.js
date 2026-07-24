@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '@/config/endpoints'
+import { getStoredUser } from '@/utils/storage'
 import {
   apiGet,
   apiPost,
@@ -859,4 +860,35 @@ export const storageService = {
   },
 
   delete: (path) => apiDelete(API_ENDPOINTS.STORAGE.DELETE, { data: { path } }),
+}
+
+function resolveSchoolId(explicitSchoolId) {
+  if (explicitSchoolId) return explicitSchoolId
+  const user = getStoredUser()
+  return user?.school_id || user?.school?.id || user?.school || null
+}
+
+export const formService = {
+  list: (params) => apiGet(API_ENDPOINTS.FORMS.LIST, params),
+  get: (id) => apiGet(API_ENDPOINTS.FORMS.DETAIL(id)),
+  create: (payload, schoolId) => {
+    const body = { ...payload }
+    const sid = resolveSchoolId(schoolId)
+    if (sid) body.school = sid
+    return apiPost(API_ENDPOINTS.FORMS.LIST, body)
+  },
+  save: (id, payload, schoolId) => {
+    const body = { ...payload }
+    const sid = resolveSchoolId(schoolId)
+    if (sid) body.school = sid
+    return apiPatch(API_ENDPOINTS.FORMS.DETAIL(id), body)
+  },
+  delete: (id) => apiDelete(API_ENDPOINTS.FORMS.DETAIL(id)),
+  publish: (id) => apiPost(API_ENDPOINTS.FORMS.PUBLISH(id)),
+  unpublish: (id) => apiPost(API_ENDPOINTS.FORMS.UNPUBLISH(id)),
+  duplicate: (id) => apiPost(API_ENDPOINTS.FORMS.DUPLICATE(id)),
+  listSubmissions: (id) => apiGet(API_ENDPOINTS.FORMS.SUBMISSIONS(id)),
+  getPublic: (slug) => apiGet(API_ENDPOINTS.FORMS.PUBLIC(slug), undefined, { skipAuthRefresh: true }),
+  submitPublic: (slug, data) =>
+    apiPost(API_ENDPOINTS.FORMS.PUBLIC_SUBMIT(slug), { data }, { skipAuthRefresh: true }),
 }

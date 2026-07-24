@@ -10,6 +10,7 @@ import PublishSuccessPanel from '../components/PublishSuccessPanel'
 import FormSettingsPanel from '../components/FormSettingsPanel'
 import { createFieldFromPalette } from '../utils/fieldFactory'
 import { publishForm, saveForm } from '../services/formStorage'
+import { getErrorMessage } from '@/api/client'
 import { Drawer } from '@/components/ui/Modal'
 import { cn } from '@/lib/utils'
 
@@ -41,7 +42,7 @@ export default function FormDesigner({ form: initialForm }) {
     }))
   }
 
-  const handleSave = (silent = false) => {
+  const handleSave = async (silent = false) => {
     if (saving) return form
     if (!form?.id) {
       toast.error('Cannot save: form id is missing')
@@ -49,7 +50,7 @@ export default function FormDesigner({ form: initialForm }) {
     }
     setSaving(true)
     try {
-      const saved = saveForm(form)
+      const saved = await saveForm(form)
       if (!saved) {
         toast.error('Save failed')
         return null
@@ -57,29 +58,36 @@ export default function FormDesigner({ form: initialForm }) {
       setForm(saved)
       if (!silent) toast.success('Form saved')
       return saved
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Save failed'))
+      return null
     } finally {
       setSaving(false)
     }
   }
 
-  const handlePreview = () => {
-    const saved = handleSave(true)
+  const handlePreview = async () => {
+    const saved = await handleSave(true)
     if (!saved?.id) return
     navigate(`/form-builder/${saved.id}/preview`)
   }
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (saving) return
-    const saved = handleSave(true)
+    const saved = await handleSave(true)
     if (!saved?.id) return
-    const pub = publishForm(saved.id)
-    if (!pub) {
-      toast.error('Publish failed')
-      return
+    try {
+      const pub = await publishForm(saved.id)
+      if (!pub) {
+        toast.error('Publish failed')
+        return
+      }
+      setForm(pub)
+      setPublished(pub)
+      toast.success('Form published — URL is ready to share!')
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Publish failed'))
     }
-    setForm(pub)
-    setPublished(pub)
-    toast.success('Form published — URL is ready to share!')
   }
 
   const handleAiGenerated = (generated) => {

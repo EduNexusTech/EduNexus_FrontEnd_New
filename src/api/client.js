@@ -3,7 +3,7 @@ import { API_BASE_URL } from '@/config/constants'
 
 export function buildQuery(params = {}) {
   const query = {}
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       query[key] = value
     }
@@ -12,7 +12,7 @@ export function buildQuery(params = {}) {
 }
 
 export async function apiGet(url, params, config) {
-  const response = await axiosInstance.get(url, { params: buildQuery(params), ...config })
+  const response = await axiosInstance.get(url, { params: buildQuery(params ?? {}), ...config })
   return response.data
 }
 

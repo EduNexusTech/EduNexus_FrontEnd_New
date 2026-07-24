@@ -146,6 +146,7 @@ import FormBuilderListPage from '@/features/form-builder/pages/FormBuilderListPa
 import FormBuilderNewPage from '@/features/form-builder/pages/FormBuilderNewPage'
 import FormDesignerPage from '@/features/form-builder/pages/FormDesignerPage'
 import FormPreviewPage from '@/features/form-builder/pages/FormPreviewPage'
+import FormResponsesPage from '@/features/form-builder/pages/FormResponsesPage'
 import PublicFormPage from '@/features/form-builder/pages/PublicFormPage'
 
 export default function AppRoutes() {
@@ -172,6 +173,7 @@ export default function AppRoutes() {
           <Route path="/form-builder/new" element={<FormBuilderNewPage />} />
           <Route path="/form-builder/:id/edit" element={<FormDesignerPage />} />
           <Route path="/form-builder/:id/preview" element={<FormPreviewPage />} />
+          <Route path="/form-builder/:id/responses" element={<FormResponsesPage />} />
 
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { FiArrowLeft, FiEdit2 } from 'react-icons/fi'
 import FieldRenderer from '../components/FieldRenderer'
@@ -6,7 +7,31 @@ import NotFoundPage from '@/pages/NotFoundPage'
 
 export default function FormPreviewPage() {
   const { id } = useParams()
-  const form = getFormById(id)
+  const [form, setForm] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      setLoading(true)
+      const row = await getFormById(id)
+      if (active) {
+        setForm(row)
+        setLoading(false)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+        Loading preview…
+      </div>
+    )
+  }
 
   if (!form) return <NotFoundPage />
 

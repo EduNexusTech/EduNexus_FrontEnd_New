@@ -1,117 +1,68 @@
-import { FORM_STORAGE_KEY, SUBMISSION_STORAGE_KEY } from '../types'
-import { createId } from '../utils/createId'
+import { formService } from '@/api/services'
+import { unwrapData, unwrapList } from '@/api/client'
 
-function readJson(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw ? JSON.parse(raw) : fallback
-  } catch {
-    return fallback
-  }
+export function getPublicFormUrl(slug) {
+  if (typeof window === 'undefined') return `/f/${slug}`
+  return `${window.location.origin}/f/${slug}`
 }
 
-function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value))
+async function unwrapForm(response) {
+  return unwrapData(response)
 }
 
-function slugify(text) {
-  return String(text || 'form')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48) || 'form'
+async function unwrapFormList(response) {
+  const payload = unwrapData(response)
+  if (Array.isArray(payload)) return payload
+  if (payload?.results) return payload.results
+  return unwrapList(response).results
 }
 
-function uniqueSlug(base, existing, excludeId = null) {
-  let slug = slugify(base)
-  let i = 1
-  while (existing.some((f) => f.slug === slug && f.id !== excludeId)) {
-    slug = `${slugify(base)}-${i++}`
-  }
-  return slug
+export async function listForms(params) {
+  const response = await formService.list(params)
+  return unwrapFormList(response)
 }
 
-/** Keep one entry per id (newest updatedAt wins). */
-function dedupeById(forms) {
-  const map = new Map()
-  for (const form of forms) {
-    if (!form?.id) continue
-    const prev = map.get(form.id)
-    if (!prev || String(form.updatedAt || '') >= String(prev.updatedAt || '')) {
-      map.set(form.id, form)
-    }
-  }
-  return Array.from(map.values()).sort(
-    (a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')),
-  )
-}
-
-export function listForms() {
-  const raw = readJson(FORM_STORAGE_KEY, [])
-  const forms = dedupeById(Array.isArray(raw) ? raw : [])
-  // Heal storage only when duplicates or invalid entries were present
-  if (forms.length !== (Array.isArray(raw) ? raw.filter((f) => f?.id).length : 0) || forms.length !== raw.length) {
-    writeJson(FORM_STORAGE_KEY, forms)
-  }
-  return forms
-}
-
-export function getFormById(id) {
+export async function getFormById(id) {
   if (!id) return null
-  return listForms().find((f) => f.id === id) ?? null
+  try {
+    const response = await formService.get(id)
+    return unwrapForm(response)
+  } catch {
+    return null
+  }
 }
 
-export function getFormBySlug(slug) {
-  return listForms().find((f) => f.slug === slug && f.status === 'published') ?? null
+export async function getFormBySlug(slug) {
+  if (!slug) return null
+  try {
+    const response = await formService.getPublic(slug)
+    return unwrapForm(response)
+  } catch {
+    return null
+  }
 }
 
-/**
- * Upsert by id only. Never inserts a second copy of the same form.
- * Requires a valid form.id — otherwise returns null and does nothing.
- */
-export function saveForm(form) {
+export async function saveForm(form) {
   if (!form?.id) {
     console.warn('[formStorage] saveForm skipped: missing form.id')
     return null
   }
-
-  const forms = listForms()
-  const idx = forms.findIndex((f) => f.id === form.id)
-  const next = {
-    ...form,
-    id: form.id,
-    updatedAt: new Date().toISOString(),
-  }
-
-  if (idx >= 0) {
-    forms[idx] = next
-  } else {
-    forms.unshift(next)
-  }
-
-  writeJson(FORM_STORAGE_KEY, dedupeById(forms))
-  return next
+  const response = await formService.save(form.id, form)
+  return unwrapForm(response)
 }
 
-export function deleteForm(id) {
+export async function deleteForm(id) {
   if (!id) return
-  writeJson(FORM_STORAGE_KEY, listForms().filter((f) => f.id !== id))
+  await formService.delete(id)
 }
 
-export function createEmptyForm(partial = {}) {
-  const forms = listForms()
+export async function createEmptyForm(partial = {}) {
   const title = String(partial.title || 'Untitled Form').trim() || 'Untitled Form'
-  const id = partial.id || createId('form')
-  const now = new Date().toISOString()
-  return {
-    id,
-    slug: uniqueSlug(title, forms, id),
-    formName: title,
+  const response = await formService.create({
     title,
+    formName: partial.formName || title,
     description: partial.description || '',
-    status: 'draft',
-    schoolName: partial.schoolName || 'EduNexus School',
+    schoolName: partial.schoolName || '',
     logoUrl: partial.logoUrl || '',
     headerSubtitle: partial.headerSubtitle || '',
     fields: partial.fields || [],
@@ -121,64 +72,34 @@ export function createEmptyForm(partial = {}) {
       showBranding: true,
       ...(partial.settings || {}),
     },
-    createdAt: now,
-    updatedAt: now,
-  }
-}
-
-export function publishForm(id) {
-  const form = getFormById(id)
-  if (!form) return null
-  return saveForm({
-    ...form,
-    status: 'published',
-    publishedAt: new Date().toISOString(),
   })
+  return unwrapForm(response)
 }
 
-export function getPublicFormUrl(slug) {
-  if (typeof window === 'undefined') return `/f/${slug}`
-  return `${window.location.origin}/f/${slug}`
+export async function publishForm(id) {
+  const response = await formService.publish(id)
+  return unwrapForm(response)
 }
 
-export function listSubmissions(formId) {
-  return readJson(SUBMISSION_STORAGE_KEY, []).filter((s) => s.formId === formId)
+export async function unpublishForm(id) {
+  const response = await formService.unpublish(id)
+  return unwrapForm(response)
 }
 
-export function saveSubmission(formId, data) {
-  const all = readJson(SUBMISSION_STORAGE_KEY, [])
-  const submission = {
-    id: createId('sub'),
-    formId,
-    data,
-    submittedAt: new Date().toISOString(),
-  }
-  all.unshift(submission)
-  writeJson(SUBMISSION_STORAGE_KEY, all)
-  return submission
+export async function listSubmissions(formId) {
+  const response = await formService.listSubmissions(formId)
+  const payload = unwrapData(response)
+  if (Array.isArray(payload)) return payload
+  return payload?.results || unwrapList(response).results || []
 }
 
-export function duplicateForm(id) {
-  const source = getFormById(id)
-  if (!source) return null
-  const forms = listForms()
-  const baseName = `${source.formName || source.title || 'Form'} (Copy)`
-  const copy = createEmptyForm({
-    title: baseName,
-    formName: baseName,
-    description: source.description,
-    schoolName: source.schoolName,
-    logoUrl: source.logoUrl,
-    headerSubtitle: source.headerSubtitle,
-    fields: JSON.parse(JSON.stringify(source.fields)),
-    settings: { ...source.settings },
-  })
-  copy.slug = uniqueSlug(baseName, forms, copy.id)
-  return saveForm(copy)
+export async function saveSubmission(_formId, data, slug) {
+  if (!slug) throw new Error('Form slug is required for public submission')
+  const response = await formService.submitPublic(slug, data)
+  return unwrapForm(response)
 }
 
-export function unpublishForm(id) {
-  const form = getFormById(id)
-  if (!form) return null
-  return saveForm({ ...form, status: 'draft' })
+export async function duplicateForm(id) {
+  const response = await formService.duplicate(id)
+  return unwrapForm(response)
 }
