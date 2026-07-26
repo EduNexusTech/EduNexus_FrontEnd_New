@@ -202,8 +202,8 @@ export default function SchoolUserList() {
         listFn={schoolUserService.list}
         listParams={listParams}
         deleteFn={schoolUserService.delete}
-        deleteSuccessMessage="User deactivated"
-        deleteBehavior="deactivate"
+        deleteSuccessMessage="User deleted"
+        deleteBehavior="remove"
         basePath="/school-users"
         columns={columns}
         filters={roleFilter}

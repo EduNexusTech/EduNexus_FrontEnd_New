@@ -22,6 +22,8 @@ export default function ResourceFormPage({
   transformSubmit,
   transformLoad,
   onSuccess,
+  renderExtra,
+  renderTop,
 }) {
   const { id } = useParams()
   const isEdit = Boolean(id)
@@ -135,11 +137,27 @@ export default function ResourceFormPage({
 
       <Card className="w-full lms-form-card">
         <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]">
+          {renderTop ? (
+            <div className="sm:col-span-2 lg:col-span-3">
+              {renderTop({
+                isEdit,
+                item: isEdit && data ? unwrapData(data) : null,
+              })}
+            </div>
+          ) : null}
           {fields.map((field) => (
             <div key={field.name} className={field.fullWidth ? 'sm:col-span-2 lg:col-span-3' : ''}>
               {renderField(field)}
             </div>
           ))}
+          {renderExtra ? (
+            <div className="sm:col-span-2 lg:col-span-3">
+              {renderExtra({
+                isEdit,
+                item: isEdit && data ? unwrapData(data) : null,
+              })}
+            </div>
+          ) : null}
           <div className="sm:col-span-2 lg:col-span-3 flex flex-wrap gap-3 pt-4 border-t border-[var(--clay-border)]">
             <Button type="submit" variant="primary" loading={mutation.isPending}>
               {isEdit ? 'Update' : 'Create'}
@@ -166,6 +184,7 @@ export function ResourceDetailPage({
   fields,
   actions,
   renderExtra,
+  renderTop,
 }) {
   const { id } = useParams()
   const { data, isLoading, error } = useQuery({
@@ -191,7 +210,8 @@ export function ResourceDetailPage({
         }
       />
       <Card className="w-full">
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {renderTop?.(item)}
+        <dl className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${renderTop ? 'mt-6 border-t border-border pt-6' : ''}`}>
           {fields.map((f) => (
             <div key={f.key}>
               <dt className="text-xs font-medium uppercase tracking-wider text-[var(--clay-primary-soft)]">{f.label}</dt>

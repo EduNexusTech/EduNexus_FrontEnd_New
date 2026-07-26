@@ -173,12 +173,12 @@ export default function UserList() {
         queryKey="users"
         listFn={userService.list}
         deleteFn={userService.delete}
-        deleteSuccessMessage="User deactivated"
-        deleteBehavior="deactivate"
+        deleteSuccessMessage="User deleted"
+        deleteBehavior="remove"
         basePath="/users"
         columns={columns}
         enableBulkDelete
-        bulkDeleteFn={async (ids) => userService.bulkAction(ids, 'deactivate')}
+        bulkDeleteFn={async (ids) => userService.bulkAction(ids, 'delete')}
         onView={(item) => openView(item, resolveRecordId(item))}
         extraActions={
           <Button

@@ -29,3 +29,8 @@ export function isTokenExpired(token, leewaySeconds = 30) {
 export function getTokenSubject(token) {
   return decodeJwtPayload(token)?.sub ?? decodeJwtPayload(token)?.user_id ?? null
 }
+
+/** True when refresh token is expired (no leeway by default). */
+export function isRefreshTokenExpired(token, leewaySeconds = 0) {
+  return isTokenExpired(token, leewaySeconds)
+}

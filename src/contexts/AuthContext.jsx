@@ -7,9 +7,11 @@ import { unwrapData } from '@/api/client'
 import { AuthSyncEvent, notifyAuthSync, subscribeAuthSync } from '@/utils/authSync'
 import {
   bootstrapStoredSession,
+  hasRefreshableSession,
+  hydrateAuthSession,
   persistAuthSession,
   readAuthSession,
-  validateStoredSession,
+  refreshStoredSession,
 } from '@/utils/authSession'
 import {
   clearAuth,
@@ -24,7 +26,7 @@ const AuthContext = createContext(null)
 
 const TOKEN_CHECK_MS = 30_000
 
-function buildAuthState(saved) {
+function buildAuthState(saved, { isHydrated = true, isLoading = false } = {}) {
   if (!saved?.accessToken) {
     return {
       user: null,
@@ -32,8 +34,8 @@ function buildAuthState(saved) {
       refreshToken: null,
       rememberMe: false,
       isAuthenticated: false,
-      isLoading: false,
-      isHydrated: true,
+      isLoading,
+      isHydrated,
     }
   }
 
@@ -43,9 +45,20 @@ function buildAuthState(saved) {
     refreshToken: saved.refreshToken,
     rememberMe: saved.rememberMe || false,
     isAuthenticated: true,
-    isLoading: false,
-    isHydrated: true,
+    isLoading,
+    isHydrated,
   }
+}
+
+function initialAuthState() {
+  const saved = bootstrapStoredSession()
+  if (saved) return buildAuthState(saved)
+
+  if (hasRefreshableSession()) {
+    return buildAuthState(null, { isHydrated: false, isLoading: true })
+  }
+
+  return buildAuthState(null)
 }
 
 function resolveUserId(user) {
@@ -55,9 +68,10 @@ function resolveUserId(user) {
 
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient()
-  const [state, setState] = useState(() => buildAuthState(bootstrapStoredSession()))
+  const [state, setState] = useState(() => initialAuthState())
   const stateRef = useRef(state)
   const remoteLogoutHandledAtRef = useRef(0)
+  const refreshInFlightRef = useRef(null)
   stateRef.current = state
 
   const isLoggedOut = useCallback(() => {
@@ -103,13 +117,22 @@ export function AuthProvider({ children }) {
   )
 
   const applyAuthFromStorage = useCallback(
-    (options = {}) => {
+    async (options = {}) => {
       const { silent = false } = options
-      const raw = loadAuth()
-      const valid = validateStoredSession(raw)
+      let valid = readAuthSession()
 
-      if (raw && !valid) {
-        forceLogoutLocal({ broadcast: true, message: 'Your session has expired. Please sign in again.' })
+      if (!valid && hasRefreshableSession()) {
+        valid = await refreshStoredSession()
+      }
+
+      if (!valid) {
+        const raw = loadAuth()
+        if (raw?.accessToken || raw?.refreshToken) {
+          forceLogoutLocal({ broadcast: true, message: 'Your session has expired. Please sign in again.' })
+          return 'logout'
+        }
+        setState(buildAuthState(null))
+        queryClient.clear()
         return 'logout'
       }
 
@@ -118,11 +141,6 @@ export function AuthProvider({ children }) {
       const nextUserId = resolveUserId(nextState.user)
 
       setState(nextState)
-
-      if (!nextState.isAuthenticated) {
-        queryClient.clear()
-        return 'logout'
-      }
 
       if (nextUserId && nextUserId !== prevUserId) {
         queryClient.clear()
@@ -267,22 +285,62 @@ export function AuthProvider({ children }) {
   }, [state.accessToken, state.refreshToken, state.user, updateTokens, forceLogoutLocal])
 
   useEffect(() => {
-    if (!state.isAuthenticated) return undefined
+    if (state.isHydrated) return undefined
 
-    const checkExpiry = () => {
-      const token = stateRef.current.accessToken || getStoredAccessToken()
-      if (token && isTokenExpired(token)) {
+    let active = true
+    ;(async () => {
+      const saved = await hydrateAuthSession()
+      if (!active) return
+      setState(buildAuthState(saved))
+      if (saved) notifyAuthSync(AuthSyncEvent.UPDATED)
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [state.isHydrated])
+
+  const trySilentRefresh = useCallback(async () => {
+    if (refreshInFlightRef.current) {
+      return refreshInFlightRef.current
+    }
+
+    const task = (async () => {
+      const saved = await refreshStoredSession()
+      if (!saved) {
         forceLogoutLocal({
           broadcast: true,
           message: 'Your session has expired. Please sign in again.',
         })
+        return false
       }
+
+      setState(buildAuthState(saved))
+      notifyAuthSync(AuthSyncEvent.UPDATED)
+      return true
+    })().finally(() => {
+      refreshInFlightRef.current = null
+    })
+
+    refreshInFlightRef.current = task
+    return task
+  }, [forceLogoutLocal])
+
+  useEffect(() => {
+    if (!state.isAuthenticated) return undefined
+
+    const checkExpiry = async () => {
+      const token = stateRef.current.accessToken || getStoredAccessToken()
+      if (!token || !isTokenExpired(token)) return
+      await trySilentRefresh()
     }
 
-    checkExpiry()
-    const intervalId = window.setInterval(checkExpiry, TOKEN_CHECK_MS)
+    void checkExpiry()
+    const intervalId = window.setInterval(() => {
+      void checkExpiry()
+    }, TOKEN_CHECK_MS)
     const onVisible = () => {
-      if (document.visibilityState === 'visible') checkExpiry()
+      if (document.visibilityState === 'visible') void checkExpiry()
     }
     document.addEventListener('visibilitychange', onVisible)
 
@@ -290,16 +348,11 @@ export function AuthProvider({ children }) {
       window.clearInterval(intervalId)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [state.isAuthenticated, forceLogoutLocal])
+  }, [state.isAuthenticated, trySilentRefresh])
 
   useEffect(() => {
     const onFocus = () => {
-      if (!stateRef.current.isAuthenticated) {
-        const restored = readAuthSession()
-        if (restored) applyAuthFromStorage({ silent: true })
-        return
-      }
-      applyAuthFromStorage({ silent: true })
+      void applyAuthFromStorage({ silent: true })
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)

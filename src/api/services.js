@@ -15,6 +15,8 @@ import {
 
 export const authService = {
   login: (payload) => apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true }),
+  refresh: (refreshToken) =>
+    apiPost(API_ENDPOINTS.AUTH.REFRESH, { refresh: refreshToken }, { skipAuthRefresh: true }),
   logout: (refresh) => apiPost(API_ENDPOINTS.AUTH.LOGOUT, { refresh }),
   profile: () => apiGet(API_ENDPOINTS.AUTH.PROFILE),
   changePassword: (payload) => apiPost(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, payload),
@@ -67,11 +69,19 @@ export const subscriptionPlanService = {
   delete: (id) => apiDelete(API_ENDPOINTS.SUBSCRIPTION_PLANS.DETAIL(id)),
 }
 
+function schoolWrite(url, data, method = 'post') {
+  const isForm = typeof FormData !== 'undefined' && data instanceof FormData
+  if (method === 'patch') {
+    return isForm ? apiPatchForm(url, data) : apiPatch(url, data)
+  }
+  return isForm ? apiPostForm(url, data) : apiPost(url, data)
+}
+
 export const schoolService = {
   list: (params) => apiGetPaginated(API_ENDPOINTS.SCHOOLS.LIST, params),
   get: (id) => apiGet(API_ENDPOINTS.SCHOOLS.DETAIL(id)),
-  create: (data) => apiPost(API_ENDPOINTS.SCHOOLS.LIST, data),
-  update: (id, data) => apiPatch(API_ENDPOINTS.SCHOOLS.DETAIL(id), data),
+  create: (data) => schoolWrite(API_ENDPOINTS.SCHOOLS.LIST, data, 'post'),
+  update: (id, data) => schoolWrite(API_ENDPOINTS.SCHOOLS.DETAIL(id), data, 'patch'),
   delete: (id) => apiDelete(API_ENDPOINTS.SCHOOLS.DETAIL(id)),
   getProfile: (id) => apiGet(id ? API_ENDPOINTS.SCHOOLS.PROFILE(id) : API_ENDPOINTS.SCHOOL_PROFILE),
   updateProfile: (id, data) => {

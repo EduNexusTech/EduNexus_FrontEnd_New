@@ -9,6 +9,7 @@ import { StatusBadge, PageLoader } from '@/components/ui/Feedback'
 import { Card } from '@/components/ui/Card'
 import Input from '@/components/ui/Input'
 import { getErrorMessage, unwrapData } from '@/api/client'
+import { resolveMediaUrl } from '@/utils/format'
 import { SchoolDocumentsList } from './SchoolDocumentsModal'
 
 const FEATURE_LABELS = {
@@ -100,6 +101,10 @@ export default function SchoolDetail() {
   const features = useMemo(() => overview?.features || {}, [overview])
   const branding = overview?.branding || {}
   const analytics = overview?.analytics || {}
+  const logoSrc = resolveMediaUrl(school?.logo_url || branding?.logo || school?.logo)
+  const bannerSrc = resolveMediaUrl(
+    school?.branding_url || branding?.branding_image || school?.branding,
+  )
 
   return (
     <div className="space-y-6">
@@ -149,6 +154,46 @@ export default function SchoolDetail() {
             <Link to={`/schools/${id}/edit`}><Button variant="edit">Edit</Button></Link>
           </>
         )}
+        renderTop={(item) => {
+          const topLogo = resolveMediaUrl(item?.logo_url || logoSrc || item?.logo)
+          const topBanner = resolveMediaUrl(item?.branding_url || bannerSrc || item?.branding)
+          return (
+            <div>
+              <h2 className="text-sm font-semibold text-text">Logo & Banner</h2>
+              <p className="mt-0.5 text-xs text-muted">School identity images</p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Logo</p>
+                  <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-border bg-slate-50">
+                    {topLogo ? (
+                      <img
+                        src={topLogo}
+                        alt={`${item?.school_name || 'School'} logo`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs text-muted">No logo</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Banner</p>
+                  <div className="flex h-32 w-full items-center justify-center overflow-hidden rounded-2xl border border-border bg-slate-50">
+                    {topBanner ? (
+                      <img
+                        src={topBanner}
+                        alt={`${item?.school_name || 'School'} banner`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs text-muted">No banner</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }}
       />
 
       {overviewQuery.isLoading ? (
@@ -167,7 +212,7 @@ export default function SchoolDetail() {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-text">Branding</h2>
+            <h2 className="text-lg font-semibold text-text">Branding Colors</h2>
             <p className="mt-1 text-sm text-muted">Override organization branding for this school</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Input

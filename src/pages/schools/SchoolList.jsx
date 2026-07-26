@@ -5,6 +5,7 @@ import ResourceDetailModal, { useListDetailModal } from '@/components/crud/Resou
 import IconActionButton from '@/components/ui/IconActionButton'
 import { schoolService } from '@/api/services'
 import { resolveRecordId } from '@/utils/record'
+import { resolveMediaUrl } from '@/utils/format'
 import SchoolDocumentsModal, { SchoolDocumentsList } from './SchoolDocumentsModal'
 
 const columns = [
@@ -28,6 +29,39 @@ const columns = [
 ]
 
 const DETAIL_FIELDS = [
+  {
+    key: 'logo_url',
+    label: 'Logo',
+    render: (item) => {
+      const url = resolveMediaUrl(item.logo_url || item.logo)
+      return url ? (
+        <img
+          src={url}
+          alt={`${item.school_name || 'School'} logo`}
+          className="h-20 w-20 rounded-xl border border-border object-cover"
+        />
+      ) : (
+        <span className="text-sm text-muted">No logo</span>
+      )
+    },
+  },
+  {
+    key: 'branding_url',
+    label: 'Banner',
+    fullWidth: true,
+    render: (item) => {
+      const url = resolveMediaUrl(item.branding_url || item.branding)
+      return url ? (
+        <img
+          src={url}
+          alt={`${item.school_name || 'School'} banner`}
+          className="h-24 w-full max-w-md rounded-xl border border-border object-cover"
+        />
+      ) : (
+        <span className="text-sm text-muted">No banner</span>
+      )
+    },
+  },
   { key: 'school_name', label: 'Name' },
   { key: 'school_code', label: 'Code' },
   { key: 'short_name', label: 'Short Name' },

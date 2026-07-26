@@ -1,18 +1,22 @@
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { FiFileText } from 'react-icons/fi'
+import { FiFileText, FiImage, FiUpload } from 'react-icons/fi'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { organizationService, schoolService } from '@/api/services'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import Button from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { cn, resolveMediaUrl } from '@/utils/format'
 import {
   SchoolDocumentsList,
   SchoolDocumentsUploader,
   useSchoolDocumentDelete,
 } from './SchoolDocumentsModal'
+
+const IMAGE_ACCEPT = 'image/png,image/jpeg,image/jpg,image/webp,image/gif'
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024
 
 const SCHOOL_TYPE_OPTIONS = [
   { label: 'CBSE', value: 'cbse' },
@@ -134,6 +138,132 @@ function transformSchoolLoad(item) {
   }
 }
 
+function buildSchoolPayload(values, { logoFile, brandingFile }) {
+  const cleaned = { ...values }
+  Object.keys(cleaned).forEach((key) => {
+    if (cleaned[key] === undefined || cleaned[key] === null) delete cleaned[key]
+  })
+
+  if (!logoFile && !brandingFile) return cleaned
+
+  const fd = new FormData()
+  Object.entries(cleaned).forEach(([key, value]) => {
+    if (value === '' || value === undefined || value === null) return
+    fd.append(key, value)
+  })
+  if (logoFile) fd.append('logo', logoFile)
+  if (brandingFile) fd.append('branding', brandingFile)
+  return fd
+}
+
+function schoolImageUrl(item, kind = 'logo') {
+  if (!item) return null
+  if (kind === 'banner') {
+    return resolveMediaUrl(item.branding_url || item.branding)
+  }
+  return resolveMediaUrl(item.logo_url || item.logo)
+}
+
+function ImageUploadField({
+  label,
+  hint,
+  previewUrl,
+  onSelect,
+  onClear,
+  error,
+  previewClassName = 'h-24 w-24',
+}) {
+  const inputRef = useRef(null)
+
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-text">{label}</label>
+      <p className="text-sm text-muted">{hint || 'PNG, JPG, WebP or GIF. Max 5 MB.'}</p>
+      <div className="flex flex-col gap-4 rounded-xl border border-dashed border-border bg-slate-50/50 p-4 sm:flex-row sm:items-center">
+        <div
+          className={cn(
+            'flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-white',
+            previewClassName,
+          )}
+        >
+          {previewUrl ? (
+            <img src={previewUrl} alt={`${label} preview`} className="h-full w-full object-cover" />
+          ) : (
+            <FiImage className="h-8 w-8 text-muted" />
+          )}
+        </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" size="sm" onClick={() => inputRef.current?.click()}>
+              <FiUpload className="h-4 w-4" />
+              {previewUrl ? `Change ${label.toLowerCase()}` : `Upload ${label.toLowerCase()}`}
+            </Button>
+            {previewUrl ? (
+              <Button type="button" variant="ghost" size="sm" onClick={onClear}>
+                Remove
+              </Button>
+            ) : null}
+          </div>
+          <input
+            ref={inputRef}
+            type="file"
+            accept={IMAGE_ACCEPT}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) onSelect(file)
+              e.target.value = ''
+            }}
+          />
+        </div>
+      </div>
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
+    </div>
+  )
+}
+
+function SchoolBrandingUploadSection({
+  logoPreview,
+  bannerPreview,
+  logoError,
+  bannerError,
+  onLogoSelect,
+  onBannerSelect,
+  onLogoClear,
+  onBannerClear,
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-slate-50/40 p-4 sm:p-5">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-text">Logo & Banner</h3>
+        <p className="mt-0.5 text-xs text-muted">
+          Upload a school logo and banner image. These appear on school profiles, forms, and reports.
+        </p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ImageUploadField
+          label="School Logo"
+          hint="Square logo works best. PNG, JPG, WebP or GIF. Max 5 MB."
+          previewUrl={logoPreview}
+          onSelect={onLogoSelect}
+          onClear={onLogoClear}
+          error={logoError}
+          previewClassName="h-28 w-28"
+        />
+        <ImageUploadField
+          label="Banner"
+          hint="Wide banner for headers and branding. PNG, JPG, WebP or GIF. Max 5 MB."
+          previewUrl={bannerPreview}
+          onSelect={onBannerSelect}
+          onClear={onBannerClear}
+          error={bannerError}
+          previewClassName="h-28 w-full max-w-md"
+        />
+      </div>
+    </div>
+  )
+}
+
 function SchoolDocumentsEditSection({ schoolId }) {
   const queryClient = useQueryClient()
   const { data } = useQuery({
@@ -188,9 +318,25 @@ function SchoolDocumentsEditSection({ schoolId }) {
   )
 }
 
+function validateImageFile(file) {
+  if (!file) return 'Please choose an image file'
+  if (!file.type?.startsWith('image/')) return 'Please choose an image file (PNG, JPG, WebP or GIF)'
+  if (file.size > IMAGE_MAX_BYTES) return 'Image must be 5 MB or smaller'
+  return ''
+}
+
 export default function SchoolForm() {
   const { id } = useParams()
   const isEdit = Boolean(id)
+
+  const [logoFile, setLogoFile] = useState(null)
+  const [bannerFile, setBannerFile] = useState(null)
+  const [logoPreview, setLogoPreview] = useState(null)
+  const [bannerPreview, setBannerPreview] = useState(null)
+  const [logoError, setLogoError] = useState('')
+  const [bannerError, setBannerError] = useState('')
+  const logoPreviewRef = useRef(null)
+  const bannerPreviewRef = useRef(null)
 
   const {
     data: orgData,
@@ -226,6 +372,76 @@ export default function SchoolForm() {
     [orgOptions],
   )
 
+  const revokeBlob = (url) => {
+    if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
+  }
+
+  const handleLogoSelect = useCallback((file) => {
+    const error = validateImageFile(file)
+    setLogoError(error)
+    if (error) return
+    revokeBlob(logoPreviewRef.current)
+    const url = URL.createObjectURL(file)
+    logoPreviewRef.current = url
+    setLogoFile(file)
+    setLogoPreview(url)
+  }, [])
+
+  const handleBannerSelect = useCallback((file) => {
+    const error = validateImageFile(file)
+    setBannerError(error)
+    if (error) return
+    revokeBlob(bannerPreviewRef.current)
+    const url = URL.createObjectURL(file)
+    bannerPreviewRef.current = url
+    setBannerFile(file)
+    setBannerPreview(url)
+  }, [])
+
+  const handleLogoClear = useCallback(() => {
+    revokeBlob(logoPreviewRef.current)
+    logoPreviewRef.current = null
+    setLogoFile(null)
+    setLogoPreview(null)
+    setLogoError('')
+  }, [])
+
+  const handleBannerClear = useCallback(() => {
+    revokeBlob(bannerPreviewRef.current)
+    bannerPreviewRef.current = null
+    setBannerFile(null)
+    setBannerPreview(null)
+    setBannerError('')
+  }, [])
+
+  const { data: schoolEditData } = useQuery({
+    queryKey: ['schools', id],
+    queryFn: () => schoolService.get(id),
+    enabled: isEdit,
+  })
+
+  useEffect(() => {
+    if (!isEdit || !schoolEditData) return
+    if (logoFile || bannerFile) return
+    const item = unwrapData(schoolEditData)
+    const nextLogo = schoolImageUrl(item, 'logo')
+    const nextBanner = schoolImageUrl(item, 'banner')
+    setLogoPreview((prev) => (prev?.startsWith('blob:') ? prev : nextLogo))
+    setBannerPreview((prev) => (prev?.startsWith('blob:') ? prev : nextBanner))
+  }, [isEdit, schoolEditData, logoFile, bannerFile])
+
+  const transformSubmit = useCallback(
+    (values) => buildSchoolPayload(values, { logoFile, brandingFile: bannerFile }),
+    [logoFile, bannerFile],
+  )
+
+  useEffect(() => {
+    return () => {
+      revokeBlob(logoPreviewRef.current)
+      revokeBlob(bannerPreviewRef.current)
+    }
+  }, [])
+
   if (orgsLoading) return <PageLoader />
   if (orgsError) {
     return <ErrorState message={getErrorMessage(orgsError, 'Failed to load organizations')} onRetry={refetchOrgs} />
@@ -256,6 +472,19 @@ export default function SchoolForm() {
         basePath="/schools"
         fields={fields}
         transformLoad={transformSchoolLoad}
+        transformSubmit={transformSubmit}
+        renderTop={() => (
+          <SchoolBrandingUploadSection
+            logoPreview={logoPreview}
+            bannerPreview={bannerPreview}
+            logoError={logoError}
+            bannerError={bannerError}
+            onLogoSelect={handleLogoSelect}
+            onBannerSelect={handleBannerSelect}
+            onLogoClear={handleLogoClear}
+            onBannerClear={handleBannerClear}
+          />
+        )}
       />
       {isEdit && <SchoolDocumentsEditSection schoolId={id} />}
     </div>
