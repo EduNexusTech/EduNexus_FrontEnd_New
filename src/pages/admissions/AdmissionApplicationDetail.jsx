@@ -8,7 +8,8 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
-import { admissionService, academicServices } from '@/api/services'
+import { admissionService } from '@/api/services'
+import { listActiveClassSections } from '@/api/activeClassSections'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import {
   ADMISSION_LADDER,
@@ -59,21 +60,12 @@ export default function AdmissionApplicationDetail() {
     queryKey: ['class-sections', String(schoolId || ''), String(academicYearId || '')],
     queryFn: async () => {
       // Prefer school + academic year; if empty, fall back to school-only so options still appear.
-      const primary = await academicServices.classSections.list({
-        page_size: 200,
-        is_active: true,
-        ...(schoolId ? { school: schoolId } : {}),
-        ...(academicYearId ? { academic_year: academicYearId } : {}),
-      })
-      const primaryList = unwrapList(primary)
-      if ((primaryList.results || []).length > 0 || !schoolId || !academicYearId) {
+      // Only year-activated class sections appear in academic workflows
+      const primary = await listActiveClassSections({ schoolId, academicYearId })
+      if ((primary.results || []).length > 0 || !schoolId || !academicYearId) {
         return primary
       }
-      return academicServices.classSections.list({
-        page_size: 200,
-        is_active: true,
-        school: schoolId,
-      })
+      return listActiveClassSections({ schoolId })
     },
     enabled: Boolean(id && schoolId),
   })
@@ -499,13 +491,18 @@ export default function AdmissionApplicationDetail() {
           ) : classSections.length === 0 ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm font-normal text-amber-950">
               <p>
-                No class–section options found for this school / academic year.
-                Create them under Academics → Class Sections, then refresh.
+                No active class–section options for this school / academic year.
+                Create STD → Section → Map under Masters, then activate them under Academics → Active Classes.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                <Link to="/masters/setup/map">
+                  <Button type="button" variant="outline" size="sm">
+                    Masters Map
+                  </Button>
+                </Link>
                 <Link to="/academics/class-sections">
                   <Button type="button" variant="outline" size="sm">
-                    Open Class Sections
+                    Activate Classes
                   </Button>
                 </Link>
                 <Button type="button" variant="outline" size="sm" onClick={() => classSectionsQuery.refetch()}>

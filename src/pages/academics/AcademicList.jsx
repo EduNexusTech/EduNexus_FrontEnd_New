@@ -6,6 +6,7 @@ import { FiUpload } from 'react-icons/fi'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
+import ClassSectionActivationPage from '@/pages/academics/ClassSectionActivationPage'
 import { ACADEMIC_DEFINITIONS } from '@/config/academicDefinitions'
 import { academicServices, academicYearService, masterServices } from '@/api/services'
 import { resolveRecordId } from '@/utils/record'
@@ -229,6 +230,11 @@ export function AcademicList() {
   if (!def) return <div className="p-8 text-center text-muted">Academic entity not found</div>
   if (def.masterKey) return <Navigate to={`/masters/${def.masterKey}`} replace />
 
+  // Year activation UI — STD/Section/Map live under Masters
+  if (entityKey === 'class-sections') {
+    return <ClassSectionActivationPage />
+  }
+
   const service = resolveService(def)
   const sampleFields = def.fields?.filter((f) => f.required).map((f) => f.name).slice(0, 4) || ['name', 'code']
 
@@ -284,11 +290,16 @@ export function AcademicList() {
 }
 
 export function AcademicForm() {
-  const { entityKey } = useParams()
+  const { entityKey, id } = useParams()
   const def = ACADEMIC_DEFINITIONS[entityKey]
 
   if (!def) return <div className="p-8 text-center text-muted">Academic entity not found</div>
   if (def.masterKey) return <Navigate to={`/masters/${def.masterKey}/new`} replace />
+
+  // Create STD / Section / Map under Masters; Academics only activates for the year
+  if (entityKey === 'class-sections' && !id) {
+    return <Navigate to="/masters/setup/map" replace />
+  }
 
   const service = resolveService(def)
 

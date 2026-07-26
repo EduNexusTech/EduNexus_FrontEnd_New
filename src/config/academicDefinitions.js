@@ -79,10 +79,11 @@ export const ACADEMIC_DEFINITIONS = {
   },
   'class-sections': {
     key: 'class-sections',
-    label: 'Class Section',
-    labelPlural: 'Class Sections',
+    label: 'Active Class',
+    labelPlural: 'Active Classes',
     serviceKey: 'classSections',
     scope: 'school',
+    // List/activate in ClassSectionActivationPage. Create STD/Section/Map under Masters.
     fields: [
       { name: 'school_id', label: 'School ID', type: 'text', required: true },
       { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
@@ -541,9 +542,6 @@ export const ACADEMIC_HUB_GROUPS = [
     items: [
       { key: 'academic-years', label: 'Academic Years', path: '/academics/academic-years' },
       { key: 'terms', label: 'Terms / Semesters', path: '/academics/terms' },
-      { key: 'boards', label: 'Boards', path: '/masters/boards' },
-      { key: 'classes', label: 'Standards / Classes', path: '/masters/classes' },
-      { key: 'sections', label: 'Sections', path: '/masters/sections' },
       { key: 'streams', label: 'Streams', path: '/masters/streams' },
     ],
   },
@@ -560,7 +558,7 @@ export const ACADEMIC_HUB_GROUPS = [
   {
     title: 'Class Allocation',
     items: [
-      { key: 'class-sections', label: 'Class Sections', path: '/academics/class-sections' },
+      { key: 'class-sections', label: 'Active / Inactive Classes', path: '/academics/class-sections' },
       { key: 'class-teachers', label: 'Class Teachers', path: '/academics/class-teachers' },
       { key: 'class-section-subjects', label: 'Class Subjects', path: '/academics/class-section-subjects' },
       { key: 'rooms', label: 'Rooms', path: '/academics/rooms' },

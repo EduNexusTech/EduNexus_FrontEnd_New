@@ -89,7 +89,8 @@ export const MASTER_DEFINITIONS = {
     labelPlural: 'Classes',
     serviceKey: 'classes',
     fields: [
-      { name: 'organization_id', label: 'Organization ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School ID (optional if Organization ID set)', type: 'text' },
+      { name: 'organization_id', label: 'Organization ID', type: 'text' },
       { name: 'board', label: 'Board ID', type: 'text' },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
@@ -110,8 +111,9 @@ export const MASTER_DEFINITIONS = {
     labelPlural: 'Sections',
     serviceKey: 'sections',
     fields: [
-      { name: 'organization_id', label: 'Organization ID', type: 'text', required: true },
-      { name: 'school_class', label: 'Class ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School ID (optional if Organization ID set)', type: 'text' },
+      { name: 'organization_id', label: 'Organization ID', type: 'text' },
+      { name: 'school_class', label: 'Class ID (optional — map later via Class Sections)', type: 'text' },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'capacity', label: 'Capacity', type: 'number' },

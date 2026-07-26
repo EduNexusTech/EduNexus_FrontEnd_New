@@ -124,6 +124,11 @@ import UserRoleForm from '@/pages/user-roles/UserRoleForm'
 import MastersHubPage from '@/pages/masters/MastersHubPage'
 import MasterList from '@/pages/masters/MasterList'
 import MasterForm from '@/pages/masters/MasterForm'
+import {
+  SchoolStandardsSetupPage,
+  SchoolSectionsSetupPage,
+  SchoolClassMapSetupPage,
+} from '@/pages/masters/SchoolClassSetupPages'
 import SchoolMastersHubPage from '@/pages/school-masters/SchoolMastersHubPage'
 import SchoolMasterList from '@/pages/school-masters/SchoolMasterList'
 import SchoolMasterForm from '@/pages/school-masters/SchoolMasterForm'
@@ -312,6 +317,9 @@ export default function AppRoutes() {
           <Route path="/user-roles/:id/edit" element={<UserRoleForm />} />
 
           <Route path="/masters" element={<MastersHubPage />} />
+          <Route path="/masters/setup/standards" element={<SchoolStandardsSetupPage />} />
+          <Route path="/masters/setup/sections" element={<SchoolSectionsSetupPage />} />
+          <Route path="/masters/setup/map" element={<SchoolClassMapSetupPage />} />
           <Route path="/masters/:masterKey" element={<MasterList />} />
           <Route path="/masters/:masterKey/new" element={<MasterForm />} />
           <Route path="/masters/:masterKey/:id/edit" element={<MasterForm />} />

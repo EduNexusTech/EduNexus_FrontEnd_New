@@ -1,8 +1,7 @@
-import { Link } from 'react-router-dom'
-import { FiGlobe, FiMap, FiMapPin, FiBook, FiLayers, FiGrid, FiUsers, FiTag } from 'react-icons/fi'
+import { FiGlobe, FiMap, FiMapPin, FiBook, FiLayers, FiGrid, FiUsers, FiTag, FiLink } from 'react-icons/fi'
 import { PageHeader } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
-import { HubPageShell, HubSectionTitle, HubTileCard } from '@/components/hub/HubWidgets'
+import { HubPageShell, HubSectionTitle, HubTileCard, HubLinkCard } from '@/components/hub/HubWidgets'
 
 const masterGroups = [
   {
@@ -14,12 +13,9 @@ const masterGroups = [
     ],
   },
   {
-    title: 'Academic',
+    title: 'Other Academic Catalog',
     items: [
-      { key: 'academic-years', label: 'Academic Years', icon: FiBook, path: '/academics/academic-years' },
       { key: 'boards', label: 'Boards', icon: FiLayers, path: '/masters/boards' },
-      { key: 'classes', label: 'Classes', icon: FiGrid, path: '/masters/classes' },
-      { key: 'sections', label: 'Sections', icon: FiGrid, path: '/masters/sections' },
       { key: 'streams', label: 'Streams', icon: FiLayers, path: '/masters/streams' },
       { key: 'subjects', label: 'Subjects', icon: FiBook, path: '/masters/subjects' },
       { key: 'subject-groups', label: 'Subject Groups', icon: FiLayers, path: '/masters/subject-groups' },
@@ -46,8 +42,35 @@ export default function MastersHubPage() {
       <Breadcrumb items={[{ label: 'Masters' }]} />
       <PageHeader
         title="Master Data"
-        subtitle="Organization reference data — adopt platform boards via MDM, then manage local catalogs"
+        subtitle="Create school standards & sections here, then activate them for a year under Academic Structure"
       />
+
+      <div className="mb-8">
+        <HubSectionTitle
+          title="School Class Setup"
+          subtitle="Use school ID flow: Standards → Sections → Map. Activate for the year in Academics."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <HubLinkCard
+            to="/masters/setup/standards"
+            icon={FiGrid}
+            label="Standards (STD)"
+            description="Create standards / classes by school. No academic year required."
+          />
+          <HubLinkCard
+            to="/masters/setup/sections"
+            icon={FiLayers}
+            label="Sections"
+            description="Create section labels (A, B, C…) by school, independent of standards."
+          />
+          <HubLinkCard
+            to="/masters/setup/map"
+            icon={FiLink}
+            label="Map"
+            description="Map sections to standards for a school year (created inactive until activated)."
+          />
+        </div>
+      </div>
 
       <div className="mb-8">
         <HubSectionTitle title="MDM" />
