@@ -1,6 +1,6 @@
 /**
  * Module folder keys for POST /api/v1/storage/upload/
- * Must match ERP_Backend/core/storage/constants.py
+ * Must match EduNexus_Backend/core/storage/constants.py
  */
 export const STORAGE_FOLDERS = {
   USER_PROFILE: 'user_profile',
@@ -20,10 +20,14 @@ export const STORAGE_FOLDERS = {
   SCHOOL_LOGO: 'school_logo',
   SCHOOL_BRANDING: 'school_branding',
   SCHOOL_DOCUMENT: 'school_document',
+  /** R2: {env}/Orgs/Orgs_Logo/{organization_id}/… */
   ORGANIZATION_LOGO: 'organization_logo',
-  /** R2 path: {env}/Org_Docs/{organization_id}/… */
+  ORGS_LOGO: 'orgs_logo',
+  /** R2: {env}/Orgs/Orgs_Docs/{organization_id}/… */
   ORGANIZATION_DOCUMENT: 'organization_document',
-  ORG_DOCS: 'org_docs',
+  ORGS_DOCS: 'orgs_docs',
+  /** @deprecated use ORGS_DOCS */
+  ORG_DOCS: 'orgs_docs',
   LMS_CONTENT: 'lms_content',
   LMS_ASSIGNMENT: 'lms_assignment',
   LMS_SUBMISSION: 'lms_submission',
@@ -38,6 +42,8 @@ export const STORAGE_FOLDER_LABELS = {
   [STORAGE_FOLDERS.ANNOUNCEMENTS]: 'Announcements & attachments',
   [STORAGE_FOLDERS.ADMISSIONS]: 'Admission documents',
   [STORAGE_FOLDERS.STUDENT_DOCUMENT]: 'Student documents',
-  [STORAGE_FOLDERS.ORGANIZATION_DOCUMENT]: 'Organization documents (Org_Docs)',
-  [STORAGE_FOLDERS.ORG_DOCS]: 'Organization documents (Org_Docs)',
+  [STORAGE_FOLDERS.ORGANIZATION_LOGO]: 'Organization logo (Orgs/Orgs_Logo)',
+  [STORAGE_FOLDERS.ORGS_LOGO]: 'Organization logo (Orgs/Orgs_Logo)',
+  [STORAGE_FOLDERS.ORGANIZATION_DOCUMENT]: 'Organization documents (Orgs/Orgs_Docs)',
+  [STORAGE_FOLDERS.ORGS_DOCS]: 'Organization documents (Orgs/Orgs_Docs)',
 }
