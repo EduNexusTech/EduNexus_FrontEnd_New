@@ -7,6 +7,7 @@ import {
   userService,
 } from '@/api/services'
 import { unwrapList } from '@/api/client'
+import { sortClassSections } from '@/utils/classSections'
 import {
   FK_DISPLAY_LABELS,
   FK_FIELD_NAMES,
@@ -305,7 +306,7 @@ export function useScopedFormFields(def) {
     const yearResults = unwrapList(yearsQuery.data).results || []
     const curriculumResults = unwrapList(curriculumsQuery.data).results || []
     const timingResults = unwrapList(classTimingsQuery.data).results || []
-    const sectionResults = unwrapList(classSectionsQuery.data).results || []
+    const sectionResults = sortClassSections(unwrapList(classSectionsQuery.data).results || [])
     const userResults = unwrapList(usersQuery.data).results || []
     const roleResults = unwrapList(rolesQuery.data).results || []
 

@@ -1,5 +1,6 @@
 import { academicServices } from '@/api/services'
 import { unwrapList } from '@/api/client'
+import { CLASS_SECTION_ORDERING, sortClassSections } from '@/utils/classSections'
 
 /**
  * List class sections that are activated for academic forms / workflows.
@@ -10,8 +11,13 @@ export async function listActiveClassSections({ schoolId, academicYearId, pageSi
     page_size: pageSize,
     is_active: true,
     status: 'active',
+    ordering: CLASS_SECTION_ORDERING,
     ...(schoolId ? { school: schoolId } : {}),
     ...(academicYearId ? { academic_year: academicYearId } : {}),
   })
-  return unwrapList(response)
+  const list = unwrapList(response)
+  return {
+    ...list,
+    results: sortClassSections(list.results),
+  }
 }

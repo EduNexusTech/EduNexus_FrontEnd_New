@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { admissionService } from '@/api/services'
 import { listActiveClassSections } from '@/api/activeClassSections'
+import { sortClassSections } from '@/utils/classSections'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import {
   ADMISSION_LADDER,
@@ -72,12 +73,7 @@ export default function AdmissionApplicationDetail() {
 
   const classSections = useMemo(() => {
     const list = unwrapList(classSectionsQuery.data)
-    const rows = list.results || []
-    return [...rows].sort((a, b) => {
-      const la = `${a.class_name || ''} ${a.section_name || ''}`
-      const lb = `${b.class_name || ''} ${b.section_name || ''}`
-      return la.localeCompare(lb)
-    })
+    return sortClassSections(list.results || [])
   }, [classSectionsQuery.data])
 
   const invalidate = () => {

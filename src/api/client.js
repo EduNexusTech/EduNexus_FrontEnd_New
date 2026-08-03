@@ -12,17 +12,26 @@ export function buildQuery(params = {}) {
 }
 
 export async function apiGet(url, params, config) {
-  const response = await axiosInstance.get(url, { params: buildQuery(params ?? {}), ...config })
+  const { params: configParams, ...restConfig } = config ?? {}
+  const mergedParams = buildQuery({ ...(configParams ?? {}), ...(params ?? {}) })
+  const response = await axiosInstance.get(url, { params: mergedParams, ...restConfig })
   return response.data
 }
 
 export async function apiGetPaginated(url, params, config) {
-  const response = await axiosInstance.get(url, { params: buildQuery(params), ...config })
+  const { params: configParams, ...restConfig } = config ?? {}
+  const mergedParams = buildQuery({ ...(configParams ?? {}), ...(params ?? {}) })
+  const response = await axiosInstance.get(url, { params: mergedParams, ...restConfig })
   return response.data
 }
 
 export async function apiPost(url, body, config) {
-  const response = await axiosInstance.post(url, body, config)
+  const { params: configParams, ...restConfig } = config ?? {}
+  const mergedParams = buildQuery(configParams ?? {})
+  const response = await axiosInstance.post(url, body, {
+    ...restConfig,
+    ...(Object.keys(mergedParams).length ? { params: mergedParams } : {}),
+  })
   return response.data
 }
 
@@ -63,12 +72,32 @@ export async function apiDelete(url, config) {
   return response.data
 }
 
-export async function apiGetBlob(url, params) {
-  const response = await axiosInstance.get(url, {
-    params: buildQuery(params),
-    responseType: 'blob',
-  })
-  return response.data
+export async function apiGetBlob(url, params, config) {
+  const { params: configParams, ...restConfig } = config ?? {}
+  const mergedParams = buildQuery({ ...(configParams ?? {}), ...(params ?? {}) })
+  try {
+    const response = await axiosInstance.get(url, {
+      params: mergedParams,
+      responseType: 'blob',
+      ...restConfig,
+    })
+    return response.data
+  } catch (error) {
+    const data = error?.response?.data
+    if (typeof Blob !== 'undefined' && data instanceof Blob) {
+      try {
+        const text = await data.text()
+        try {
+          error.response.data = JSON.parse(text)
+        } catch {
+          error.response.data = { detail: text }
+        }
+      } catch {
+        // keep original blob if parsing fails
+      }
+    }
+    throw error
+  }
 }
 
 export function unwrapData(response) {
@@ -139,8 +168,14 @@ export function getErrorMessage(error, fallback = 'Something went wrong') {
     return data.error.message
   }
 
+  const nestedDetail = data?.data?.detail ?? data?.errors?.detail
+  if (Array.isArray(nestedDetail) && nestedDetail[0]) return String(nestedDetail[0])
+  if (typeof nestedDetail === 'string' && nestedDetail) return nestedDetail
+
   if (status === 403) return 'You do not have permission to access this resource.'
   if (status === 401) return 'Session expired. Please sign in again.'
+  if (status === 406) return 'Could not download file — server format mismatch. Refresh and try again.'
+  if (status === 405) return 'This action is not allowed on the server route. Restart the backend after updates.'
   if (status === 404) {
     return 'API route not found. Start the Django backend (python manage.py runserver) or check VITE_API_BASE_URL.'
   }

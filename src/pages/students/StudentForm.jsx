@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -8,12 +8,15 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import Input, { Textarea, SelectField } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
-import { studentService } from '@/api/services'
-import { getErrorMessage, unwrapData } from '@/api/client'
+import { academicYearService, studentService } from '@/api/services'
+import { listActiveClassSections } from '@/api/activeClassSections'
+import { mapClassSectionOptions } from '@/utils/classSections'
+import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import ProfilePhotoFrame from '@/components/common/ProfilePhotoFrame'
 import { compressImageFile } from '@/utils/imageCompress'
 import { registerValidated, RHF_VALIDATION_MODE } from '@/utils/validation'
+import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
 
 const GENDER_OPTIONS = [
   { label: 'Male', value: 'male' },
@@ -27,6 +30,8 @@ const defaultValues = {
   email: '',
   mobile_number: '',
   admission_number: '',
+  academic_year_id: '',
+  class_section: '',
   roll_number: '',
   date_of_birth: '',
   gender: '',
@@ -104,13 +109,67 @@ export default function StudentForm() {
   const isEdit = Boolean(id)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const schoolScope = useSchoolScopedSelection()
   const [photoUrl, setPhotoUrl] = useState('')
   const [pendingPhotoFile, setPendingPhotoFile] = useState(null)
   const [photoUploading, setPhotoUploading] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
     defaultValues,
     ...RHF_VALIDATION_MODE,
+  })
+
+  const academicYearId = watch('academic_year_id')
+  const prevAcademicYearRef = useRef('')
+
+  const yearsQuery = useQuery({
+    queryKey: ['academic-years-student-form', schoolScope.schoolId],
+    queryFn: () =>
+      academicYearService.list({
+        school: schoolScope.schoolId,
+        page_size: 100,
+        ordering: '-start_date',
+      }),
+    enabled: Boolean(schoolScope.schoolId),
+  })
+
+  const yearOptions = useMemo(() => {
+    const { results } = unwrapList(yearsQuery.data)
+    return (results || []).map((year) => ({
+      label: year.is_current ? `${year.name} (current)` : year.name,
+      value: String(year.id),
+    }))
+  }, [yearsQuery.data])
+
+  const classSectionsQuery = useQuery({
+    queryKey: ['class-sections-student-form', schoolScope.schoolId, academicYearId],
+    queryFn: async () => {
+      const primary = await listActiveClassSections({
+        schoolId: schoolScope.schoolId,
+        academicYearId,
+      })
+      if ((primary.results || []).length > 0 || !schoolScope.schoolId || !academicYearId) {
+        return primary
+      }
+      return listActiveClassSections({ schoolId: schoolScope.schoolId })
+    },
+    enabled: Boolean(schoolScope.schoolId),
+  })
+
+  const classSectionOptions = useMemo(() => {
+    const { results } = unwrapList(classSectionsQuery.data)
+    return mapClassSectionOptions(results)
+  }, [classSectionsQuery.data])
+
+  const nextAdmQuery = useQuery({
+    queryKey: ['students', 'next-admission-number', academicYearId],
+    queryFn: async () =>
+      unwrapData(
+        await studentService.nextAdmissionNumber(
+          academicYearId ? { academic_year: academicYearId } : {},
+        ),
+      ),
+    enabled: !isEdit && Boolean(academicYearId),
   })
 
   const { data, isLoading, error } = useQuery({
@@ -120,15 +179,42 @@ export default function StudentForm() {
   })
 
   useEffect(() => {
+    if (isEdit) return
+    if (prevAcademicYearRef.current && prevAcademicYearRef.current !== academicYearId) {
+      reset((current) => ({ ...current, class_section: '' }))
+    }
+    prevAcademicYearRef.current = academicYearId || ''
+  }, [academicYearId, isEdit, reset])
+
+  useEffect(() => {
+    if (isEdit || yearOptions.length === 0) return
+    const currentYear = yearOptions.find((year) => year.label.includes('(current)'))
+    const nextYearId = currentYear?.value || yearOptions[0]?.value || ''
+    if (!nextYearId) return
+    reset((current) => (current.academic_year_id ? current : { ...current, academic_year_id: nextYearId }))
+  }, [isEdit, yearOptions, reset])
+
+  useEffect(() => {
+    if (isEdit || !nextAdmQuery.data?.admission_number) return
+    reset((current) => ({
+      ...current,
+      admission_number: nextAdmQuery.data.admission_number,
+    }))
+  }, [isEdit, nextAdmQuery.data, reset])
+
+  useEffect(() => {
     if (!data || !isEdit) return
     const item = unwrapData(data)
+    const enrollment = item.current_enrollment || {}
     reset({
       first_name: item.full_name?.split(' ')[0] || '',
       last_name: item.full_name?.split(' ').slice(1).join(' ') || '',
       email: item.email || '',
       mobile_number: item.mobile_number || '',
       admission_number: item.admission_number || '',
-      roll_number: item.roll_number || '',
+      academic_year_id: enrollment.academic_year ? String(enrollment.academic_year) : '',
+      class_section: enrollment.class_section ? String(enrollment.class_section) : '',
+      roll_number: enrollment.roll_number || item.roll_number || '',
       date_of_birth: item.date_of_birth || '',
       gender: item.gender || '',
       blood_group: item.blood_group || '',
@@ -197,9 +283,13 @@ export default function StudentForm() {
 
   const mutation = useMutation({
     mutationFn: async (values) => {
+      const payload = {
+        ...values,
+        class_section: values.class_section || null,
+      }
       const response = isEdit
-        ? await studentService.update(id, values)
-        : await studentService.create(values)
+        ? await studentService.update(id, payload)
+        : await studentService.create(payload)
 
       const saved = unwrapData(response)
       const studentId = saved?.student_id || saved?.id || id
@@ -239,12 +329,43 @@ export default function StudentForm() {
             onClearPending={() => setPendingPhotoFile(null)}
           />
 
+          <div className="sm:col-span-2 lg:col-span-3 rounded-lg border border-border/70 bg-muted/20 px-4 py-3">
+            <p className="text-sm font-medium text-foreground">Enrollment</p>
+            <p className="text-xs text-muted">Academic year and class section for this student.</p>
+          </div>
+
+          <SelectField
+            label="Academic Year"
+            required
+            options={yearOptions}
+            placeholder={yearsQuery.isLoading ? 'Loading years…' : 'Select academic year'}
+            error={errors.academic_year_id?.message}
+            {...register('academic_year_id', { required: 'Academic year is required' })}
+          />
+          <SelectField
+            label="Class & Section"
+            options={classSectionOptions}
+            placeholder={
+              classSectionsQuery.isLoading
+                ? 'Loading classes…'
+                : academicYearId
+                  ? 'Select class section'
+                  : 'Select academic year first'
+            }
+            {...register('class_section')}
+          />
+          <Input label="Roll Number" {...register('roll_number')} />
+
           <Input label="First Name" required error={errors.first_name?.message} {...register('first_name', { required: 'First name is required' })} />
           <Input label="Last Name" {...register('last_name')} />
           <Input label="Email" error={errors.email?.message} {...registerValidated(register, 'email', { label: 'Email', type: 'email' })} />
           <Input label="Mobile" required error={errors.mobile_number?.message} {...registerValidated(register, 'mobile_number', { required: true, label: 'Mobile' })} />
-          <Input label="Admission Number" {...register('admission_number')} />
-          <Input label="Roll Number" {...register('roll_number')} />
+          <Input
+            label="Admission Number"
+            readOnly={!isEdit}
+            hint={!isEdit ? 'Auto-generated from the last admission number for the selected year' : undefined}
+            {...register('admission_number')}
+          />
           <Input label="Date of Birth" type="date" {...register('date_of_birth')} />
           <SelectField label="Gender" options={GENDER_OPTIONS} placeholder="Select gender" {...register('gender')} />
           <Input label="Blood Group" {...register('blood_group')} />
@@ -272,14 +393,46 @@ export default function StudentForm() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => {
-                reset()
-                setPendingPhotoFile(null)
+              onClick={async () => {
                 if (isEdit) {
-                  setPhotoUrl(unwrapData(data)?.photo_url || '')
-                } else {
-                  setPhotoUrl('')
+                  const item = unwrapData(data)
+                  const enrollment = item?.current_enrollment || {}
+                  reset({
+                    first_name: item?.full_name?.split(' ')[0] || '',
+                    last_name: item?.full_name?.split(' ').slice(1).join(' ') || '',
+                    email: item?.email || '',
+                    mobile_number: item?.mobile_number || '',
+                    admission_number: item?.admission_number || '',
+                    academic_year_id: enrollment.academic_year ? String(enrollment.academic_year) : '',
+                    class_section: enrollment.class_section ? String(enrollment.class_section) : '',
+                    roll_number: enrollment.roll_number || item?.roll_number || '',
+                    date_of_birth: item?.date_of_birth || '',
+                    gender: item?.gender || '',
+                    blood_group: item?.blood_group || '',
+                    address: item?.address || '',
+                    city: item?.city || '',
+                    pincode: item?.pincode || '',
+                    previous_school: item?.previous_school || '',
+                    previous_class: item?.previous_class || '',
+                    emergency_contact_name: item?.emergency_contact_name || '',
+                    emergency_contact_phone: item?.emergency_contact_phone || '',
+                    status: item?.status || 'active',
+                    notes: item?.notes || '',
+                  })
+                  setPendingPhotoFile(null)
+                  setPhotoUrl(item?.photo_url || '')
+                  return
                 }
+                setPendingPhotoFile(null)
+                setPhotoUrl('')
+                const currentYear = yearOptions.find((year) => year.label.includes('(current)'))
+                const defaultYearId = currentYear?.value || yearOptions[0]?.value || ''
+                const { data: nextData } = await nextAdmQuery.refetch()
+                reset({
+                  ...defaultValues,
+                  academic_year_id: defaultYearId,
+                  admission_number: nextData?.admission_number || '',
+                })
               }}
             >
               Reset

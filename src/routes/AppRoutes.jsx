@@ -27,6 +27,8 @@ import StudentList from '@/pages/students/StudentList'
 import StudentForm from '@/pages/students/StudentForm'
 import StudentDetail from '@/pages/students/StudentDetail'
 import StudentsHubPage from '@/pages/students/StudentsHubPage'
+import ClassWiseStudentsReportPage from '@/pages/students/ClassWiseStudentsReportPage'
+import StudentShufflePage from '@/pages/students/StudentShufflePage'
 import TeacherList from '@/pages/teachers/TeacherList'
 import TeacherForm from '@/pages/teachers/TeacherForm'
 import TeacherDetail from '@/pages/teachers/TeacherDetail'
@@ -69,19 +71,21 @@ import {
 import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage'
 import LibraryPage from '@/pages/library/LibraryPage'
 import LibraryBookForm from '@/pages/library/LibraryBookForm'
-import AttendanceHubPage, {
-  AttendanceMarkPage,
-  AttendanceReportsPage,
-} from '@/pages/attendance/AttendanceHubPage'
+import AttendanceHubPage, { AttendanceReportsPage } from '@/pages/attendance/AttendanceHubPage'
+import MarkAttendancePage from '@/pages/attendance/MarkAttendancePage'
 import TimetableHubPage, {
   TimetableBuilderPage,
   TimetableSubstitutionsPage,
 } from '@/pages/timetable/TimetableHubPage'
-import FeesHubPage, {
+import FeesHubPage from '@/pages/fees/FeesHubPage'
+import {
   FeesCollectPage,
-  FeesAssignPage,
+  FeesGeneratePage,
   FeesDefaultersPage,
-} from '@/pages/fees/FeesHubPage'
+  FeesLedgerPage,
+} from '@/pages/fees/FeesOperationsPages'
+import { FeeMasterList, FeeMasterForm, FeeModulePlaceholder } from '@/pages/fees/FeeMasterList'
+import ClassWiseFeePaidReportPage from '@/pages/fees/ClassWiseFeePaidReportPage'
 import AssessmentsHubPage, {
   AssessmentsMarksPage,
   AssessmentsResultsPage,
@@ -201,6 +205,8 @@ export default function AppRoutes() {
 
           <Route path="/students" element={<StudentsHubPage />} />
           <Route path="/students/roster" element={<StudentList />} />
+          <Route path="/students/reports/class-wise" element={<ClassWiseStudentsReportPage />} />
+          <Route path="/students/shuffle" element={<StudentShufflePage />} />
           <Route path="/students/new" element={<StudentForm />} />
           <Route path="/students/:id" element={<StudentDetail />} />
           <Route path="/students/:id/edit" element={<StudentForm />} />
@@ -256,7 +262,7 @@ export default function AppRoutes() {
           <Route path="/lms/lesson-plans" element={<LmsLessonPlansPage />} />
           <Route path="/lms/quizzes" element={<LmsQuizzesPage />} />
           <Route path="/attendance" element={<AttendanceHubPage />} />
-          <Route path="/attendance/mark" element={<AttendanceMarkPage />} />
+          <Route path="/attendance/mark" element={<MarkAttendancePage />} />
           <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
           <Route path="/timetable" element={<TimetableHubPage />} />
           <Route path="/timetable/builder" element={<TimetableBuilderPage />} />
@@ -272,9 +278,16 @@ export default function AppRoutes() {
           <Route path="/documents/certificates" element={<DocumentCertificatesPage />} />
           <Route path="/documents/verify" element={<DocumentVerifyPage />} />
           <Route path="/fees" element={<FeesHubPage />} />
+          <Route path="/fees/masters/:entityKey" element={<FeeMasterList />} />
+          <Route path="/fees/masters/:entityKey/new" element={<FeeMasterForm />} />
+          <Route path="/fees/masters/:entityKey/:id/edit" element={<FeeMasterForm />} />
           <Route path="/fees/collect" element={<FeesCollectPage />} />
-          <Route path="/fees/assign" element={<FeesAssignPage />} />
+          <Route path="/fees/ledger" element={<FeesLedgerPage />} />
+          <Route path="/fees/generate" element={<FeesGeneratePage />} />
+          <Route path="/fees/assign" element={<FeesGeneratePage />} />
           <Route path="/fees/defaulters" element={<FeesDefaultersPage />} />
+          <Route path="/fees/reports/class-wise-paid" element={<ClassWiseFeePaidReportPage />} />
+          <Route path="/fees/:moduleKey" element={<FeeModulePlaceholder />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/library/new" element={<LibraryBookForm />} />

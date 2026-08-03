@@ -15,8 +15,8 @@ import { getUserOrganizationId, getUserSchoolId } from '@/utils/schoolScope'
 import {
   buildSampleCsv,
   mapCsvRowsToItems,
-  parseCsvText,
 } from '@/utils/csvImport'
+import { parseSpreadsheetFile } from '@/utils/spreadsheetImport'
 import { downloadBlob } from '@/utils/format'
 
 export default function BulkImportModal({
@@ -39,6 +39,7 @@ export default function BulkImportModal({
   queryKey,
   sampleFilename = 'import-sample.csv',
   helpText,
+  acceptSpreadsheet = false,
 }) {
   const queryClient = useQueryClient()
   const { user, isSuperAdmin } = useAuth()
@@ -59,9 +60,20 @@ export default function BulkImportModal({
 
   const importMut = useMutation({
     mutationFn: importFn,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: [queryKey] })
-      toast.success('Bulk import completed')
+      const payload = response?.data?.data ?? response?.data ?? response ?? {}
+      const count = payload?.count ?? payload?.results?.length
+      const errors = payload?.errors?.length ?? 0
+      if (typeof count === 'number') {
+        toast.success(
+          errors
+            ? `Imported ${count} row(s)${errors ? ` (${errors} skipped/failed)` : ''}`
+            : `Imported ${count} row(s) successfully`,
+        )
+      } else {
+        toast.success('Bulk import completed')
+      }
       handleClose()
     },
     onError: (err) => toast.error(getErrorMessage(err)),
@@ -81,25 +93,28 @@ export default function BulkImportModal({
     toast.success('Sample file downloaded — open in Excel, fill rows, then upload here')
   }
 
+  const fileAccept = acceptSpreadsheet
+    ? '.csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel'
+    : '.csv,text/csv'
+
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
     setFileName(file.name)
     try {
-      const text = await file.text()
-      const parsed = parseCsvText(text)
+      const parsed = await parseSpreadsheetFile(file)
       setRowCount(parsed.length)
       if (!parsed.length) toast.error('No data rows found in the file')
-    } catch {
+    } catch (err) {
       setRowCount(0)
-      toast.error('Could not read the file')
+      toast.error(err.message || 'Could not read the file')
     }
   }
 
   const handleImport = async () => {
     const file = fileRef.current?.files?.[0]
     if (!file) {
-      toast.error('Choose a CSV file to import')
+      toast.error(acceptSpreadsheet ? 'Choose an Excel or CSV file to import' : 'Choose a CSV file to import')
       return
     }
 
@@ -122,8 +137,7 @@ export default function BulkImportModal({
     }
 
     try {
-      const text = await file.text()
-      const parsed = parseCsvText(text)
+      const parsed = await parseSpreadsheetFile(file)
       if (!parsed.length) {
         toast.error('No data rows found in the file')
         return
@@ -193,7 +207,9 @@ export default function BulkImportModal({
     <Modal open={open} onClose={handleClose} title={title || 'Bulk Import'} size="lg">
       <div className="space-y-4">
         <p className="text-sm text-muted">
-          Download the sample file, fill in your {entityLabel} data in Excel, save as CSV, then upload.
+          {acceptSpreadsheet
+            ? 'Download the sample file, fill in Excel, then upload the .xlsx or .csv file here.'
+            : 'Download the sample file, fill in your data in Excel, save as CSV, then upload.'}
           {helpText ? (
             <span className="mt-1 block text-xs">{helpText}</span>
           ) : scopeSchool && schoolId && !scopeAcademicYear ? (
@@ -260,11 +276,13 @@ export default function BulkImportModal({
           <p className="mb-2 text-xs font-medium text-muted">Columns: {columnHint}</p>
           <label className="flex cursor-pointer flex-col items-center gap-2 py-4">
             <FiUpload className="h-8 w-8 text-primary" />
-            <span className="text-sm font-medium">Choose filled CSV file</span>
+            <span className="text-sm font-medium">
+              {acceptSpreadsheet ? 'Choose Excel (.xlsx) or CSV file' : 'Choose filled CSV file'}
+            </span>
             <input
               ref={fileRef}
               type="file"
-              accept=".csv,text/csv"
+              accept={fileAccept}
               className="hidden"
               onChange={handleFileChange}
             />

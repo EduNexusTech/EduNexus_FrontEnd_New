@@ -11,6 +11,7 @@ export default function SchoolScopeField({
   selectedSchoolLabel,
   schoolLocked = false,
   className,
+  compact = false,
 }) {
   if (schoolLocked && selectedSchoolLabel) {
     return (
@@ -19,9 +20,11 @@ export default function SchoolScopeField({
         <p className="mt-1 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm font-medium text-black">
           {selectedSchoolLabel}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Academic years are created for your assigned school.
-        </p>
+        {!compact ? (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Academic years are created for your assigned school.
+          </p>
+        ) : null}
       </div>
     )
   }

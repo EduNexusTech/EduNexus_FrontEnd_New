@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import {
   FiUsers,
@@ -14,9 +14,8 @@ import {
 import { PageHeader } from '@/components/common/PageHeader'
 import { Card, StatCard } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Input, { SelectField } from '@/components/ui/Input'
+import Input from '@/components/ui/Input'
 import { attendanceService } from '@/api/services'
-import { getErrorMessage } from '@/api/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { downloadBlob } from '@/utils/format'
 
@@ -24,23 +23,8 @@ function unwrap(res) {
   return res?.data?.data ?? res?.data ?? res ?? {}
 }
 
-const SUBJECT_TYPES = [
-  { label: 'Student', value: 'student' },
-  { label: 'Teacher', value: 'teacher' },
-  { label: 'Employee', value: 'employee' },
-]
-
-const STATUS_OPTIONS = [
-  { label: 'Present', value: 'present' },
-  { label: 'Absent', value: 'absent' },
-  { label: 'Late', value: 'late' },
-  { label: 'Half Day', value: 'half_day' },
-  { label: 'Leave', value: 'leave' },
-  { label: 'Excused', value: 'excused' },
-]
-
 const QUICK_LINKS = [
-  { to: '/attendance/mark', label: 'Mark Attendance', icon: FiClipboard, desc: 'Student / teacher / employee' },
+  { to: '/attendance/mark', label: 'Mark Attendance', icon: FiClipboard, desc: 'Class-wise daily register' },
   { to: '/attendance/reports', label: 'Daily Reports', icon: FiBarChart2, desc: 'Registers & percentages' },
   { to: '/students', label: 'Students', icon: FiUsers, desc: 'SIS identity SoT' },
   { to: '/staff', label: 'HRMS Employees', icon: FiUserCheck, desc: 'Employee punch & shifts' },
@@ -72,7 +56,7 @@ export default function AttendanceHubPage() {
           <div className="flex flex-wrap gap-2">
             <Input type="date" value={dashDate} onChange={(e) => setDashDate(e.target.value)} />
             <Link to="/attendance/mark">
-              <Button variant="primary"><FiClipboard className="h-4 w-4" /> Mark</Button>
+              <Button variant="primary"><FiClipboard className="h-4 w-4" /> Mark class attendance</Button>
             </Link>
             <Button
               variant="excel"
@@ -118,96 +102,6 @@ export default function AttendanceHubPage() {
             </Link>
           ))}
         </div>
-      </Card>
-    </div>
-  )
-}
-
-export function AttendanceMarkPage() {
-  const { user } = useAuth()
-  const schoolId = user?.school_id || user?.school || undefined
-  const queryClient = useQueryClient()
-  const [form, setForm] = useState({
-    subject_type: 'student',
-    attendance_date: new Date().toISOString().slice(0, 10),
-    status: 'present',
-    student_id: '',
-    teacher_id: '',
-    employee_id: '',
-    remarks: '',
-  })
-
-  const markMut = useMutation({
-    mutationFn: () => attendanceService.mark({
-      ...form,
-      school_id: schoolId,
-      student_id: form.subject_type === 'student' ? form.student_id || undefined : undefined,
-      teacher_id: form.subject_type === 'teacher' ? form.teacher_id || undefined : undefined,
-      employee_id: form.subject_type === 'employee' ? form.employee_id || undefined : undefined,
-    }),
-    onSuccess: () => {
-      toast.success('Attendance marked')
-      queryClient.invalidateQueries({ queryKey: ['attendance-dashboard'] })
-    },
-    onError: (e) => toast.error(getErrorMessage(e)),
-  })
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Mark Attendance"
-        description="Single mark across student, teacher, or employee domains"
-        actions={<Link to="/attendance"><Button variant="outline">Hub</Button></Link>}
-      />
-      <Card className="max-w-2xl space-y-4 p-5">
-        <SelectField
-          label="Domain"
-          value={form.subject_type}
-          onChange={(e) => setForm((p) => ({ ...p, subject_type: e.target.value }))}
-          options={SUBJECT_TYPES}
-        />
-        <Input
-          type="date"
-          label="Date"
-          value={form.attendance_date}
-          onChange={(e) => setForm((p) => ({ ...p, attendance_date: e.target.value }))}
-        />
-        <SelectField
-          label="Status"
-          value={form.status}
-          onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
-          options={STATUS_OPTIONS}
-        />
-        {form.subject_type === 'student' && (
-          <Input
-            label="Student UUID"
-            value={form.student_id}
-            onChange={(e) => setForm((p) => ({ ...p, student_id: e.target.value }))}
-            placeholder="Student profile ID"
-          />
-        )}
-        {form.subject_type === 'teacher' && (
-          <Input
-            label="Teacher UUID"
-            value={form.teacher_id}
-            onChange={(e) => setForm((p) => ({ ...p, teacher_id: e.target.value }))}
-          />
-        )}
-        {form.subject_type === 'employee' && (
-          <Input
-            label="Employee UUID"
-            value={form.employee_id}
-            onChange={(e) => setForm((p) => ({ ...p, employee_id: e.target.value }))}
-          />
-        )}
-        <Input
-          label="Remarks"
-          value={form.remarks}
-          onChange={(e) => setForm((p) => ({ ...p, remarks: e.target.value }))}
-        />
-        <Button loading={markMut.isPending} onClick={() => markMut.mutate()}>
-          Save Mark
-        </Button>
       </Card>
     </div>
   )
