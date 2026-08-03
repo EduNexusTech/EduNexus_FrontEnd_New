@@ -10,6 +10,13 @@ import {
   masterServices,
 } from '@/api/services'
 import { unwrapList } from '@/api/client'
+import { useAuth } from '@/contexts/AuthContext'
+import {
+  filterSchoolOptionsForUser,
+  getUserSchoolId,
+  isSchoolAdminUser,
+  mapSchoolsToOptions,
+} from '@/utils/schoolScope'
 
 const STALE_TIME = 5 * 60 * 1000
 
@@ -40,13 +47,18 @@ export function useOrganizationOptions(enabled = true) {
 }
 
 export function useSchoolOptions(organizationId, enabled = true) {
+  const { user } = useAuth()
+  const userSchoolId = getUserSchoolId(user)
+  const isSchoolAdmin = isSchoolAdminUser(user)
+
   const query = useQuery({
-    queryKey: ['schools', 'form-options', organizationId || 'all'],
+    queryKey: ['schools', 'form-options', organizationId || 'all', userSchoolId, isSchoolAdmin],
     queryFn: () =>
       schoolService.list({
         page_size: 500,
         ordering: 'school_name',
         ...(organizationId ? { organization: organizationId } : {}),
+        ...(isSchoolAdmin && userSchoolId ? { school: userSchoolId } : {}),
       }),
     enabled,
     staleTime: STALE_TIME,
@@ -54,12 +66,8 @@ export function useSchoolOptions(organizationId, enabled = true) {
 
   const options = useMemo(() => {
     const { results } = unwrapList(query.data)
-    return (results || []).map((school) => ({
-      value: String(school.school_id || school.id),
-      label: `${school.school_name}${school.school_code ? ` (${school.school_code})` : ''}`,
-      organizationId: school.organization_id ? String(school.organization_id) : '',
-    }))
-  }, [query.data])
+    return filterSchoolOptionsForUser(mapSchoolsToOptions(results), user)
+  }, [query.data, user])
 
   return { ...query, options }
 }
@@ -196,7 +204,9 @@ export function useMasterRecordOptions(serviceKey, organizationId, enabled = tru
         : item.organization
           ? String(item.organization)
           : '',
+      schoolId: item.school_id ? String(item.school_id) : item.school ? String(item.school) : '',
       countryId: item.country ? String(item.country) : item.country_id ? String(item.country_id) : '',
+      stateId: item.state ? String(item.state) : item.state_id ? String(item.state_id) : '',
     }))
   }, [query.data])
 

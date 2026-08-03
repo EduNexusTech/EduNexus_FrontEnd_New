@@ -167,13 +167,15 @@ export const schoolUserService = {
 
 export const admissionService = {
   setup: {
-    list: (params) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP, params),
-    get: (id) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id)),
-    create: (data) => apiPost(API_ENDPOINTS.ADMISSIONS.SETUP, data),
-    update: (id, data) => apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id), data),
-    delete: (id) => apiDelete(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id)),
-    getEmailSettings: () => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL),
-    updateEmailSettings: (data) => apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL, data),
+    list: (params, config) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP, params, config),
+    get: (id, config) => apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id), undefined, config),
+    create: (data, config) => apiPost(API_ENDPOINTS.ADMISSIONS.SETUP, data, config),
+    update: (id, data, config) => apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id), data, config),
+    delete: (id, config) => apiDelete(API_ENDPOINTS.ADMISSIONS.SETUP_DETAIL(id), config),
+    getEmailSettings: (params, config) =>
+      apiGet(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL, params, config),
+    updateEmailSettings: (data, config) =>
+      apiPatch(API_ENDPOINTS.ADMISSIONS.SETUP_EMAIL, data, config),
   },
   leads: {
     list: (params) => apiGetPaginated(API_ENDPOINTS.ADMISSIONS.LEADS, params),
@@ -709,12 +711,12 @@ export const nexusMailService = {
 export function createMasterService(apiPath) {
   const detail = (id) => (apiPath.endsWith('/') ? `${apiPath}${id}/` : `${apiPath}/${id}/`)
   return {
-    list: (params) => apiGetPaginated(apiPath, params),
+    list: (params, config) => apiGetPaginated(apiPath, params, config),
     get: (id) => apiGet(detail(id)),
     create: (data) => apiPost(apiPath, data),
-    update: (id, data) => apiPatch(detail(id), data),
-    delete: (id) => apiDelete(detail(id)),
-    bulkImport: (items) => apiPost(`${apiPath}bulk-import/`, { items }),
+    update: (id, data, config) => apiPatch(detail(id), data, config),
+    delete: (id, config) => apiDelete(detail(id), config),
+    bulkImport: (items, config) => apiPost(`${apiPath}bulk-import/`, { items }, config),
     bulkUpdate: (items) => apiPatch(`${apiPath}bulk-update/`, { items }),
     export: (params) => apiGetBlob(`${apiPath}export/`, params),
   }
@@ -728,7 +730,7 @@ export function createAcademicService(apiPath) {
     create: (data) => apiPost(apiPath, data),
     update: (id, data) => apiPatch(detail(id), data),
     delete: (id) => apiDelete(detail(id)),
-    bulkUpload: (items) => apiPost(`${apiPath}bulk-upload/`, { items }),
+    bulkUpload: (items, config) => apiPost(`${apiPath}bulk-upload/`, { items }, config),
     bulkUpdate: (items) => apiPatch(`${apiPath}bulk-update/`, { items }),
   }
 }
@@ -769,9 +771,9 @@ export const masterServices = {
 }
 
 export const academicYearService = {
-  list: (params) => apiGetPaginated(API_ENDPOINTS.ACADEMIC_YEARS.LIST, params),
+  list: (params, config) => apiGetPaginated(API_ENDPOINTS.ACADEMIC_YEARS.LIST, params, config),
   get: (id) => apiGet(API_ENDPOINTS.ACADEMIC_YEARS.DETAIL(id)),
-  create: (data) => apiPost(API_ENDPOINTS.ACADEMIC_YEARS.LIST, data),
+  create: (data, config) => apiPost(API_ENDPOINTS.ACADEMIC_YEARS.LIST, data, config),
   update: (id, data) => apiPatch(API_ENDPOINTS.ACADEMIC_YEARS.DETAIL(id), data),
   delete: (id) => apiDelete(API_ENDPOINTS.ACADEMIC_YEARS.DETAIL(id)),
   setCurrent: (id) => apiPost(API_ENDPOINTS.ACADEMIC_YEARS.SET_CURRENT(id)),
@@ -792,7 +794,11 @@ export const academicYearService = {
 export const academicServices = {
   academicYears: academicYearService,
   terms: createAcademicService(API_ENDPOINTS.ACADEMICS.TERMS),
-  classSections: createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_SECTIONS),
+  classSections: {
+    ...createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_SECTIONS),
+    applyMaps: (payload) => apiPost(API_ENDPOINTS.ACADEMICS.CLASS_SECTIONS_APPLY_MAPS, payload),
+  },
+  classSectionMaps: createAcademicService(API_ENDPOINTS.ACADEMICS.CLASS_SECTION_MAPS),
   curriculums: createAcademicService(API_ENDPOINTS.ACADEMICS.CURRICULUMS),
   curriculumSubjects: createAcademicService(API_ENDPOINTS.ACADEMICS.CURRICULUM_SUBJECTS),
   electiveSubjects: createAcademicService(API_ENDPOINTS.ACADEMICS.ELECTIVE_SUBJECTS),

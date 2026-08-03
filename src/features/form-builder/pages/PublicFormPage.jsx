@@ -7,6 +7,7 @@ import { getFormBySlug, saveSubmission } from '../services/formStorage'
 import { isInputField } from '../utils/fieldFactory'
 import { getErrorMessage } from '@/api/client'
 import NotFoundPage from '@/pages/NotFoundPage'
+import { validateByKind } from '@/utils/validation'
 
 function buildInitialValues(fields) {
   const initial = {}
@@ -87,14 +88,29 @@ export default function PublicFormPage() {
   const validate = () => {
     const next = {}
     inputFields.forEach((f) => {
-      if (!f.required) return
       const v = values[f.id]
       if (f.type === 'checkbox') {
-        if (!v) next[f.id] = 'This field is required'
+        if (f.required && !v) next[f.id] = 'This field is required'
         return
       }
-      if (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)) {
+      if (f.required && (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length))) {
         next[f.id] = 'This field is required'
+        return
+      }
+      if (v === undefined || v === null || v === '') return
+
+      const label = String(f.label || '').toLowerCase()
+      const type = String(f.type || '').toLowerCase()
+      let kind = null
+      if (type === 'email' || label.includes('email')) kind = 'email'
+      else if (type === 'tel' || label.includes('mobile') || label.includes('phone') || label.includes('whatsapp')) kind = 'mobile'
+      else if (label.includes('aadhaar') || label.includes('aadhar')) kind = 'aadhaar'
+      else if (label.includes('pincode') || label.includes('pin code') || label.includes('postal')) kind = 'pincode'
+      else if (/\bpan\b/.test(label)) kind = 'pan'
+
+      if (kind) {
+        const result = validateByKind(kind, v, { label: f.label || 'Field' })
+        if (result !== true) next[f.id] = result
       }
     })
     setErrors(next)

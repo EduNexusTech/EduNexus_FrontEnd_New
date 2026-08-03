@@ -3,6 +3,8 @@ import { FiPlus, FiSettings, FiAlertCircle } from 'react-icons/fi'
 import Button from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/common/PageHeader'
+import { PageLoader } from '@/components/ui/Feedback'
+import SchoolScopeField from '@/components/forms/SchoolScopeField'
 import { AdmissionsSubNav } from '../components/AdmissionsSubNav'
 import { AcademicYearCard } from '../components/AcademicYearCard'
 import { AcademicYearForm } from '../components/AcademicYearForm'
@@ -22,6 +24,12 @@ export default function AdmissionSetupPage() {
     toggleFeature,
     currentYear,
     isYearActive,
+    schoolId,
+    setSchoolId,
+    schoolOptions,
+    selectedSchoolLabel,
+    schoolsLoading,
+    schoolLocked,
   } = useAdmissionSetup()
 
   const [formOpen, setFormOpen] = useState(false)
@@ -47,15 +55,17 @@ export default function AdmissionSetupPage() {
 
   const activeYears = academicYears.filter((y) => y.status === 'active').length
 
+  if (schoolsLoading) return <PageLoader />
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Admission Setup"
-        description="Manage academic years and configure which admission modules are active"
+        description="Manage academic years per school and configure which admission modules are active"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <AcademicYearSelector />
-            <Button variant="primary" onClick={openCreate}>
+            <Button variant="primary" onClick={openCreate} disabled={!schoolId}>
               <FiPlus className="h-4 w-4" />
               Add Academic Year
             </Button>
@@ -63,6 +73,32 @@ export default function AdmissionSetupPage() {
         }
       />
       <AdmissionsSubNav />
+
+      <Card padding={false}>
+        <CardContent className="pt-4">
+          <div className="max-w-md">
+            <SchoolScopeField
+              schoolId={schoolId}
+              setSchoolId={setSchoolId}
+              schoolOptions={schoolOptions}
+              selectedSchoolLabel={selectedSchoolLabel}
+              schoolLocked={schoolLocked}
+            />
+          </div>
+          {selectedSchoolLabel ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {schoolLocked
+                ? 'New academic years will be saved for this school.'
+                : (
+                  <>
+                    Academic years below are scoped to{' '}
+                    <strong className="text-foreground">{selectedSchoolLabel}</strong>.
+                  </>
+                )}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       {currentYear && !isYearActive ? (
         <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -136,8 +172,12 @@ export default function AdmissionSetupPage() {
         {academicYears.length === 0 ? (
           <Card className="border-dashed" padding={false}>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No academic years configured yet.</p>
-              <Button className="mt-4" variant="primary" onClick={openCreate}>
+              <p className="text-muted-foreground">
+                {schoolId
+                  ? 'No academic years for this school yet.'
+                  : 'Select a school to manage academic years.'}
+              </p>
+              <Button className="mt-4" variant="primary" onClick={openCreate} disabled={!schoolId}>
                 Add your first academic year
               </Button>
             </CardContent>
@@ -186,6 +226,8 @@ export default function AdmissionSetupPage() {
         onClose={() => setFormOpen(false)}
         onSubmit={handleSubmit}
         initial={editingYear}
+        schoolLabel={selectedSchoolLabel}
+        schoolLocked={schoolLocked}
       />
     </div>
   )

@@ -26,11 +26,12 @@ const ENTITY_PK_PRIORITY = [
 export function resolveRecordId(item) {
   if (!item) return null
 
+  // Prefer canonical UUID primary key when present (before FK fields like school_id).
+  if (item.id) return item.id
+
   for (const key of ENTITY_PK_PRIORITY) {
     if (item[key]) return item[key]
   }
-
-  if (item.id) return item.id
 
   const dynamicIdKey = Object.keys(item).find((key) => key.endsWith('_id') && item[key])
   return dynamicIdKey ? item[dynamicIdKey] : null

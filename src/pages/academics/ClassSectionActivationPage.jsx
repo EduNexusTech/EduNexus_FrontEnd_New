@@ -8,10 +8,11 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { SelectField } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
-import { useAuth } from '@/contexts/AuthContext'
-import { academicServices, academicYearService, schoolService } from '@/api/services'
+import { academicServices, academicYearService } from '@/api/services'
 import { getErrorMessage, unwrapList } from '@/api/client'
 import { resolveRecordId } from '@/utils/record'
+import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
+import SchoolScopeField from '@/components/forms/SchoolScopeField'
 import { cn } from '@/lib/utils'
 
 /**
@@ -19,35 +20,37 @@ import { cn } from '@/lib/utils'
  * Only active ones are used in academic forms and workflows (admissions, etc.).
  */
 export default function ClassSectionActivationPage() {
-  const { user } = useAuth()
   const queryClient = useQueryClient()
-  const userSchoolId = String(user?.school_id || user?.school || '')
+  const {
+    schoolId,
+    setSchoolId,
+    resolvedOrgId,
+    listRequestConfig,
+    schoolOptions,
+    schoolsQuery,
+    selectedSchoolLabel,
+    schoolLocked,
+  } = useSchoolScopedSelection()
 
-  const [schoolId, setSchoolId] = useState(userSchoolId)
   const [academicYearId, setAcademicYearId] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // all | active | inactive
 
-  const schoolsQuery = useQuery({
-    queryKey: ['schools-for-activation'],
-    queryFn: () => schoolService.list({ page_size: 500, ordering: 'school_name' }),
-  })
-
-  const schoolOptions = useMemo(() => {
-    const { results } = unwrapList(schoolsQuery.data)
-    return (results || []).map((s) => ({
-      value: String(resolveRecordId(s) || s.id),
-      label: s.school_name || s.name || 'School',
-    }))
-  }, [schoolsQuery.data])
+  useEffect(() => {
+    setAcademicYearId('')
+  }, [schoolId])
 
   const yearsQuery = useQuery({
-    queryKey: ['academic-years-activation', schoolId],
+    queryKey: ['academic-years-activation', schoolId, resolvedOrgId],
     queryFn: () =>
-      academicYearService.list({
-        page_size: 100,
-        school: schoolId,
-        ordering: '-start_date',
-      }),
+      academicYearService.list(
+        {
+          page_size: 100,
+          school: schoolId,
+          ...(resolvedOrgId ? { organization: resolvedOrgId } : {}),
+          ordering: '-start_date',
+        },
+        listRequestConfig,
+      ),
     enabled: Boolean(schoolId),
   })
 
@@ -55,20 +58,37 @@ export default function ClassSectionActivationPage() {
     const { results } = unwrapList(yearsQuery.data)
     return (results || []).map((y) => ({
       value: String(resolveRecordId(y) || y.id),
-      label: `${y.name}${y.is_current ? ' (Current)' : ''}`,
+      label: `${y.name || y.label || y.financial_year_label || 'Academic year'}${y.is_current ? ' (Current)' : ''}`,
       isCurrent: Boolean(y.is_current),
     }))
   }, [yearsQuery.data])
 
-  // Auto-pick current year when years load
+  // Auto-pick current (or first) year when years load or school changes
   useEffect(() => {
-    if (academicYearId || !yearOptions.length) return
-    const current = yearOptions.find((y) => y.isCurrent)
+    if (!yearOptions.length) {
+      if (academicYearId) setAcademicYearId('')
+      return
+    }
+    const stillValid = yearOptions.some((y) => y.value === academicYearId)
+    if (stillValid) return
+    const current = yearOptions.find((y) => y.isCurrent) || yearOptions[0]
     if (current) setAcademicYearId(current.value)
   }, [yearOptions, academicYearId])
 
+  // Pull school maps into this academic year (creates inactive ClassSection rows if missing)
+  const applyMapsQuery = useQuery({
+    queryKey: ['class-sections-apply-maps', schoolId, academicYearId],
+    queryFn: () =>
+      academicServices.classSections.applyMaps({
+        school_id: schoolId,
+        academic_year_id: academicYearId,
+      }),
+    enabled: Boolean(schoolId && academicYearId),
+    staleTime: 30_000,
+  })
+
   const listQuery = useQuery({
-    queryKey: ['class-section-activation', schoolId, academicYearId],
+    queryKey: ['class-section-activation', schoolId, academicYearId, applyMapsQuery.dataUpdatedAt],
     queryFn: () =>
       academicServices.classSections.list({
         page_size: 500,
@@ -76,7 +96,7 @@ export default function ClassSectionActivationPage() {
         academic_year: academicYearId,
         ordering: 'class_name',
       }),
-    enabled: Boolean(schoolId && academicYearId),
+    enabled: Boolean(schoolId && academicYearId && applyMapsQuery.isFetched),
   })
 
   const rows = useMemo(() => {
@@ -97,7 +117,7 @@ export default function ClassSectionActivationPage() {
       queryClient.invalidateQueries({ queryKey: ['class-section-activation'] })
       queryClient.invalidateQueries({ queryKey: ['academics-class-sections'] })
       queryClient.invalidateQueries({ queryKey: ['class-sections'] })
-      toast.success(vars.active ? 'Class activated for academic year' : 'Class deactivated')
+      toast.success(vars.active ? 'Activated' : 'Deactivated')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
@@ -115,7 +135,7 @@ export default function ClassSectionActivationPage() {
       queryClient.invalidateQueries({ queryKey: ['class-section-activation'] })
       queryClient.invalidateQueries({ queryKey: ['academics-class-sections'] })
       queryClient.invalidateQueries({ queryKey: ['class-sections'] })
-      toast.success(vars.active ? 'All listed classes activated' : 'All listed classes deactivated')
+      toast.success(vars.active ? 'All activated' : 'All deactivated')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
@@ -138,27 +158,32 @@ export default function ClassSectionActivationPage() {
         ]}
       />
       <PageHeader
-        title="Active Classes (Academic Year)"
-        description="Turn class sections on/off for the selected year. Only active classes appear in academic forms and workflows."
+        title="Active Classes"
         actions={
-          <Link to="/masters/setup/standards">
-            <Button variant="secondary">Create STD / Section / Map</Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/masters/setup/map">
+              <Button variant="secondary">Map</Button>
+            </Link>
+            <Button
+              variant="secondary"
+              loading={applyMapsQuery.isFetching}
+              disabled={!schoolId || !academicYearId}
+              onClick={() => applyMapsQuery.refetch()}
+            >
+              Refresh
+            </Button>
+          </div>
         }
       />
 
       <Card>
         <div className="grid gap-3 sm:grid-cols-3">
-          <SelectField
-            label="School"
-            required
-            value={schoolId}
-            onChange={(e) => {
-              setSchoolId(e.target.value)
-              setAcademicYearId('')
-            }}
-            options={schoolOptions}
-            placeholder="Select school..."
+          <SchoolScopeField
+            schoolId={schoolId}
+            setSchoolId={setSchoolId}
+            schoolOptions={schoolOptions}
+            selectedSchoolLabel={selectedSchoolLabel}
+            schoolLocked={schoolLocked}
           />
           <SelectField
             label="Academic year"
@@ -166,8 +191,25 @@ export default function ClassSectionActivationPage() {
             value={academicYearId}
             onChange={(e) => setAcademicYearId(e.target.value)}
             options={yearOptions}
-            placeholder="Select academic year..."
+            placeholder={
+              yearsQuery.isLoading
+                ? 'Loading years...'
+                : yearsQuery.error
+                  ? 'Failed to load years'
+                  : yearOptions.length
+                    ? 'Select academic year...'
+                    : 'No academic years — create in Admissions Setup'
+            }
+            disabled={yearsQuery.isLoading || !schoolId}
           />
+          {!yearOptions.length && schoolId && !yearsQuery.isLoading ? (
+            <p className="sm:col-span-3 text-sm text-muted">
+              No academic years for this school.{' '}
+              <Link to="/admissions/setup" className="font-medium text-primary underline">
+                Create one in Admissions Setup
+              </Link>
+            </p>
+          ) : null}
           <SelectField
             label="Show"
             value={statusFilter}
@@ -196,7 +238,7 @@ export default function ClassSectionActivationPage() {
                 })
               }
             >
-              <FiCheck className="h-4 w-4" /> Activate listed
+              <FiCheck className="h-4 w-4" /> Activate all
             </Button>
             <Button
               variant="secondary"
@@ -209,22 +251,22 @@ export default function ClassSectionActivationPage() {
                 })
               }
             >
-              <FiX className="h-4 w-4" /> Deactivate listed
+              <FiX className="h-4 w-4" /> Deactivate all
             </Button>
           </div>
         </div>
 
         {!schoolId || !academicYearId ? (
-          <p className="mt-6 text-sm text-muted">Select school and academic year to manage classes.</p>
+          <p className="mt-6 text-sm text-muted">Select school and year.</p>
         ) : listQuery.isLoading ? (
           <PageLoader />
         ) : listQuery.error ? (
           <ErrorState message={getErrorMessage(listQuery.error)} onRetry={() => listQuery.refetch()} />
         ) : rows.length === 0 ? (
           <div className="mt-6 rounded-lg border border-dashed border-border p-6 text-center">
-            <p className="text-sm text-muted">No mapped class sections for this year yet.</p>
+            <p className="text-sm text-muted">No classes for this year.</p>
             <Link to="/masters/setup/map" className="mt-3 inline-block">
-              <Button variant="create">Map standards & sections</Button>
+              <Button variant="create">Map</Button>
             </Link>
           </div>
         ) : (

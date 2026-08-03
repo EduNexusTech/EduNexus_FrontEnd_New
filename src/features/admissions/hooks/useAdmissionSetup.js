@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { admissionService } from '@/api/services'
 import { unwrapData, unwrapList, getErrorMessage } from '@/api/client'
+import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
 import { useAdmissionSetupStore } from '../stores/admission-setup.store'
 import { DEFAULT_ADMISSION_EMAIL_SETTINGS, DEFAULT_ADMISSION_FEATURES } from '../types/setup'
 import { apiSetupToUi, setupFormToApi } from '../utils/leadMapper'
@@ -13,15 +14,40 @@ export function useAdmissionSetup() {
   const queryClient = useQueryClient()
   const selectedYearId = useAdmissionSetupStore((s) => s.selectedYearId)
   const setSelectedYearId = useAdmissionSetupStore((s) => s.setSelectedYearId)
+  const {
+    schoolId,
+    setSchoolId,
+    resolvedOrgId,
+    listRequestConfig,
+    schoolOptions,
+    schoolsQuery,
+    selectedSchoolLabel,
+    schoolLocked,
+  } = useSchoolScopedSelection()
 
   const setupQuery = useQuery({
-    queryKey: SETUP_QUERY_KEY,
-    queryFn: () => admissionService.setup.list(),
+    queryKey: [...SETUP_QUERY_KEY, schoolId, resolvedOrgId],
+    queryFn: () =>
+      admissionService.setup.list(
+        {
+          page_size: 100,
+          ...(schoolId ? { school: schoolId } : {}),
+          ...(resolvedOrgId ? { organization: resolvedOrgId } : {}),
+          ordering: '-start_date',
+        },
+        listRequestConfig,
+      ),
+    enabled: Boolean(schoolId),
   })
 
   const emailQuery = useQuery({
-    queryKey: [...SETUP_QUERY_KEY, 'email'],
-    queryFn: () => admissionService.setup.getEmailSettings(),
+    queryKey: [...SETUP_QUERY_KEY, 'email', schoolId],
+    queryFn: () =>
+      admissionService.setup.getEmailSettings(
+        schoolId ? { school: schoolId } : undefined,
+        listRequestConfig,
+      ),
+    enabled: Boolean(schoolId),
   })
 
   const academicYears = useMemo(() => {
@@ -39,6 +65,10 @@ export function useAdmissionSetup() {
     const raw = unwrapData(emailQuery.data) || {}
     return { ...DEFAULT_ADMISSION_EMAIL_SETTINGS, ...raw }
   }, [emailQuery.data])
+
+  useEffect(() => {
+    setSelectedYearId(null)
+  }, [schoolId, setSelectedYearId])
 
   useEffect(() => {
     if (!academicYears.length) return
@@ -74,9 +104,11 @@ export function useAdmissionSetup() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: SETUP_QUERY_KEY })
 
   const createMutation = useMutation({
-    mutationFn: (input) => admissionService.setup.create(setupFormToApi(input)),
+    mutationFn: (input) =>
+      admissionService.setup.create(setupFormToApi(input, { schoolId }), listRequestConfig),
     onSuccess: (res) => {
       invalidate()
+      queryClient.invalidateQueries({ queryKey: ['academic-years-activation'] })
       const created = apiSetupToUi(unwrapData(res) || res)
       if (created?.isCurrent) setSelectedYearId(created.id)
       toast.success('Academic year saved')
@@ -85,31 +117,42 @@ export function useAdmissionSetup() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, input }) => admissionService.setup.update(id, setupFormToApi(input)),
+    mutationFn: ({ id, input }) =>
+      admissionService.setup.update(id, setupFormToApi(input, { schoolId }), listRequestConfig),
     onSuccess: () => {
       invalidate()
+      queryClient.invalidateQueries({ queryKey: ['academic-years-activation'] })
       toast.success('Academic year updated')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => admissionService.setup.delete(id),
+    mutationFn: (id) => admissionService.setup.delete(id, listRequestConfig),
     onSuccess: () => {
       invalidate()
+      queryClient.invalidateQueries({ queryKey: ['academic-years-activation'] })
       toast.success('Academic year deleted')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
 
   const patchMutation = useMutation({
-    mutationFn: ({ id, data }) => admissionService.setup.update(id, data),
-    onSuccess: () => invalidate(),
+    mutationFn: ({ id, data }) =>
+      admissionService.setup.update(id, data, listRequestConfig),
+    onSuccess: () => {
+      invalidate()
+      queryClient.invalidateQueries({ queryKey: ['academic-years-activation'] })
+    },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
 
   const emailMutation = useMutation({
-    mutationFn: (patch) => admissionService.setup.updateEmailSettings(patch),
+    mutationFn: (patch) =>
+      admissionService.setup.updateEmailSettings(
+        { ...patch, ...(schoolId ? { school_id: schoolId } : {}) },
+        listRequestConfig,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [...SETUP_QUERY_KEY, 'email'] })
       toast.success('Email settings saved')
@@ -118,8 +161,14 @@ export function useAdmissionSetup() {
   })
 
   const addAcademicYear = useCallback(
-    (input) => createMutation.mutateAsync(input),
-    [createMutation],
+    (input) => {
+      if (!schoolId) {
+        toast.error('Select a school first')
+        return Promise.reject(new Error('School is required'))
+      }
+      return createMutation.mutateAsync(input)
+    },
+    [createMutation, schoolId],
   )
 
   const updateAcademicYear = useCallback(
@@ -165,14 +214,26 @@ export function useAdmissionSetup() {
   )
 
   const updateEmailSettings = useCallback(
-    (patch) => emailMutation.mutate(patch),
-    [emailMutation],
+    (patch) => {
+      if (!schoolId) {
+        toast.error('Select a school first')
+        return
+      }
+      emailMutation.mutate(patch)
+    },
+    [emailMutation, schoolId],
   )
 
   return {
     academicYears,
     selectedYearId,
     setSelectedYearId,
+    schoolId,
+    setSchoolId,
+    schoolOptions,
+    selectedSchoolLabel,
+    schoolsLoading: schoolsQuery.isLoading,
+    schoolLocked,
     emailSettings,
     updateEmailSettings,
     addAcademicYear,
@@ -185,10 +246,9 @@ export function useAdmissionSetup() {
     isYearActive,
     isFeatureEnabled,
     enabledFeatures,
-    loading: setupQuery.isLoading,
+    loading: schoolsQuery.isLoading || setupQuery.isLoading,
     fetching: setupQuery.isFetching,
     refetch: setupQuery.refetch,
-    // compat no-op for previous store.init()
     init: () => {},
     initialized: !setupQuery.isLoading,
   }

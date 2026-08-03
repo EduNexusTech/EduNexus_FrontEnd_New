@@ -28,6 +28,7 @@ import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { organizationService, schoolService } from '@/api/services'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { cn, getInitials, resolveMediaUrl } from '@/utils/format'
+import { registerValidated } from '@/utils/validation'
 import {
   OrganizationDocumentsList,
   OrganizationDocumentsUploader,
@@ -45,8 +46,8 @@ const STEPS = [
 ]
 
 const STEP_FIELDS = {
-  identity: ['organization_name', 'organization_code', 'short_name', 'legal_name', 'org_type'],
-  contact: ['email', 'phone', 'website', 'support_email', 'billing_email'],
+  identity: ['organization_name', 'organization_code', 'short_name', 'legal_name', 'org_type', 'gst_number', 'pan_number'],
+  contact: ['email', 'phone', 'website', 'support_email', 'support_phone', 'billing_email', 'billing_phone'],
   location: ['address', 'address_line2', 'city', 'district', 'state', 'country', 'postal_code', 'timezone_name', 'currency', 'language'],
 }
 
@@ -544,7 +545,12 @@ export default function OrganizationForm() {
     trigger,
     setValue,
     formState: { errors },
-  } = useForm({ defaultValues: DEFAULT_VALUES, mode: 'onBlur' })
+  } = useForm({
+    defaultValues: DEFAULT_VALUES,
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    shouldFocusError: true,
+  })
 
   const values = watch()
 
@@ -741,16 +747,17 @@ export default function OrganizationForm() {
         message: 'Lowercase letters, numbers, underscores; must start with a letter',
       },
     },
-    email: {
-      required: 'Email is required',
-      pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email address' },
-    },
   }), [])
+
+  const rv = (name, opts = {}) => registerValidated(register, name, opts)
 
   const goNext = async () => {
     const fields = STEP_FIELDS[step]
-    const valid = await trigger(fields)
-    if (!valid) return
+    const valid = await trigger(fields, { shouldFocus: true })
+    if (!valid) {
+      toast.error('Please fix the highlighted fields before continuing')
+      return
+    }
 
     const order = STEPS.map((s) => s.id)
     const idx = order.indexOf(step)
@@ -804,8 +811,8 @@ export default function OrganizationForm() {
           <div className="sm:col-span-2">
             <Input label="Legal Name" {...register('legal_name')} />
           </div>
-          <Input label="GST Number" {...register('gst_number')} />
-          <Input label="PAN Number" {...register('pan_number')} />
+          <Input label="GST Number" error={errors.gst_number?.message} {...rv('gst_number', { label: 'GST number' })} />
+          <Input label="PAN Number" error={errors.pan_number?.message} {...rv('pan_number', { label: 'PAN' })} />
           <Input label="Registration Number" {...register('registration_number')} />
           <Input label="Tax Number" {...register('tax_number')} />
         </div>
@@ -823,30 +830,27 @@ export default function OrganizationForm() {
         <div className="grid gap-5 sm:grid-cols-2">
           <Input
             label="Email"
-            type="email"
             placeholder="contact@organization.com"
             required
             error={errors.email?.message}
-            {...register('email', fieldRules.email)}
+            {...rv('email', { required: true, label: 'Email', type: 'email' })}
           />
           <Input
             label="Phone"
-            placeholder="+91 98765 43210"
             error={errors.phone?.message}
-            {...register('phone')}
+            {...rv('phone', { label: 'Phone' })}
           />
           <div className="sm:col-span-2">
             <Input
               label="Website"
-              placeholder="https://www.organization.com"
               error={errors.website?.message}
-              {...register('website')}
+              {...rv('website', { label: 'Website' })}
             />
           </div>
-          <Input label="Support Email" type="email" {...register('support_email')} />
-          <Input label="Support Phone" {...register('support_phone')} />
-          <Input label="Billing Email" type="email" {...register('billing_email')} />
-          <Input label="Billing Phone" {...register('billing_phone')} />
+          <Input label="Support Email" error={errors.support_email?.message} {...rv('support_email', { label: 'Support email', type: 'email' })} />
+          <Input label="Support Phone" error={errors.support_phone?.message} {...rv('support_phone', { label: 'Support phone' })} />
+          <Input label="Billing Email" error={errors.billing_email?.message} {...rv('billing_email', { label: 'Billing email', type: 'email' })} />
+          <Input label="Billing Phone" error={errors.billing_phone?.message} {...rv('billing_phone', { label: 'Billing phone' })} />
         </div>
       </SectionCard>
 
@@ -867,7 +871,7 @@ export default function OrganizationForm() {
           <Input label="District" {...register('district')} />
           <Input label="State" placeholder="Maharashtra" error={errors.state?.message} {...register('state')} />
           <Input label="Country" placeholder="India" error={errors.country?.message} {...register('country')} />
-          <Input label="Postal Code" {...register('postal_code')} />
+          <Input label="Postal Code" error={errors.postal_code?.message} {...rv('postal_code', { label: 'Postal code' })} />
           <Input label="Timezone" {...register('timezone_name')} />
           <Input label="Currency" {...register('currency')} />
           <Input label="Language" {...register('language')} />
@@ -983,8 +987,8 @@ export default function OrganizationForm() {
                   {...register('legal_name')}
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Input label="GST Number" placeholder="29AAAAA0000A1Z5" {...register('gst_number')} />
-                  <Input label="PAN Number" placeholder="AAAAA0000A" {...register('pan_number')} />
+                  <Input label="GST Number" error={errors.gst_number?.message} {...rv('gst_number', { label: 'GST number' })} />
+                  <Input label="PAN Number" error={errors.pan_number?.message} {...rv('pan_number', { label: 'PAN' })} />
                   <Input label="Registration Number" {...register('registration_number')} />
                   <Input label="Tax Number" {...register('tax_number')} />
                 </div>
@@ -1007,29 +1011,26 @@ export default function OrganizationForm() {
                 </div>
                 <Input
                   label="Email"
-                  type="email"
                   placeholder="contact@organization.com"
                   required
                   error={errors.email?.message}
-                  {...register('email', fieldRules.email)}
+                  {...rv('email', { required: true, label: 'Email', type: 'email' })}
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Input
                     label="Phone"
-                    placeholder="+91 98765 43210"
                     error={errors.phone?.message}
-                    {...register('phone')}
+                    {...rv('phone', { label: 'Phone' })}
                   />
                   <Input
                     label="Website"
-                    placeholder="https://www.organization.com"
                     error={errors.website?.message}
-                    {...register('website')}
+                    {...rv('website', { label: 'Website' })}
                   />
-                  <Input label="Support Email" type="email" {...register('support_email')} />
-                  <Input label="Support Phone" {...register('support_phone')} />
-                  <Input label="Billing Email" type="email" {...register('billing_email')} />
-                  <Input label="Billing Phone" {...register('billing_phone')} />
+                  <Input label="Support Email" error={errors.support_email?.message} {...rv('support_email', { label: 'Support email', type: 'email' })} />
+                  <Input label="Support Phone" error={errors.support_phone?.message} {...rv('support_phone', { label: 'Support phone' })} />
+                  <Input label="Billing Email" error={errors.billing_email?.message} {...rv('billing_email', { label: 'Billing email', type: 'email' })} />
+                  <Input label="Billing Phone" error={errors.billing_phone?.message} {...rv('billing_phone', { label: 'Billing phone' })} />
                 </div>
               </div>
             )}
@@ -1058,7 +1059,7 @@ export default function OrganizationForm() {
                   <Input label="District" placeholder="Mumbai Suburban" {...register('district')} />
                   <Input label="State" placeholder="Maharashtra" error={errors.state?.message} {...register('state')} />
                   <Input label="Country" placeholder="India" error={errors.country?.message} {...register('country')} />
-                  <Input label="Postal Code" placeholder="400001" {...register('postal_code')} />
+                  <Input label="Postal Code" error={errors.postal_code?.message} {...rv('postal_code', { label: 'Postal code' })} />
                   <Input label="Timezone" placeholder="Asia/Kolkata" {...register('timezone_name')} />
                   <Input label="Currency" placeholder="INR" {...register('currency')} />
                   <Input label="Language" placeholder="en" {...register('language')} />

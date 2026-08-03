@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -8,16 +8,13 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input, { SelectField } from '@/components/ui/Input'
 import { PageLoader } from '@/components/ui/Feedback'
-import { useAuth } from '@/contexts/AuthContext'
-import {
-  academicServices,
-  academicYearService,
-  masterServices,
-  schoolService,
-} from '@/api/services'
+import SchoolScopeField from '@/components/forms/SchoolScopeField'
+import { useSchoolSetup } from '@/hooks/useSchoolScopedSelection'
+import { cn } from '@/lib/utils'
 import { getErrorMessage, unwrapList } from '@/api/client'
 import { resolveRecordId } from '@/utils/record'
-import { cn } from '@/lib/utils'
+import { academicServices, masterServices } from '@/api/services'
+import SetupExistingItemsPanel from '@/pages/masters/SetupExistingItemsPanel'
 import {
   emptySectionRow,
   emptyStdRow,
@@ -45,48 +42,6 @@ function SetupNav({ activeKey }) {
           {item.label}
         </Link>
       ))}
-    </div>
-  )
-}
-
-function useSchoolOptions() {
-  const { user } = useAuth()
-  const userSchoolId = String(user?.school_id || user?.school || '')
-
-  const schoolsQuery = useQuery({
-    queryKey: ['schools-for-class-setup'],
-    queryFn: () => schoolService.list({ page_size: 500, ordering: 'school_name' }),
-  })
-
-  const schoolOptions = useMemo(() => {
-    const { results } = unwrapList(schoolsQuery.data)
-    return (results || []).map((s) => ({
-      value: String(resolveRecordId(s) || s.id),
-      label: s.school_name || s.name || 'School',
-      organizationId: String(s.organization_id || s.organization || ''),
-    }))
-  }, [schoolsQuery.data])
-
-  return { user, userSchoolId, schoolsQuery, schoolOptions }
-}
-
-function SchoolPicker({ schoolId, setSchoolId, schoolOptions, onOrgChange }) {
-  return (
-    <div className="max-w-md">
-      <SelectField
-        label="School"
-        required
-        value={schoolId}
-        onChange={(e) => {
-          const value = e.target.value
-          setSchoolId(value)
-          const match = schoolOptions.find((s) => s.value === value)
-          onOrgChange?.(match?.organizationId || '')
-        }}
-        options={schoolOptions}
-        placeholder="Select school..."
-      />
-      <p className="mt-1 text-xs text-muted">All create steps use school only — no academic year here.</p>
     </div>
   )
 }
@@ -147,51 +102,17 @@ function BulkRows({ rows, setRows, emptyRow, namePlaceholder, codePlaceholder })
   )
 }
 
-function ExistingChips({ items, emptyLabel }) {
-  if (!items.length) {
-    return <p className="mt-4 text-sm text-muted">{emptyLabel}</p>
-  }
-  return (
-    <div className="mt-4 rounded-lg border border-border bg-muted/20 p-3">
-      <p className="mb-2 text-xs font-semibold uppercase text-muted">Already created</p>
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span
-            key={resolveRecordId(item)}
-            className="rounded-md border border-border bg-card px-2 py-1 text-xs"
-          >
-            {item.name}
-            <span className="text-muted"> ({item.code})</span>
-            {item.class_name ? <span className="text-muted"> → {item.class_name}</span> : null}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export function SchoolStandardsSetupPage() {
   const queryClient = useQueryClient()
-  const { userSchoolId, schoolsQuery, schoolOptions } = useSchoolOptions()
-  const [schoolId, setSchoolId] = useState(userSchoolId)
-  const [organizationId, setOrganizationId] = useState('')
+  const { schoolId, setSchoolId, resolvedOrgId, listParams, listRequestConfig, schoolsQuery, schoolOptions, schoolLocked, selectedSchoolLabel } = useSchoolSetup()
   const [rows, setRows] = useState([emptyStdRow(1), emptyStdRow(2), emptyStdRow(3)])
 
-  const resolvedOrgId =
-    organizationId ||
-    schoolOptions.find((s) => s.value === schoolId)?.organizationId ||
-    ''
-
   const listQuery = useQuery({
-    queryKey: ['master-classes-setup', resolvedOrgId],
-    queryFn: () =>
-      masterServices.classes.list({
-        page_size: 500,
-        is_active: true,
-        organization: resolvedOrgId || undefined,
-        ordering: 'sequence',
-      }),
-    enabled: Boolean(resolvedOrgId),
+    queryKey: ['master-classes-setup', schoolId, resolvedOrgId, 'manage'],
+    queryFn: () => masterServices.classes.list(listParams, listRequestConfig),
+    enabled: Boolean(schoolId),
+    retry: 2,
+    retryDelay: 1000,
   })
 
   const existing = useMemo(() => unwrapList(listQuery.data).results || [], [listQuery.data])
@@ -240,17 +161,15 @@ export function SchoolStandardsSetupPage() {
   return (
     <div className="space-y-5">
       <Breadcrumb items={[{ label: 'Masters', href: '/masters' }, { label: 'Standards' }]} />
-      <PageHeader
-        title="Create Standards (STD)"
-        description="School-based standards catalog. No academic year needed."
-      />
+      <PageHeader title="Standards" />
       <SetupNav activeKey="standards" />
       <Card>
-        <SchoolPicker
+        <SchoolScopeField
           schoolId={schoolId}
           setSchoolId={setSchoolId}
           schoolOptions={schoolOptions}
-          onOrgChange={setOrganizationId}
+          selectedSchoolLabel={selectedSchoolLabel}
+          schoolLocked={schoolLocked}
         />
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" onClick={() => setRows(STD_PRESETS.map((p) => ({ ...p })))}>
@@ -266,7 +185,22 @@ export function SchoolStandardsSetupPage() {
             <FiPlus className="h-4 w-4" /> Add row
           </Button>
         </div>
-        <ExistingChips items={existing} emptyLabel="No standards yet for this school’s organization." />
+        <SetupExistingItemsPanel
+          items={existing}
+          entityLabel="Standard"
+          service={masterServices.classes}
+          queryKey={['master-classes-setup']}
+          requestConfig={listRequestConfig}
+          isError={listQuery.isError && !listQuery.isLoading}
+          onRetry={() => listQuery.refetch()}
+          emptyLabel={
+            listQuery.isLoading
+              ? 'Loading…'
+              : listQuery.isError
+                ? getErrorMessage(listQuery.error, 'Could not load.')
+                : 'No standards yet.'
+          }
+        />
         <BulkRows
           rows={rows}
           setRows={setRows}
@@ -277,11 +211,11 @@ export function SchoolStandardsSetupPage() {
         <div className="mt-6 flex flex-wrap justify-end gap-2">
           <Link to="/masters/setup/sections">
             <Button variant="secondary">
-              Next: Sections <FiArrowRight className="h-4 w-4" />
+              Sections <FiArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <Button variant="create" loading={mutation.isPending} onClick={handleCreate} disabled={!schoolId}>
-            Create standards
+            Create
           </Button>
         </div>
       </Card>
@@ -291,26 +225,15 @@ export function SchoolStandardsSetupPage() {
 
 export function SchoolSectionsSetupPage() {
   const queryClient = useQueryClient()
-  const { userSchoolId, schoolsQuery, schoolOptions } = useSchoolOptions()
-  const [schoolId, setSchoolId] = useState(userSchoolId)
-  const [organizationId, setOrganizationId] = useState('')
+  const { schoolId, setSchoolId, resolvedOrgId, listParams, listRequestConfig, schoolsQuery, schoolOptions, schoolLocked, selectedSchoolLabel } = useSchoolSetup()
   const [rows, setRows] = useState([emptySectionRow(1), emptySectionRow(2), emptySectionRow(3)])
 
-  const resolvedOrgId =
-    organizationId ||
-    schoolOptions.find((s) => s.value === schoolId)?.organizationId ||
-    ''
-
   const listQuery = useQuery({
-    queryKey: ['master-sections-setup', resolvedOrgId],
-    queryFn: () =>
-      masterServices.sections.list({
-        page_size: 500,
-        is_active: true,
-        organization: resolvedOrgId || undefined,
-        ordering: 'sequence',
-      }),
-    enabled: Boolean(resolvedOrgId),
+    queryKey: ['master-sections-setup', schoolId, resolvedOrgId, 'manage'],
+    queryFn: () => masterServices.sections.list(listParams, listRequestConfig),
+    enabled: Boolean(schoolId),
+    retry: 2,
+    retryDelay: 1000,
   })
 
   const existing = useMemo(() => unwrapList(listQuery.data).results || [], [listQuery.data])
@@ -360,17 +283,15 @@ export function SchoolSectionsSetupPage() {
   return (
     <div className="space-y-5">
       <Breadcrumb items={[{ label: 'Masters', href: '/masters' }, { label: 'Sections' }]} />
-      <PageHeader
-        title="Create Sections"
-        description="Create section labels (A, B, C…) by school. Map them to standards in the next step."
-      />
+      <PageHeader title="Sections" />
       <SetupNav activeKey="sections" />
       <Card>
-        <SchoolPicker
+        <SchoolScopeField
           schoolId={schoolId}
           setSchoolId={setSchoolId}
           schoolOptions={schoolOptions}
-          onOrgChange={setOrganizationId}
+          selectedSchoolLabel={selectedSchoolLabel}
+          schoolLocked={schoolLocked}
         />
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
@@ -390,7 +311,22 @@ export function SchoolSectionsSetupPage() {
             <FiPlus className="h-4 w-4" /> Add row
           </Button>
         </div>
-        <ExistingChips items={existing} emptyLabel="No sections yet for this school’s organization." />
+        <SetupExistingItemsPanel
+          items={existing}
+          entityLabel="Section"
+          service={masterServices.sections}
+          queryKey={['master-sections-setup']}
+          requestConfig={listRequestConfig}
+          isError={listQuery.isError && !listQuery.isLoading}
+          onRetry={() => listQuery.refetch()}
+          emptyLabel={
+            listQuery.isLoading
+              ? 'Loading…'
+              : listQuery.isError
+                ? getErrorMessage(listQuery.error, 'Could not load.')
+                : 'No sections yet.'
+          }
+        />
         <BulkRows
           rows={rows}
           setRows={setRows}
@@ -401,11 +337,11 @@ export function SchoolSectionsSetupPage() {
         <div className="mt-6 flex flex-wrap justify-end gap-2">
           <Link to="/masters/setup/map">
             <Button variant="secondary">
-              Next: Map <FiArrowRight className="h-4 w-4" />
+              Map <FiArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <Button variant="create" loading={mutation.isPending} onClick={handleCreate} disabled={!schoolId}>
-            Create sections
+            Create
           </Button>
         </div>
       </Card>
@@ -416,68 +352,144 @@ export function SchoolSectionsSetupPage() {
 export function SchoolClassMapSetupPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { userSchoolId, schoolsQuery, schoolOptions } = useSchoolOptions()
-  const [schoolId, setSchoolId] = useState(userSchoolId)
-  const [organizationId, setOrganizationId] = useState('')
-  const [academicYearId, setAcademicYearId] = useState('')
+  const {
+    schoolId,
+    setSchoolId,
+    resolvedOrgId,
+    activeListParams,
+    listRequestConfig,
+    schoolsQuery,
+    schoolOptions,
+    schoolLocked,
+    selectedSchoolLabel,
+  } = useSchoolSetup()
   const [selectedPairs, setSelectedPairs] = useState(() => new Set())
-  const [defaultCapacity, setDefaultCapacity] = useState(40)
+  const [pairCapacities, setPairCapacities] = useState(() => ({}))
 
-  const resolvedOrgId =
-    organizationId ||
-    schoolOptions.find((s) => s.value === schoolId)?.organizationId ||
-    ''
+  useEffect(() => {
+    setSelectedPairs(new Set())
+    setPairCapacities({})
+  }, [schoolId])
 
   const standardsQuery = useQuery({
-    queryKey: ['master-classes-setup', resolvedOrgId],
-    queryFn: () =>
-      masterServices.classes.list({
-        page_size: 500,
-        is_active: true,
-        organization: resolvedOrgId || undefined,
-        ordering: 'sequence',
-      }),
-    enabled: Boolean(resolvedOrgId),
+    queryKey: ['master-classes-setup', schoolId, resolvedOrgId, 'active'],
+    queryFn: () => masterServices.classes.list(activeListParams, listRequestConfig),
+    enabled: Boolean(schoolId),
+    retry: 2,
+    retryDelay: 1000,
   })
 
   const sectionsQuery = useQuery({
-    queryKey: ['master-sections-setup', resolvedOrgId],
-    queryFn: () =>
-      masterServices.sections.list({
-        page_size: 500,
-        is_active: true,
-        organization: resolvedOrgId || undefined,
-        ordering: 'sequence',
-      }),
-    enabled: Boolean(resolvedOrgId),
+    queryKey: ['master-sections-setup', schoolId, resolvedOrgId, 'active'],
+    queryFn: () => masterServices.sections.list(activeListParams, listRequestConfig),
+    enabled: Boolean(schoolId),
+    retry: 2,
+    retryDelay: 1000,
   })
 
-  const yearsQuery = useQuery({
-    queryKey: ['academic-years-setup', schoolId],
+  const existingMapsQuery = useQuery({
+    queryKey: ['class-section-maps', schoolId],
     queryFn: () =>
-      academicYearService.list({
-        page_size: 100,
+      academicServices.classSectionMaps.list({
+        page_size: 500,
         school: schoolId,
-        ordering: '-start_date',
+        is_active: true,
       }),
     enabled: Boolean(schoolId),
   })
 
   const standards = useMemo(() => unwrapList(standardsQuery.data).results || [], [standardsQuery.data])
   const sections = useMemo(() => unwrapList(sectionsQuery.data).results || [], [sectionsQuery.data])
-  const yearOptions = useMemo(() => {
-    const { results } = unwrapList(yearsQuery.data)
-    return (results || []).map((y) => ({
-      value: String(resolveRecordId(y) || y.id),
-      label: `${y.name}${y.is_current ? ' (Current)' : ''}`,
-    }))
-  }, [yearsQuery.data])
+  const existingMapKeys = useMemo(() => {
+    const { results } = unwrapList(existingMapsQuery.data)
+    return new Set(
+      (results || []).map((row) =>
+        pairKey(row.class_id || row.school_class, row.section_id || row.section),
+      ),
+    )
+  }, [existingMapsQuery.data])
+
+  const existingMapsByKey = useMemo(() => {
+    const { results } = unwrapList(existingMapsQuery.data)
+    const map = new Map()
+    ;(results || []).forEach((row) => {
+      map.set(pairKey(row.class_id || row.school_class, row.section_id || row.section), row)
+    })
+    return map
+  }, [existingMapsQuery.data])
+
+  const isPairAvailable = (classId, sec) => {
+    if (sec.school_class && String(sec.school_class) !== String(classId)) return false
+    const key = pairKey(classId, resolveRecordId(sec))
+    return !existingMapKeys.has(key)
+  }
+
+  const setPairCapacity = (key, value) => {
+    setPairCapacities((prev) => {
+      const next = { ...prev }
+      if (value === '' || value === null || value === undefined) {
+        delete next[key]
+      } else {
+        next[key] = value
+      }
+      return next
+    })
+  }
+
+  const getColumnPairKeys = (sec) => {
+    const sectionId = resolveRecordId(sec)
+    const keys = []
+    standards.forEach((std) => {
+      const classId = resolveRecordId(std)
+      if (isPairAvailable(classId, sec)) {
+        keys.push(pairKey(classId, sectionId))
+      }
+    })
+    return keys
+  }
+
+  const getColumnCheckState = (sec) => {
+    const keys = getColumnPairKeys(sec)
+    if (!keys.length) {
+      return { checked: false, indeterminate: false, disabled: true }
+    }
+    const selectedCount = keys.filter((key) => selectedPairs.has(key)).length
+    if (selectedCount === 0) {
+      return { checked: false, indeterminate: false, disabled: false }
+    }
+    if (selectedCount === keys.length) {
+      return { checked: true, indeterminate: false, disabled: false }
+    }
+    return { checked: false, indeterminate: true, disabled: false }
+  }
+
+  const toggleSectionColumn = (sec) => {
+    const keys = getColumnPairKeys(sec)
+    if (!keys.length) return
+    const allSelected = keys.every((key) => selectedPairs.has(key))
+    setSelectedPairs((prev) => {
+      const next = new Set(prev)
+      if (allSelected) {
+        keys.forEach((key) => next.delete(key))
+      } else {
+        keys.forEach((key) => next.add(key))
+      }
+      return next
+    })
+    if (allSelected) {
+      setPairCapacities((caps) => {
+        const updated = { ...caps }
+        keys.forEach((key) => delete updated[key])
+        return updated
+      })
+    }
+  }
 
   const mutation = useMutation({
-    mutationFn: (items) => academicServices.classSections.bulkUpload(items),
+    mutationFn: (items) => academicServices.classSectionMaps.bulkUpload(items, listRequestConfig),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['academics-class-sections'] })
-      toast.success('Mapped. Activate them under Academic Structure → Active Classes.')
+      queryClient.invalidateQueries({ queryKey: ['class-section-maps'] })
+      toast.success('Maps saved')
       navigate('/academics/class-sections')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
@@ -485,10 +497,19 @@ export function SchoolClassMapSetupPage() {
 
   const togglePair = (classId, sectionId) => {
     const key = pairKey(classId, sectionId)
+    if (existingMapKeys.has(key)) return
     setSelectedPairs((prev) => {
       const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
+      if (next.has(key)) {
+        next.delete(key)
+        setPairCapacities((caps) => {
+          const updated = { ...caps }
+          delete updated[key]
+          return updated
+        })
+      } else {
+        next.add(key)
+      }
       return next
     })
   }
@@ -498,11 +519,16 @@ export function SchoolClassMapSetupPage() {
     standards.forEach((std) => {
       const classId = resolveRecordId(std)
       sections.forEach((sec) => {
-        if (sec.school_class && String(sec.school_class) !== String(classId)) return
+        if (!isPairAvailable(classId, sec)) return
         next.add(pairKey(classId, resolveRecordId(sec)))
       })
     })
     setSelectedPairs(next)
+  }
+
+  const clearSelection = () => {
+    setSelectedPairs(new Set())
+    setPairCapacities({})
   }
 
   const handleMap = () => {
@@ -510,26 +536,24 @@ export function SchoolClassMapSetupPage() {
       toast.error('Select a school')
       return
     }
-    if (!academicYearId) {
-      toast.error('Select an academic year for the mapping year-slot')
-      return
-    }
     if (!selectedPairs.size) {
       toast.error('Select at least one standard × section pair')
       return
     }
-    // Created inactive — activate later in Academics for forms/workflows
     const items = [...selectedPairs].map((key) => {
       const [school_class, section] = key.split('::')
-      return {
+      const capRaw = pairCapacities[key]
+      const item = {
         school_id: schoolId,
-        academic_year_id: academicYearId,
+        ...(resolvedOrgId ? { organization_id: resolvedOrgId } : {}),
         school_class,
         section,
-        capacity: Number(defaultCapacity) || 0,
-        status: 'inactive',
-        is_active: false,
+        is_active: true,
       }
+      if (capRaw !== undefined && capRaw !== '') {
+        item.capacity = Number(capRaw) || 0
+      }
+      return item
     })
     mutation.mutate(items)
   }
@@ -539,61 +563,80 @@ export function SchoolClassMapSetupPage() {
   return (
     <div className="space-y-5">
       <Breadcrumb items={[{ label: 'Masters', href: '/masters' }, { label: 'Map' }]} />
-      <PageHeader
-        title="Map Sections to Standards"
-        description="School-based mapping. New class sections are created inactive — activate them in Academic Structure for forms and workflows."
-      />
+      <PageHeader title="Map" />
       <SetupNav activeKey="map" />
       <Card>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <SchoolPicker
-            schoolId={schoolId}
-            setSchoolId={setSchoolId}
-            schoolOptions={schoolOptions}
-            onOrgChange={setOrganizationId}
-          />
-          <SelectField
-            label="Academic year (mapping year)"
-            required
-            value={academicYearId}
-            onChange={(e) => setAcademicYearId(e.target.value)}
-            options={yearOptions}
-            placeholder="Select academic year..."
-          />
-        </div>
-        <div className="mt-3 max-w-xs">
-          <Input
-            label="Default capacity"
-            type="number"
-            value={defaultCapacity}
-            onChange={(e) => setDefaultCapacity(e.target.value)}
-          />
-        </div>
-
+        <SchoolScopeField
+          schoolId={schoolId}
+          setSchoolId={setSchoolId}
+          schoolOptions={schoolOptions}
+          selectedSchoolLabel={selectedSchoolLabel}
+          schoolLocked={schoolLocked}
+        />
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" onClick={selectAllPairs}>
             Select all
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setSelectedPairs(new Set())}>
+          <Button variant="secondary" size="sm" onClick={clearSelection}>
             Clear
           </Button>
         </div>
 
-        {!standards.length || !sections.length ? (
+        {existingMapKeys.size > 0 ? (
+          <p className="mt-3 text-xs text-muted">{existingMapKeys.size} already mapped</p>
+        ) : null}
+
+        {!schoolId ? (
+          <p className="mt-4 text-sm text-muted">Select a school.</p>
+        ) : standardsQuery.isLoading || sectionsQuery.isLoading ? (
+          <p className="mt-4 text-sm text-muted">Loading…</p>
+        ) : standardsQuery.isError || sectionsQuery.isError ? (
           <p className="mt-4 text-sm text-danger">
-            Create standards and sections first using the Masters setup steps.
+            {getErrorMessage(standardsQuery.error || sectionsQuery.error, 'Could not load.')}
           </p>
+        ) : !standards.length || !sections.length ? (
+          <div className="mt-4 space-y-2 text-sm">
+            <p className="text-muted">Add standards and sections first.</p>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/masters/setup/standards">
+                <Button variant="secondary" size="sm">Standards</Button>
+              </Link>
+              <Link to="/masters/setup/sections">
+                <Button variant="secondary" size="sm">Sections</Button>
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="mt-4 overflow-x-auto rounded-xl border border-border">
             <table className="min-w-full text-sm">
               <thead className="bg-muted/40">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold">Standard</th>
-                  {sections.map((sec) => (
-                    <th key={resolveRecordId(sec)} className="px-3 py-2 text-center font-semibold">
-                      {sec.name}
-                    </th>
-                  ))}
+                  {sections.map((sec) => {
+                    const sectionId = resolveRecordId(sec)
+                    const columnState = getColumnCheckState(sec)
+                    return (
+                      <th
+                        key={sectionId}
+                        className="min-w-[5.5rem] px-2 py-2 text-center font-semibold"
+                      >
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span>{sec.name}</span>
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-border"
+                            title={`Select all for section ${sec.name}`}
+                            checked={columnState.checked}
+                            disabled={columnState.disabled}
+                            ref={(el) => {
+                              if (el) el.indeterminate = columnState.indeterminate
+                            }}
+                            onChange={() => toggleSectionColumn(sec)}
+                          />
+                        </div>
+                      </th>
+                    )
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -607,17 +650,38 @@ export function SchoolClassMapSetupPage() {
                         const legacyMismatch =
                           sec.school_class && String(sec.school_class) !== String(classId)
                         const key = pairKey(classId, sectionId)
+                        const alreadyMapped = existingMapKeys.has(key)
+                        const isSelected = selectedPairs.has(key)
+                        const existingMap = existingMapsByKey.get(key)
                         return (
-                          <td key={sectionId} className="px-3 py-2 text-center">
+                          <td key={sectionId} className="px-2 py-2 align-top">
                             {legacyMismatch ? (
-                              <span className="text-xs text-muted">—</span>
+                              <span className="block text-center text-xs text-muted">—</span>
                             ) : (
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-border"
-                                checked={selectedPairs.has(key)}
-                                onChange={() => togglePair(classId, sectionId)}
-                              />
+                              <div className="flex flex-col items-center gap-1.5">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-border"
+                                  checked={alreadyMapped || isSelected}
+                                  disabled={alreadyMapped}
+                                  onChange={() => togglePair(classId, sectionId)}
+                                />
+                                {alreadyMapped ? (
+                                  existingMap?.capacity ? (
+                                    <span className="text-[10px] text-muted">{existingMap.capacity}</span>
+                                  ) : null
+                                ) : isSelected ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Cap"
+                                    title="Capacity (optional)"
+                                    className="h-7 w-14 rounded-md border border-border bg-card px-1 text-center text-xs"
+                                    value={pairCapacities[key] ?? ''}
+                                    onChange={(e) => setPairCapacity(key, e.target.value)}
+                                  />
+                                ) : null}
+                              </div>
                             )}
                           </td>
                         )
@@ -630,16 +694,18 @@ export function SchoolClassMapSetupPage() {
           </div>
         )}
 
-        <p className="mt-3 text-xs text-muted">Selected mappings: {selectedPairs.size}</p>
+        {selectedPairs.size > 0 ? (
+          <p className="mt-3 text-xs text-muted">Selected: {selectedPairs.size}</p>
+        ) : null}
 
         <div className="mt-6 flex justify-end">
           <Button
             variant="finish"
             loading={mutation.isPending}
             onClick={handleMap}
-            disabled={!schoolId || !academicYearId || !selectedPairs.size}
+            disabled={!schoolId || !selectedPairs.size}
           >
-            Map & create (inactive)
+            Save
           </Button>
         </div>
       </Card>

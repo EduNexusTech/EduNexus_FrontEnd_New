@@ -1,6 +1,5 @@
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
 import { libraryService } from '@/api/services'
-import { useAuth } from '@/contexts/AuthContext'
 
 const FIELDS = [
   { name: 'title', label: 'Title', type: 'text', required: true, fullWidth: true },
@@ -26,9 +25,6 @@ const FIELDS = [
 ]
 
 export default function LibraryBookForm() {
-  const { user } = useAuth()
-  const schoolId = user?.school_id || user?.school || undefined
-
   return (
     <ResourceFormPage
       title="Book"
@@ -59,7 +55,6 @@ export default function LibraryBookForm() {
         total_copies: Number(values.total_copies) || 1,
         available_copies: Number(values.available_copies || values.total_copies) || 1,
         is_active: values.is_active !== false && values.is_active !== 'false',
-        ...(schoolId ? { school_id: schoolId } : {}),
       })}
     />
   )

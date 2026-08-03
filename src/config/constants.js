@@ -287,7 +287,7 @@ export const SCHOOL_SETTINGS_FIELDS = {
     { key: 'reset_sequence_yearly', label: 'Reset Sequence Yearly', type: 'boolean' },
   ],
   academic: [
-    { key: 'current_academic_year_id', label: 'Current Academic Year ID' },
+    { key: 'current_academic_year_id', label: 'Current Academic Year' },
     { key: 'current_session', label: 'Current Session', placeholder: '2026-27' },
     { key: 'session_start_month', label: 'Session Start Month', type: 'number' },
     { key: 'terms_per_year', label: 'Terms Per Year', type: 'number' },

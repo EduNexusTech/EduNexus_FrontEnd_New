@@ -134,6 +134,7 @@ import SchoolMasterList from '@/pages/school-masters/SchoolMasterList'
 import SchoolMasterForm from '@/pages/school-masters/SchoolMasterForm'
 
 import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
+import AcademicSetupViewPage from '@/pages/academics/AcademicSetupViewPage'
 import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
 import MdmHubPage from '@/pages/mdm/MdmHubPage'
 
@@ -330,6 +331,7 @@ export default function AppRoutes() {
           <Route path="/school-masters/:masterKey/:id/edit" element={<SchoolMasterForm />} />
 
           <Route path="/academics" element={<AcademicsHubPage />} />
+          <Route path="/academics/admission-setup" element={<AcademicSetupViewPage />} />
           <Route path="/academics/:entityKey" element={<AcademicList />} />
           <Route path="/academics/:entityKey/new" element={<AcademicForm />} />
           <Route path="/academics/:entityKey/:id/edit" element={<AcademicForm />} />

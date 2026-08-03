@@ -13,6 +13,7 @@ import { getErrorMessage, unwrapData } from '@/api/client'
 import { SCHOOL_STAFF_ROLES } from '@/config/constants'
 import { saveUserPassword } from '@/utils/userPasswordStorage'
 import { resolveMediaUrl } from '@/utils/format'
+import { registerValidated, RHF_VALIDATION_MODE } from '@/utils/validation'
 
 function ProfilePhotoField({ currentUrl, file, onChange }) {
   const preview = file ? URL.createObjectURL(file) : resolveMediaUrl(currentUrl)
@@ -55,7 +56,8 @@ export default function SchoolUserForm() {
   const queryClient = useQueryClient()
   const [profileFile, setProfileFile] = useState(null)
 
-  const { register, handleSubmit, reset, watch } = useForm({
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
+    ...RHF_VALIDATION_MODE,
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -144,10 +146,10 @@ export default function SchoolUserForm() {
             />
           </div>
 
-          <Input label="First Name" required {...register('first_name', { required: 'First name is required' })} />
+          <Input label="First Name" required error={errors.first_name?.message} {...register('first_name', { required: 'First name is required' })} />
           <Input label="Last Name" {...register('last_name')} />
-          <Input label="Email" type="email" {...register('email')} />
-          <Input label="Mobile" {...register('mobile_number')} />
+          <Input label="Email" error={errors.email?.message} {...registerValidated(register, 'email', { label: 'Email', type: 'email' })} />
+          <Input label="Mobile" error={errors.mobile_number?.message} {...registerValidated(register, 'mobile_number', { label: 'Mobile' })} />
 
           <SelectField
             label="Staff Role"

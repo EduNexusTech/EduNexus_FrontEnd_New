@@ -22,8 +22,9 @@ import {
 } from '@/features/admissions/utils/applicationFormDraft'
 import { cn } from '@/lib/utils'
 import PhotoUploadField from '@/components/common/PhotoUploadField'
+import { sanitizeByKind, validateByKind, getFieldError } from '@/utils/validation'
 
-function Field({ label, required, children, className }) {
+function Field({ label, required, children, className, error }) {
   return (
     <label className={cn('lms-field block space-y-1.5', className)}>
       <span className="block text-sm font-normal text-black" style={{ fontWeight: 500 }}>
@@ -31,8 +32,33 @@ function Field({ label, required, children, className }) {
         {required ? <span className="ml-1 font-normal text-danger">*</span> : null}
       </span>
       {children}
+      {error ? <span className="block text-xs text-danger">{error}</span> : null}
     </label>
   )
+}
+
+function collectApplicationFieldErrors(draft) {
+  const errors = {}
+  const check = (key, value, kind, label) => {
+    const result = validateByKind(kind, value, { required: false, label })
+    if (result !== true) errors[key] = result
+  }
+
+  check('student.aadhaar_number', draft.student?.aadhaar_number, 'aadhaar', 'Aadhaar number')
+  check('father.mobile', draft.father?.mobile, 'mobile', 'Father mobile')
+  check('father.email', draft.father?.email, 'email', 'Father email')
+  check('mother.mobile', draft.mother?.mobile, 'mobile', 'Mother mobile')
+  check('mother.email', draft.mother?.email, 'email', 'Mother email')
+  if (draft.guardian?.applicable) {
+    check('guardian.mobile', draft.guardian?.mobile, 'mobile', 'Guardian mobile')
+  }
+  check('address.pincode', draft.address?.pincode, 'pincode', 'PIN code')
+  if (!draft.address?.permanent_same_as_communication) {
+    check('address.permanent_pincode', draft.address?.permanent_pincode, 'pincode', 'Permanent PIN code')
+  }
+  check('emergency_contact.mobile', draft.emergency_contact?.mobile, 'mobile', 'Emergency mobile')
+  check('emergency_contact.alternate_number', draft.emergency_contact?.alternate_number, 'mobile', 'Alternate number')
+  return errors
 }
 
 function SubHeading({ children, className }) {
@@ -81,6 +107,7 @@ export default function AdmissionApplicationForm() {
   const [activeSection, setActiveSection] = useState(APPLICATION_FORM_SECTIONS[0].id)
   const [notes, setNotes] = useState('')
   const [meta, setMeta] = useState({ applicationNumber: '', status: '', academicYearName: '' })
+  const [fieldErrors, setFieldErrors] = useState({})
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admission-applications', id],
@@ -105,7 +132,69 @@ export default function AdmissionApplicationForm() {
   }, [data, isEdit])
 
   const prefillSummary = useMemo(() => getEnquiryPrefillSummary(draft), [draft])
-  const update = (path, value) => setDraft((prev) => setPath(prev, path, value))
+
+  const update = (path, value, kind, meta = {}) => {
+    const nextValue = kind ? sanitizeByKind(kind, value) : value
+    setDraft((prev) => setPath(prev, path, nextValue))
+    setFieldErrors((prev) => {
+      // Live re-check once the field already showed an error
+      if (!prev[path] && !meta.forceValidate) return prev
+      if (!kind && !meta.required) {
+        const next = { ...prev }
+        delete next[path]
+        return next
+      }
+      const message = kind
+        ? getFieldError(kind, nextValue, {
+            required: meta.required,
+            label: meta.label,
+          })
+        : nextValue || !meta.required
+          ? null
+          : `${meta.label || 'Field'} is required`
+      if (!message) {
+        const next = { ...prev }
+        delete next[path]
+        return next
+      }
+      return { ...prev, [path]: message }
+    })
+  }
+
+  const blurField = (path, value, kind, meta = {}) => {
+    if (!kind && !meta.required) return
+    const message = kind
+      ? getFieldError(kind, value, { required: meta.required, label: meta.label })
+      : (String(value || '').trim() || !meta.required
+          ? null
+          : `${meta.label || 'Field'} is required`)
+    setFieldErrors((prev) => {
+      if (!message) {
+        if (!prev[path]) return prev
+        const next = { ...prev }
+        delete next[path]
+        return next
+      }
+      return { ...prev, [path]: message }
+    })
+  }
+
+  const runFieldValidation = ({ submit }) => {
+    const errors = collectApplicationFieldErrors(draft)
+    if (submit && !draft.student?.first_name?.trim()) {
+      errors['student.first_name'] = 'Student first name is required'
+    }
+    setFieldErrors(errors)
+    if (Object.keys(errors).length) {
+      toast.error('Please fix invalid fields before continuing')
+      const firstKey = Object.keys(errors)[0]
+      const el = document.querySelector(`[data-field-path="${firstKey}"]`)
+      el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+      el?.focus?.()
+      return false
+    }
+    return true
+  }
 
   const updateStudentDob = (value) => {
     setDraft((prev) => {
@@ -193,14 +282,20 @@ export default function AdmissionApplicationForm() {
               type="button"
               variant="outline"
               disabled={saveMutation.isPending}
-              onClick={() => saveMutation.mutate({ submit: false })}
+              onClick={() => {
+                if (!runFieldValidation({ submit: false })) return
+                saveMutation.mutate({ submit: false })
+              }}
             >
               Save draft
             </Button>
             <Button
               type="button"
               disabled={saveMutation.isPending || !draft.student.first_name?.trim()}
-              onClick={() => saveMutation.mutate({ submit: true })}
+              onClick={() => {
+                if (!runFieldValidation({ submit: true })) return
+                saveMutation.mutate({ submit: true })
+              }}
             >
               Submit application
             </Button>
@@ -264,8 +359,14 @@ export default function AdmissionApplicationForm() {
         <Card className="space-y-10">
           <Section id="student" title="Student Information" hint="Basic student identity. Admission number is generated after confirmation.">
             <Grid>
-              <Field label="First Name" required>
-                <input className="lms-input w-full" value={draft.student.first_name} onChange={(e) => update('student.first_name', e.target.value)} />
+              <Field label="First Name" required error={fieldErrors['student.first_name']}>
+                <input
+                  className="lms-input w-full"
+                  data-field-path="student.first_name"
+                  value={draft.student.first_name}
+                  onChange={(e) => update('student.first_name', e.target.value, null, { required: true, label: 'Student first name' })}
+                  onBlur={(e) => blurField('student.first_name', e.target.value, null, { required: true, label: 'Student first name' })}
+                />
               </Field>
               <Field label="Middle Name">
                 <input className="lms-input w-full" value={draft.student.middle_name} onChange={(e) => update('student.middle_name', e.target.value)} />
@@ -317,8 +418,17 @@ export default function AdmissionApplicationForm() {
               <Field label="Caste / Category">
                 <input className="lms-input w-full" value={draft.student.caste_category} onChange={(e) => update('student.caste_category', e.target.value)} />
               </Field>
-              <Field label="Aadhaar Number">
-                <input className="lms-input w-full" value={draft.student.aadhaar_number} onChange={(e) => update('student.aadhaar_number', e.target.value)} />
+              <Field label="Aadhaar Number" error={fieldErrors['student.aadhaar_number']}>
+                <input
+                  className="lms-input w-full"
+                  data-field-path="student.aadhaar_number"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={draft.student.aadhaar_number}
+                  onChange={(e) => update('student.aadhaar_number', e.target.value, 'aadhaar', { label: 'Aadhaar number' })}
+                  onBlur={(e) => blurField('student.aadhaar_number', e.target.value, 'aadhaar', { label: 'Aadhaar number' })}
+                  placeholder="12-digit Aadhaar"
+                />
               </Field>
               <Field label="Student Photo" className="sm:col-span-2">
                 <PhotoUploadField
@@ -350,8 +460,12 @@ export default function AdmissionApplicationForm() {
               <Field label="Occupation"><input className="lms-input w-full" value={draft.father.occupation} onChange={(e) => update('father.occupation', e.target.value)} /></Field>
               <Field label="Company Name"><input className="lms-input w-full" value={draft.father.company_name} onChange={(e) => update('father.company_name', e.target.value)} /></Field>
               <Field label="Annual Income"><input className="lms-input w-full" value={draft.father.annual_income} onChange={(e) => update('father.annual_income', e.target.value)} /></Field>
-              <Field label="Mobile Number"><input className="lms-input w-full" value={draft.father.mobile} onChange={(e) => update('father.mobile', e.target.value)} /></Field>
-              <Field label="Email"><input className="lms-input w-full" type="email" value={draft.father.email} onChange={(e) => update('father.email', e.target.value)} /></Field>
+              <Field label="Mobile Number" error={fieldErrors['father.mobile']}>
+                <input className="lms-input w-full" data-field-path="father.mobile" type="tel" inputMode="numeric" maxLength={10} value={draft.father.mobile} onChange={(e) => update('father.mobile', e.target.value, 'mobile', { label: 'Father mobile' })} onBlur={(e) => blurField('father.mobile', e.target.value, 'mobile', { label: 'Father mobile' })} placeholder="10-digit mobile" />
+              </Field>
+              <Field label="Email" error={fieldErrors['father.email']}>
+                <input className="lms-input w-full" data-field-path="father.email" type="email" value={draft.father.email} onChange={(e) => update('father.email', e.target.value, 'email', { label: 'Father email' })} onBlur={(e) => blurField('father.email', e.target.value, 'email', { label: 'Father email' })} />
+              </Field>
               <Field label="Father Photo" className="sm:col-span-2">
                 <PhotoUploadField
                   label=""
@@ -378,8 +492,12 @@ export default function AdmissionApplicationForm() {
               <Field label="Occupation"><input className="lms-input w-full" value={draft.mother.occupation} onChange={(e) => update('mother.occupation', e.target.value)} /></Field>
               <Field label="Company Name"><input className="lms-input w-full" value={draft.mother.company_name} onChange={(e) => update('mother.company_name', e.target.value)} /></Field>
               <Field label="Annual Income"><input className="lms-input w-full" value={draft.mother.annual_income} onChange={(e) => update('mother.annual_income', e.target.value)} /></Field>
-              <Field label="Mobile Number"><input className="lms-input w-full" value={draft.mother.mobile} onChange={(e) => update('mother.mobile', e.target.value)} /></Field>
-              <Field label="Email"><input className="lms-input w-full" type="email" value={draft.mother.email} onChange={(e) => update('mother.email', e.target.value)} /></Field>
+              <Field label="Mobile Number" error={fieldErrors['mother.mobile']}>
+                <input className="lms-input w-full" data-field-path="mother.mobile" type="tel" inputMode="numeric" maxLength={10} value={draft.mother.mobile} onChange={(e) => update('mother.mobile', e.target.value, 'mobile', { label: 'Mother mobile' })} onBlur={(e) => blurField('mother.mobile', e.target.value, 'mobile', { label: 'Mother mobile' })} placeholder="10-digit mobile" />
+              </Field>
+              <Field label="Email" error={fieldErrors['mother.email']}>
+                <input className="lms-input w-full" data-field-path="mother.email" type="email" value={draft.mother.email} onChange={(e) => update('mother.email', e.target.value, 'email', { label: 'Mother email' })} onBlur={(e) => blurField('mother.email', e.target.value, 'email', { label: 'Mother email' })} />
+              </Field>
               <Field label="Mother Photo" className="sm:col-span-2">
                 <PhotoUploadField
                   label=""
@@ -412,7 +530,9 @@ export default function AdmissionApplicationForm() {
               <Grid>
                 <Field label="Name"><input className="lms-input w-full" value={draft.guardian.name} onChange={(e) => update('guardian.name', e.target.value)} /></Field>
                 <Field label="Relationship"><input className="lms-input w-full" value={draft.guardian.relationship} onChange={(e) => update('guardian.relationship', e.target.value)} /></Field>
-                <Field label="Mobile Number"><input className="lms-input w-full" value={draft.guardian.mobile} onChange={(e) => update('guardian.mobile', e.target.value)} /></Field>
+                <Field label="Mobile Number" error={fieldErrors['guardian.mobile']}>
+                  <input className="lms-input w-full" data-field-path="guardian.mobile" type="tel" inputMode="numeric" maxLength={10} value={draft.guardian.mobile} onChange={(e) => update('guardian.mobile', e.target.value, 'mobile', { label: 'Guardian mobile' })} onBlur={(e) => blurField('guardian.mobile', e.target.value, 'mobile', { label: 'Guardian mobile' })} placeholder="10-digit mobile" />
+                </Field>
                 <Field label="Guardian Photo" className="sm:col-span-2">
                   <PhotoUploadField
                     label=""
@@ -449,7 +569,9 @@ export default function AdmissionApplicationForm() {
                 </select>
               </Field>
               <Field label="Country"><input className="lms-input w-full" value={draft.address.country} onChange={(e) => update('address.country', e.target.value)} /></Field>
-              <Field label="PIN Code"><input className="lms-input w-full" value={draft.address.pincode} onChange={(e) => update('address.pincode', e.target.value)} /></Field>
+              <Field label="PIN Code" error={fieldErrors['address.pincode']}>
+                <input className="lms-input w-full" data-field-path="address.pincode" inputMode="numeric" maxLength={6} value={draft.address.pincode} onChange={(e) => update('address.pincode', e.target.value, 'pincode', { label: 'PIN code' })} onBlur={(e) => blurField('address.pincode', e.target.value, 'pincode', { label: 'PIN code' })} placeholder="6-digit PIN" />
+              </Field>
             </Grid>
 
             <div className="flex items-center gap-2 pt-2">
@@ -483,7 +605,9 @@ export default function AdmissionApplicationForm() {
                   <Field label="District"><input className="lms-input w-full" value={draft.address.permanent_district} onChange={(e) => update('address.permanent_district', e.target.value)} /></Field>
                   <Field label="State"><input className="lms-input w-full" value={draft.address.permanent_state} onChange={(e) => update('address.permanent_state', e.target.value)} /></Field>
                   <Field label="Country"><input className="lms-input w-full" value={draft.address.permanent_country} onChange={(e) => update('address.permanent_country', e.target.value)} /></Field>
-                  <Field label="PIN Code"><input className="lms-input w-full" value={draft.address.permanent_pincode} onChange={(e) => update('address.permanent_pincode', e.target.value)} /></Field>
+                  <Field label="PIN Code" error={fieldErrors['address.permanent_pincode']}>
+                    <input className="lms-input w-full" data-field-path="address.permanent_pincode" inputMode="numeric" maxLength={6} value={draft.address.permanent_pincode} onChange={(e) => update('address.permanent_pincode', e.target.value, 'pincode', { label: 'Permanent PIN code' })} onBlur={(e) => blurField('address.permanent_pincode', e.target.value, 'pincode', { label: 'Permanent PIN code' })} placeholder="6-digit PIN" />
+                  </Field>
                 </Grid>
               </>
             ) : null}
@@ -742,8 +866,12 @@ export default function AdmissionApplicationForm() {
             <Grid>
               <Field label="Contact Person"><input className="lms-input w-full" value={draft.emergency_contact.contact_person} onChange={(e) => update('emergency_contact.contact_person', e.target.value)} /></Field>
               <Field label="Relationship"><input className="lms-input w-full" value={draft.emergency_contact.relationship} onChange={(e) => update('emergency_contact.relationship', e.target.value)} /></Field>
-              <Field label="Mobile Number"><input className="lms-input w-full" value={draft.emergency_contact.mobile} onChange={(e) => update('emergency_contact.mobile', e.target.value)} /></Field>
-              <Field label="Alternate Number"><input className="lms-input w-full" value={draft.emergency_contact.alternate_number} onChange={(e) => update('emergency_contact.alternate_number', e.target.value)} /></Field>
+              <Field label="Mobile Number" error={fieldErrors['emergency_contact.mobile']}>
+                <input className="lms-input w-full" data-field-path="emergency_contact.mobile" type="tel" inputMode="numeric" maxLength={10} value={draft.emergency_contact.mobile} onChange={(e) => update('emergency_contact.mobile', e.target.value, 'mobile', { label: 'Emergency mobile' })} onBlur={(e) => blurField('emergency_contact.mobile', e.target.value, 'mobile', { label: 'Emergency mobile' })} placeholder="10-digit mobile" />
+              </Field>
+              <Field label="Alternate Number" error={fieldErrors['emergency_contact.alternate_number']}>
+                <input className="lms-input w-full" data-field-path="emergency_contact.alternate_number" type="tel" inputMode="numeric" maxLength={10} value={draft.emergency_contact.alternate_number} onChange={(e) => update('emergency_contact.alternate_number', e.target.value, 'mobile', { label: 'Alternate number' })} onBlur={(e) => blurField('emergency_contact.alternate_number', e.target.value, 'mobile', { label: 'Alternate number' })} placeholder="10-digit mobile" />
+              </Field>
             </Grid>
           </Section>
 
@@ -786,14 +914,20 @@ export default function AdmissionApplicationForm() {
               type="button"
               variant="outline"
               disabled={saveMutation.isPending}
-              onClick={() => saveMutation.mutate({ submit: false })}
+              onClick={() => {
+                if (!runFieldValidation({ submit: false })) return
+                saveMutation.mutate({ submit: false })
+              }}
             >
               Save draft
             </Button>
             <Button
               type="button"
               disabled={saveMutation.isPending || !draft.student.first_name?.trim()}
-              onClick={() => saveMutation.mutate({ submit: true })}
+              onClick={() => {
+                if (!runFieldValidation({ submit: true })) return
+                saveMutation.mutate({ submit: true })
+              }}
             >
               Submit application
             </Button>

@@ -143,7 +143,7 @@ export function apiSetupToUi(row) {
   }
 }
 
-export function setupFormToApi(values) {
+export function setupFormToApi(values, { schoolId } = {}) {
   return {
     label: values.label?.trim(),
     start_date: values.startDate,
@@ -151,5 +151,6 @@ export function setupFormToApi(values) {
     is_current: Boolean(values.isCurrent),
     status: values.status || 'inactive',
     features: values.features || {},
+    ...(schoolId ? { school_id: schoolId } : {}),
   }
 }

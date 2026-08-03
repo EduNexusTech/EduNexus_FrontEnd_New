@@ -1,0 +1,223 @@
+@import 'sweetalert2/dist/sweetalert2.min.css';
+
+/* EduNexus — advanced SweetAlert2 theme (10px card radius) */
+
+.nexus-swal-container {
+  z-index: 20000;
+}
+
+.nexus-swal-popup {
+  width: min(420px, calc(100vw - 2rem));
+  padding: 1.5rem 1.25rem 1.125rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-foreground);
+  box-shadow:
+    0 24px 48px -12px rgb(15 23 42 / 0.18),
+    0 0 0 1px rgb(255 255 255 / 0.04) inset;
+  font-family: var(--font-sans);
+}
+
+.dark .nexus-swal-popup {
+  box-shadow:
+    0 24px 48px -12px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.06) inset;
+}
+
+.nexus-swal-title {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-foreground);
+}
+
+.nexus-swal-text,
+.nexus-swal-message {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-muted-foreground);
+}
+
+.nexus-swal-message strong {
+  color: var(--color-foreground);
+  font-weight: 600;
+}
+
+.nexus-swal-actions {
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: stretch;
+}
+
+.nexus-swal-btn {
+  display: inline-flex;
+  min-height: 2.5rem;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.12s ease;
+}
+
+.nexus-swal-btn:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.nexus-swal-btn:active {
+  transform: translateY(1px);
+}
+
+.nexus-swal-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgb(79 70 229 / 0.28);
+}
+
+.nexus-swal-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.nexus-swal-btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgb(239 68 68 / 0.28);
+}
+
+.nexus-swal-btn-danger:hover {
+  filter: brightness(1.05);
+}
+
+.nexus-swal-btn-cancel {
+  background: var(--color-muted);
+  border-color: var(--color-border);
+  color: var(--color-foreground) !important;
+}
+
+.nexus-swal-btn-cancel:hover {
+  background: var(--color-border);
+}
+
+.nexus-swal-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0.25rem auto 0;
+  border-width: 3px;
+  border-radius: 999px;
+}
+
+.nexus-swal-icon .swal2-icon-content {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.nexus-swal-icon.swal2-warning {
+  border-color: #f59e0b;
+  color: #d97706;
+  background: rgb(245 158 11 / 0.12);
+}
+
+.nexus-swal-icon.swal2-error {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgb(239 68 68 / 0.1);
+}
+
+.nexus-swal-icon.swal2-success {
+  border-color: #22c55e;
+  color: #16a34a;
+  background: rgb(34 197 94 / 0.1);
+}
+
+.nexus-swal-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #22c55e;
+}
+
+.nexus-swal-icon.swal2-success .swal2-success-ring {
+  border-color: rgb(34 197 94 / 0.35);
+}
+
+.nexus-swal-icon.swal2-question {
+  border-color: #6366f1;
+  color: #4f46e5;
+  background: rgb(99 102 241 / 0.1);
+}
+
+.nexus-swal-icon.swal2-info {
+  border-color: #3b82f6;
+  color: #2563eb;
+  background: rgb(59 130 246 / 0.1);
+}
+
+.nexus-swal-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  color: var(--color-muted-foreground);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nexus-swal-close:hover {
+  background: var(--color-muted);
+  color: var(--color-foreground);
+}
+
+.nexus-swal-timer {
+  height: 3px;
+  background: rgb(99 102 241 / 0.2);
+}
+
+.nexus-swal-timer .swal2-timer-progress-bar {
+  background: linear-gradient(90deg, #6366f1, #2563eb);
+}
+
+.swal2-backdrop-show,
+.nexus-swal-backdrop-in {
+  backdrop-filter: blur(4px);
+}
+
+@keyframes nexus-swal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes nexus-swal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+}
+
+.nexus-swal-animate-in {
+  animation: nexus-swal-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nexus-swal-animate-out {
+  animation: nexus-swal-out 0.16s ease-in forwards;
+}

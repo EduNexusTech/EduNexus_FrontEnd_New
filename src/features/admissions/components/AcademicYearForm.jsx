@@ -18,7 +18,7 @@ const EMPTY_FORM = {
   features: { ...DEFAULT_ADMISSION_FEATURES },
 }
 
-export function AcademicYearForm({ open, onClose, onSubmit, initial }) {
+export function AcademicYearForm({ open, onClose, onSubmit, initial, schoolLabel, schoolLocked }) {
   const [form, setForm] = useState(EMPTY_FORM)
 
   useEffect(() => {
@@ -59,9 +59,21 @@ export function AcademicYearForm({ open, onClose, onSubmit, initial }) {
       open={open}
       onClose={onClose}
       title={initial ? 'Edit Academic Year' : 'Add Academic Year'}
-      description="Configure the academic year and select which admission modules are active."
+      description={
+        schoolLabel
+          ? `Academic year for ${schoolLabel}.${schoolLocked ? ' (your assigned school)' : ''}`
+          : 'Configure the academic year and select which admission modules are active.'
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {schoolLabel ? (
+          <div>
+            <p className="block text-sm font-medium text-black">School</p>
+            <p className="mt-1 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm font-medium">
+              {schoolLabel}
+            </p>
+          </div>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Input

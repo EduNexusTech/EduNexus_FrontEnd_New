@@ -36,6 +36,7 @@ export default function ResourceListPage({
   createPath,
   deleteSuccessMessage = 'Deleted successfully',
   deleteBehavior = 'remove',
+  readOnly = false,
   /** When true, hide breadcrumb + page header (used inside LMS module shells) */
   embedded = false,
 }) {
@@ -119,7 +120,9 @@ export default function ResourceListPage({
                   <FiEye className="h-4 w-4" />
                 </IconActionButton>
               )}
-              {basePath.includes('/audit-logs') || basePath.includes('/notifications') ? null : (
+              {!readOnly &&
+              !basePath.includes('/audit-logs') &&
+              !basePath.includes('/notifications') ? (
                 <>
                   <IconActionButton variant="edit" href={`${basePath}/${id}/edit`} title="Edit">
                     <FiEdit2 className="h-4 w-4" />
@@ -136,13 +139,13 @@ export default function ResourceListPage({
                     </IconActionButton>
                   )}
                 </>
-              )}
+              ) : null}
             </div>
           )
         },
       },
     ],
-    [columns, basePath, deleteMutation, onView],
+    [columns, basePath, deleteMutation, onView, readOnly, deleteFn],
   )
 
   const selectedIds = Object.keys(rowSelection).map((idx) => resolveRecordId(rows[Number(idx)])).filter(Boolean)
@@ -175,7 +178,9 @@ export default function ResourceListPage({
         <FiDownload /> Export Excel
       </Button>
       {extraActions}
-      {!basePath.includes('/audit-logs') && !basePath.includes('/notifications') && (
+      {!readOnly &&
+        !basePath.includes('/audit-logs') &&
+        !basePath.includes('/notifications') && (
         <Link to={createPath || `${basePath}/new`}>
           <Button variant="create"><FiPlus /> Add New</Button>
         </Link>

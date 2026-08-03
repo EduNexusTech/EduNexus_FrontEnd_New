@@ -13,6 +13,7 @@ import { getErrorMessage, unwrapData } from '@/api/client'
 import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import ProfilePhotoFrame from '@/components/common/ProfilePhotoFrame'
 import { compressImageFile } from '@/utils/imageCompress'
+import { registerValidated, RHF_VALIDATION_MODE } from '@/utils/validation'
 
 const GENDER_OPTIONS = [
   { label: 'Male', value: 'male' },
@@ -107,7 +108,10 @@ export default function StudentForm() {
   const [pendingPhotoFile, setPendingPhotoFile] = useState(null)
   const [photoUploading, setPhotoUploading] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({ defaultValues })
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues,
+    ...RHF_VALIDATION_MODE,
+  })
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['students', id],
@@ -237,8 +241,8 @@ export default function StudentForm() {
 
           <Input label="First Name" required error={errors.first_name?.message} {...register('first_name', { required: 'First name is required' })} />
           <Input label="Last Name" {...register('last_name')} />
-          <Input label="Email" type="email" {...register('email')} />
-          <Input label="Mobile" required error={errors.mobile_number?.message} {...register('mobile_number', { required: 'Mobile is required' })} />
+          <Input label="Email" error={errors.email?.message} {...registerValidated(register, 'email', { label: 'Email', type: 'email' })} />
+          <Input label="Mobile" required error={errors.mobile_number?.message} {...registerValidated(register, 'mobile_number', { required: true, label: 'Mobile' })} />
           <Input label="Admission Number" {...register('admission_number')} />
           <Input label="Roll Number" {...register('roll_number')} />
           <Input label="Date of Birth" type="date" {...register('date_of_birth')} />
@@ -248,11 +252,11 @@ export default function StudentForm() {
             <Textarea label="Address" {...register('address')} />
           </div>
           <Input label="City" {...register('city')} />
-          <Input label="Pincode" {...register('pincode')} />
+          <Input label="Pincode" error={errors.pincode?.message} {...registerValidated(register, 'pincode', { label: 'Pincode' })} />
           <Input label="Previous School" {...register('previous_school')} />
           <Input label="Previous Class" {...register('previous_class')} />
           <Input label="Emergency Contact" {...register('emergency_contact_name')} />
-          <Input label="Emergency Phone" {...register('emergency_contact_phone')} />
+          <Input label="Emergency Phone" error={errors.emergency_contact_phone?.message} {...registerValidated(register, 'emergency_contact_phone', { label: 'Emergency phone' })} />
           <SelectField label="Status" options={STUDENT_STATUS_OPTIONS} {...register('status')} />
           <div className="sm:col-span-2 lg:col-span-3">
             <Textarea label="Notes" {...register('notes')} />

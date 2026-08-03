@@ -8,7 +8,7 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'academicYears',
     scope: 'master',
     fields: [
-      { name: 'school', label: 'School ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'start_date', label: 'Start Date', type: 'date', required: true },
       { name: 'end_date', label: 'End Date', type: 'date', required: true },
@@ -44,8 +44,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'terms',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'start_date', label: 'Start Date', type: 'date', required: true },
@@ -85,11 +85,11 @@ export const ACADEMIC_DEFINITIONS = {
     scope: 'school',
     // List/activate in ClassSectionActivationPage. Create STD/Section/Map under Masters.
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
-      { name: 'school_class', label: 'Class ID', type: 'text', required: true },
-      { name: 'section', label: 'Section ID', type: 'text', required: true },
-      { name: 'stream', label: 'Stream ID', type: 'text' },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
+      { name: 'school_class', label: 'Class', type: 'text', required: true },
+      { name: 'section', label: 'Section', type: 'text', required: true },
+      { name: 'stream', label: 'Stream', type: 'text' },
       { name: 'room_number', label: 'Room', type: 'text' },
       { name: 'capacity', label: 'Capacity', type: 'number' },
       { name: 'color', label: 'Color', type: 'text' },
@@ -120,13 +120,13 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'curriculums',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
-      { name: 'school_class', label: 'Class ID', type: 'text', required: true },
-      { name: 'board', label: 'Board ID', type: 'text' },
-      { name: 'stream', label: 'Stream ID', type: 'text' },
+      { name: 'school_class', label: 'Class', type: 'text', required: true },
+      { name: 'board', label: 'Board', type: 'text' },
+      { name: 'stream', label: 'Stream', type: 'text' },
       {
         name: 'curriculum_type',
         label: 'Type',
@@ -159,9 +159,9 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'curriculumSubjects',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'curriculum', label: 'Curriculum ID', type: 'text', required: true },
-      { name: 'subject', label: 'Subject ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'curriculum', label: 'Curriculum', type: 'text', required: true },
+      { name: 'subject', label: 'Subject', type: 'text', required: true },
       { name: 'is_mandatory', label: 'Mandatory', type: 'checkbox' },
       { name: 'weekly_periods', label: 'Weekly Periods', type: 'number' },
       { name: 'is_active', label: 'Active', type: 'checkbox' },
@@ -180,10 +180,10 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'electiveSubjects',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'curriculum', label: 'Curriculum ID', type: 'text', required: true },
-      { name: 'subject', label: 'Subject ID', type: 'text', required: true },
-      { name: 'subject_group', label: 'Subject Group ID', type: 'text' },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'curriculum', label: 'Curriculum', type: 'text', required: true },
+      { name: 'subject', label: 'Subject', type: 'text', required: true },
+      { name: 'subject_group', label: 'Subject Group', type: 'text' },
       { name: 'min_pick', label: 'Min Pick', type: 'number' },
       { name: 'max_pick', label: 'Max Pick', type: 'number' },
       { name: 'is_active', label: 'Active', type: 'checkbox' },
@@ -203,10 +203,10 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'classTeachers',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
-      { name: 'class_section', label: 'Class Section ID', type: 'text', required: true },
-      { name: 'teacher', label: 'Teacher User ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
+      { name: 'class_section', label: 'Class Section', type: 'text', required: true },
+      { name: 'teacher', label: 'Teacher', type: 'text', required: true },
       { name: 'is_primary', label: 'Primary Teacher', type: 'checkbox' },
       { name: 'is_active', label: 'Active', type: 'checkbox' },
     ],
@@ -223,8 +223,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'calendarEvents',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'event_type', label: 'Event Type', type: 'select', options: [
@@ -256,8 +256,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'classTimings',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'shift_start', label: 'Shift Start', type: 'text', required: true },
@@ -278,8 +278,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'periods',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'class_timing', label: 'Class Timing ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'class_timing', label: 'Class Timing', type: 'text', required: true },
       { name: 'period_number', label: 'Period #', type: 'number', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'start_time', label: 'Start Time', type: 'text', required: true },
@@ -301,8 +301,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'workingDays',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'weekday', label: 'Weekday (0=Mon)', type: 'number', required: true },
       { name: 'is_working', label: 'Working Day', type: 'checkbox' },
       { name: 'is_active', label: 'Active', type: 'checkbox' },
@@ -319,8 +319,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'holidays',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'holiday_date', label: 'Date', type: 'date', required: true },
@@ -393,7 +393,7 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'gradingSchemes',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       {
@@ -426,8 +426,8 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'policies',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text' },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text' },
       {
         name: 'kind',
         label: 'Kind',
@@ -459,7 +459,7 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'assessmentCategories',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'weightage', label: 'Weightage', type: 'number' },
@@ -478,7 +478,7 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'examTypes',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'weightage', label: 'Weightage', type: 'number' },
@@ -498,7 +498,7 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'rooms',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'room_type', label: 'Type', type: 'text' },
@@ -519,11 +519,11 @@ export const ACADEMIC_DEFINITIONS = {
     serviceKey: 'classSectionSubjects',
     scope: 'school',
     fields: [
-      { name: 'school_id', label: 'School ID', type: 'text', required: true },
-      { name: 'academic_year_id', label: 'Academic Year ID', type: 'text', required: true },
-      { name: 'class_section', label: 'Class Section ID', type: 'text', required: true },
-      { name: 'subject', label: 'Subject ID', type: 'text', required: true },
-      { name: 'teacher', label: 'Teacher User ID', type: 'text' },
+      { name: 'school_id', label: 'School', type: 'text', required: true },
+      { name: 'academic_year_id', label: 'Academic Year', type: 'text', required: true },
+      { name: 'class_section', label: 'Class Section', type: 'text', required: true },
+      { name: 'subject', label: 'Subject', type: 'text', required: true },
+      { name: 'teacher', label: 'Teacher', type: 'text' },
       { name: 'weekly_periods', label: 'Weekly Periods', type: 'number' },
       { name: 'is_elective', label: 'Elective', type: 'checkbox' },
       { name: 'is_active', label: 'Active', type: 'checkbox' },
@@ -540,16 +540,18 @@ export const ACADEMIC_HUB_GROUPS = [
   {
     title: 'Academic Setup',
     items: [
-      { key: 'academic-years', label: 'Academic Years', path: '/academics/academic-years' },
+      {
+        key: 'admission-setup-view',
+        label: 'Academic Years',
+        path: '/academics/admission-setup',
+        description: 'View years from Admissions → Setup (manage there)',
+      },
       { key: 'terms', label: 'Terms / Semesters', path: '/academics/terms' },
-      { key: 'streams', label: 'Streams', path: '/masters/streams' },
     ],
   },
   {
     title: 'Curriculum',
     items: [
-      { key: 'subjects', label: 'Subjects', path: '/masters/subjects' },
-      { key: 'subject-groups', label: 'Subject Groups', path: '/masters/subject-groups' },
       { key: 'curriculums', label: 'Curriculum', path: '/academics/curriculums' },
       { key: 'curriculum-subjects', label: 'Curriculum Subjects', path: '/academics/curriculum-subjects' },
       { key: 'elective-subjects', label: 'Elective Subjects', path: '/academics/elective-subjects' },
@@ -558,7 +560,6 @@ export const ACADEMIC_HUB_GROUPS = [
   {
     title: 'Class Allocation',
     items: [
-      { key: 'class-sections', label: 'Active / Inactive Classes', path: '/academics/class-sections' },
       { key: 'class-teachers', label: 'Class Teachers', path: '/academics/class-teachers' },
       { key: 'class-section-subjects', label: 'Class Subjects', path: '/academics/class-section-subjects' },
       { key: 'rooms', label: 'Rooms', path: '/academics/rooms' },

@@ -83,6 +83,8 @@ export const API_ENDPOINTS = {
   ACADEMICS: {
     TERMS: '/api/v1/academics/terms/',
     CLASS_SECTIONS: '/api/v1/academics/class-sections/',
+    CLASS_SECTION_MAPS: '/api/v1/academics/class-section-maps/',
+    CLASS_SECTIONS_APPLY_MAPS: '/api/v1/academics/class-sections/apply-maps/',
     CURRICULUMS: '/api/v1/academics/curriculums/',
     CURRICULUM_SUBJECTS: '/api/v1/academics/curriculum-subjects/',
     ELECTIVE_SUBJECTS: '/api/v1/academics/elective-subjects/',

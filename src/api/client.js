@@ -118,7 +118,20 @@ export function getErrorMessage(error, fallback = 'Something went wrong') {
 
   if (typeof data === 'string' && data.trim()) return data
 
-  if (typeof data?.message === 'string' && data.message) return data.message
+  if (typeof data?.message === 'string' && data.message) {
+    // Append first bulk-validation detail when present
+    const bulkErrors = data?.data?.errors || data?.errors
+    if (Array.isArray(bulkErrors) && bulkErrors[0]?.errors) {
+      const fieldErrors = bulkErrors[0].errors
+      const key = Object.keys(fieldErrors)[0]
+      if (key) {
+        const val = fieldErrors[key]
+        const msg = Array.isArray(val) ? val[0] : val
+        return `${data.message}${msg ? ` (${key}: ${msg})` : ''}`
+      }
+    }
+    return data.message
+  }
   if (typeof data?.detail === 'string' && data.detail) return data.detail
 
   // Backend custom handler: { success: false, error: { message, details } }

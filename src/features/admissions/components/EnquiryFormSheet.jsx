@@ -2,11 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { FiMessageSquare } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 import { Sheet } from '@/components/ui/Sheet'
 import Button from '@/components/ui/Button'
 import { schoolUserService } from '@/api/services'
 import { unwrapList } from '@/api/client'
 import { resolveRecordId } from '@/utils/record'
+import {
+  sanitizeByKind,
+  validateByKind,
+  getFieldError,
+} from '@/utils/validation'
 import {
   ENQUIRY_SOURCE_LABELS,
   ENQUIRY_STATUS_LABELS,
@@ -54,6 +60,7 @@ export function EnquiryFormSheet({
 }) {
   const [form, setForm] = useState(() => emptyForm(defaultAcademicYear))
   const [trackingStatus, setTrackingStatus] = useState('new')
+  const [errors, setErrors] = useState({})
 
   const counsellorsQuery = useQuery({
     queryKey: ['admission-counsellors'],
@@ -73,18 +80,95 @@ export function EnquiryFormSheet({
     if (open) {
       setForm(emptyForm(defaultAcademicYear))
       setTrackingStatus('new')
+      setErrors({})
     }
   }, [open, defaultAcademicYear])
 
-  const update = (patch) => setForm((f) => ({ ...f, ...patch }))
+  const update = (patch) => {
+    setForm((f) => ({ ...f, ...patch }))
+    setErrors((prev) => {
+      const next = { ...prev }
+      Object.entries(patch).forEach(([key, value]) => {
+        // Live re-check only after the field already has an error
+        if (!prev[key]) {
+          delete next[key]
+          return
+        }
+        if (key === 'phone') {
+          const msg = getFieldError('mobile', value, { required: true, label: 'Mobile number' })
+          if (msg) next.phone = msg
+          else delete next.phone
+        } else if (key === 'email') {
+          const msg = getFieldError('email', value, {
+            required: Boolean(sendApplicationLinkOnSave),
+            label: 'Email',
+          })
+          if (msg) next.email = msg
+          else delete next.email
+        } else if (!value || (typeof value === 'string' && !value.trim())) {
+          // keep required error until blur/submit for empty required fields
+        } else {
+          delete next[key]
+        }
+      })
+      return next
+    })
+  }
+
+  const updatePhone = (value) => update({ phone: sanitizeByKind('mobile', value) })
+  const updateEmail = (value) => update({ email: sanitizeByKind('email', value) })
+
+  const blurField = (key, value, kind, meta = {}) => {
+    let message = null
+    if (kind) {
+      message = getFieldError(kind, value, meta)
+    } else if (meta.required && !String(value || '').trim()) {
+      message = `${meta.label || 'Field'} is required`
+    }
+    setErrors((prev) => {
+      if (!message) {
+        if (!prev[key]) return prev
+        const next = { ...prev }
+        delete next[key]
+        return next
+      }
+      return { ...prev, [key]: message }
+    })
+  }
+
+  const validate = () => {
+    const next = {}
+    if (!form.studentName.trim()) next.studentName = 'Student name is required'
+    if (!form.dateOfBirth) next.dateOfBirth = 'Date of birth is required'
+    if (!form.gender) next.gender = 'Gender is required'
+    if (!form.parentName.trim()) next.parentName = 'Parent name is required'
+    if (!form.city.trim()) next.city = 'City is required'
+    if (!form.state) next.state = 'State is required'
+
+    const phoneResult = validateByKind('mobile', form.phone, { required: true, label: 'Mobile number' })
+    if (phoneResult !== true) next.phone = phoneResult
+
+    const emailRequired = Boolean(sendApplicationLinkOnSave)
+    const emailResult = validateByKind('email', form.email, {
+      required: emailRequired,
+      label: 'Email',
+    })
+    if (emailResult !== true) next.email = emailResult
+
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.studentName.trim() || !form.parentName.trim() || !form.phone.trim()) return
-    if (sendApplicationLinkOnSave && !form.email.trim()) return
+    if (!validate()) {
+      toast.error('Please fix the highlighted fields')
+      return
+    }
     await onSubmit({ ...form, enquiryStatus: trackingStatus })
     setForm(emptyForm(defaultAcademicYear))
     setTrackingStatus('new')
+    setErrors({})
     onClose()
   }
 
@@ -96,7 +180,7 @@ export function EnquiryFormSheet({
       description="Step 1 — collect minimal details only. Full application comes later."
       maxWidth="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="flex items-center gap-3 rounded-lg border border-brand-200 bg-brand-50/50 px-4 py-3">
           <FiMessageSquare className="h-5 w-5 shrink-0 text-brand-600" />
           <p className="text-sm text-muted-foreground">
@@ -109,14 +193,30 @@ export function EnquiryFormSheet({
 
         <FormBlock title="Student Information">
           <Grid>
-            <Field label="Student Name" required>
-              <input className="lms-input w-full" value={form.studentName} onChange={(e) => update({ studentName: e.target.value })} required />
+            <Field label="Student Name" required error={errors.studentName}>
+              <input
+                className="lms-input w-full"
+                value={form.studentName}
+                onChange={(e) => update({ studentName: e.target.value })}
+                onBlur={(e) => blurField('studentName', e.target.value, null, { required: true, label: 'Student name' })}
+              />
             </Field>
-            <Field label="Date of Birth" required>
-              <input className="lms-input w-full" type="date" value={form.dateOfBirth} onChange={(e) => update({ dateOfBirth: e.target.value })} required />
+            <Field label="Date of Birth" required error={errors.dateOfBirth}>
+              <input
+                className="lms-input w-full"
+                type="date"
+                value={form.dateOfBirth}
+                onChange={(e) => update({ dateOfBirth: e.target.value })}
+                onBlur={(e) => blurField('dateOfBirth', e.target.value, null, { required: true, label: 'Date of birth' })}
+              />
             </Field>
-            <Field label="Gender" required>
-              <select className="lms-select w-full" value={form.gender} onChange={(e) => update({ gender: e.target.value })} required>
+            <Field label="Gender" required error={errors.gender}>
+              <select
+                className="lms-select w-full"
+                value={form.gender}
+                onChange={(e) => update({ gender: e.target.value })}
+                onBlur={(e) => blurField('gender', e.target.value, null, { required: true, label: 'Gender' })}
+              >
                 <option value="">Select</option>
                 {GENDERS.map((g) => (
                   <option key={g} value={g}>{GENDER_LABELS[g]}</option>
@@ -124,22 +224,27 @@ export function EnquiryFormSheet({
               </select>
             </Field>
             <Field label="Class Applying For" required>
-              <select className="lms-select w-full" value={form.gradeApplying} onChange={(e) => update({ gradeApplying: e.target.value })} required>
+              <select className="lms-select w-full" value={form.gradeApplying} onChange={(e) => update({ gradeApplying: e.target.value })}>
                 {GRADES.map((g) => (
                   <option key={g} value={g}>{g}</option>
                 ))}
               </select>
             </Field>
             <Field label="Academic Year Applying For" required>
-              <input className="lms-input w-full" value={form.academicYear} onChange={(e) => update({ academicYear: e.target.value })} required />
+              <input className="lms-input w-full" value={form.academicYear} onChange={(e) => update({ academicYear: e.target.value })} />
             </Field>
           </Grid>
         </FormBlock>
 
         <FormBlock title="Parent Information">
           <Grid>
-            <Field label="Parent / Guardian Name" required>
-              <input className="lms-input w-full" value={form.parentName} onChange={(e) => update({ parentName: e.target.value })} required />
+            <Field label="Parent / Guardian Name" required error={errors.parentName}>
+              <input
+                className="lms-input w-full"
+                value={form.parentName}
+                onChange={(e) => update({ parentName: e.target.value })}
+                onBlur={(e) => blurField('parentName', e.target.value, null, { required: true, label: 'Parent name' })}
+              />
             </Field>
             <Field label="Relationship">
               <select className="lms-select w-full" value={form.parentRelationship} onChange={(e) => update({ parentRelationship: e.target.value })}>
@@ -148,16 +253,33 @@ export function EnquiryFormSheet({
                 ))}
               </select>
             </Field>
-            <Field label="Mobile Number" required>
-              <input className="lms-input w-full" value={form.phone} onChange={(e) => update({ phone: e.target.value })} placeholder="+91" required />
+            <Field label="Mobile Number" required error={errors.phone}>
+              <input
+                className="lms-input w-full"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                value={form.phone}
+                onChange={(e) => updatePhone(e.target.value)}
+                onBlur={(e) => blurField('phone', e.target.value, 'mobile', { required: true, label: 'Mobile number' })}
+                placeholder="10-digit mobile"
+              />
             </Field>
-            <Field label={sendApplicationLinkOnSave ? 'Email Address' : 'Email Address'} required={sendApplicationLinkOnSave}>
+            <Field
+              label="Email Address"
+              required={sendApplicationLinkOnSave}
+              error={errors.email}
+            >
               <input
                 className="lms-input w-full"
                 type="email"
+                inputMode="email"
                 value={form.email}
-                onChange={(e) => update({ email: e.target.value })}
-                required={sendApplicationLinkOnSave}
+                onChange={(e) => updateEmail(e.target.value)}
+                onBlur={(e) => blurField('email', e.target.value, 'email', {
+                  required: Boolean(sendApplicationLinkOnSave),
+                  label: 'Email',
+                })}
               />
             </Field>
           </Grid>
@@ -165,11 +287,21 @@ export function EnquiryFormSheet({
 
         <FormBlock title="Address Information">
           <Grid>
-            <Field label="City" required>
-              <input className="lms-input w-full" value={form.city} onChange={(e) => update({ city: e.target.value })} required />
+            <Field label="City" required error={errors.city}>
+              <input
+                className="lms-input w-full"
+                value={form.city}
+                onChange={(e) => update({ city: e.target.value })}
+                onBlur={(e) => blurField('city', e.target.value, null, { required: true, label: 'City' })}
+              />
             </Field>
-            <Field label="State" required>
-              <select className="lms-select w-full" value={form.state} onChange={(e) => update({ state: e.target.value })} required>
+            <Field label="State" required error={errors.state}>
+              <select
+                className="lms-select w-full"
+                value={form.state}
+                onChange={(e) => update({ state: e.target.value })}
+                onBlur={(e) => blurField('state', e.target.value, null, { required: true, label: 'State' })}
+              >
                 <option value="">Select state</option>
                 {INDIAN_STATES.map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -251,7 +383,7 @@ function Grid({ children }) {
   return <div className="grid gap-3 sm:grid-cols-2">{children}</div>
 }
 
-function Field({ label, required, children }) {
+function Field({ label, required, error, children }) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-medium">
@@ -259,6 +391,7 @@ function Field({ label, required, children }) {
         {required ? <span className="text-red-500"> *</span> : null}
       </label>
       {children}
+      {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
     </div>
   )
 }

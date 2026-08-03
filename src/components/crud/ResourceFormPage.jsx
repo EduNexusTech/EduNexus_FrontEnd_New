@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -9,6 +9,15 @@ import Button from '@/components/ui/Button'
 import Input, { Textarea, SelectField, CheckboxField, PasswordInput } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { getErrorMessage, unwrapData } from '@/api/client'
+import { useAuth } from '@/contexts/AuthContext'
+import { buildScopedPayload, getScopedCreateDefaults } from '@/utils/scopePayload'
+import {
+  getInputConstraints,
+  getRhfRules,
+  resolveFieldKind,
+  sanitizeByKind,
+  RHF_VALIDATION_MODE,
+} from '@/utils/validation'
 
 export default function ResourceFormPage({
   title,
@@ -24,13 +33,26 @@ export default function ResourceFormPage({
   onSuccess,
   renderExtra,
   renderTop,
+  getCreateDefaults,
+  applyScope = true,
 }) {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { user, isSuperAdmin } = useAuth()
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm()
+  const scopeDefaults = useMemo(() => {
+    if (!applyScope || isEdit) return {}
+    const auto = getScopedCreateDefaults(user, fields, { isSuperAdmin })
+    const custom = getCreateDefaults?.() || {}
+    return { ...auto, ...custom }
+  }, [applyScope, isEdit, user, fields, isSuperAdmin, getCreateDefaults])
+
+  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm({
+    ...RHF_VALIDATION_MODE,
+    defaultValues: scopeDefaults,
+  })
   const formValues = watch()
 
   const { data, isLoading, error } = useQuery({
@@ -67,7 +89,13 @@ export default function ResourceFormPage({
 
   const mutation = useMutation({
     mutationFn: (formData) => {
-      const payload = transformSubmit ? transformSubmit(formData) : formData
+      let payload = formData
+      if (applyScope) {
+        payload = buildScopedPayload(formData, user, fields, { isSuperAdmin })
+      }
+      if (transformSubmit) {
+        payload = transformSubmit(payload)
+      }
       return isEdit ? updateFn(id, payload) : createFn(payload)
     },
     onSuccess: (response, formData) => {
@@ -78,6 +106,35 @@ export default function ResourceFormPage({
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
+
+  const registerField = (field) => {
+    const kind = resolveFieldKind(field.name, field.type)
+    const rules = {
+      ...getRhfRules(field.name, {
+        required: field.required,
+        label: field.label,
+        type: field.type,
+      }),
+      valueAsNumber: field.type === 'number',
+    }
+    const { onChange, onBlur, name, ref } = register(field.name, rules)
+    const constraints = getInputConstraints(field.name, field.type)
+
+    return {
+      name,
+      ref,
+      onBlur,
+      ...constraints,
+      placeholder: field.placeholder || constraints.placeholder,
+      onChange: (e) => {
+        if (kind) {
+          const next = sanitizeByKind(kind, e.target.value)
+          if (next !== e.target.value) e.target.value = next
+        }
+        return onChange(e)
+      },
+    }
+  }
 
   const renderField = (field) => {
     const isDisabled =
@@ -90,10 +147,7 @@ export default function ResourceFormPage({
       error: errors[field.name]?.message,
       required: field.required,
       disabled: isDisabled,
-      ...register(field.name, {
-        required: field.required ? `${field.label} is required` : false,
-        valueAsNumber: field.type === 'number',
-      }),
+      ...registerField(field),
     }
 
     switch (field.type) {
@@ -115,7 +169,7 @@ export default function ResourceFormPage({
       case 'checkbox':
         return <CheckboxField label={field.label} {...register(field.name)} />
       case 'password':
-        return <PasswordInput {...common} />
+        return <PasswordInput {...common} type="password" />
       case 'email':
         return <Input {...common} type="email" />
       case 'date':
@@ -123,7 +177,7 @@ export default function ResourceFormPage({
       case 'number':
         return <Input {...common} type="number" />
       default:
-        return <Input {...common} type="text" placeholder={field.placeholder} />
+        return <Input {...common} type={common.type || 'text'} />
     }
   }
 
@@ -136,7 +190,7 @@ export default function ResourceFormPage({
       <PageHeader title={isEdit ? `Edit ${title}` : `New ${title}`} />
 
       <Card className="w-full lms-form-card">
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]">
+        <form noValidate onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]">
           {renderTop ? (
             <div className="sm:col-span-2 lg:col-span-3">
               {renderTop({

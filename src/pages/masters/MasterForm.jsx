@@ -1,15 +1,26 @@
-import { useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
-import { MASTER_DEFINITIONS } from '@/config/masterDefinitions'
+import { PageLoader, ErrorState } from '@/components/ui/Feedback'
+import { getErrorMessage } from '@/api/client'
+import { useMasterFormFields } from '@/hooks/useMasterFormFields'
 import { masterServices } from '@/api/services'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function MasterForm() {
   const { masterKey } = useParams()
-  const def = MASTER_DEFINITIONS[masterKey]
+  const { isSuperAdmin } = useAuth()
+  const { def, fields, loading, error, transformLoad } = useMasterFormFields(masterKey)
 
   if (!def) {
     return <div className="p-8 text-center text-muted">Master type not found</div>
   }
+
+  if (def.superAdminOnly && !isSuperAdmin) {
+    return <Navigate to="/masters" replace />
+  }
+
+  if (loading) return <PageLoader />
+  if (error) return <ErrorState message={getErrorMessage(error)} />
 
   const service = masterServices[def.serviceKey]
 
@@ -25,7 +36,8 @@ export default function MasterForm() {
       createFn={service.create}
       updateFn={service.update}
       basePath={`/masters/${masterKey}`}
-      fields={def.fields}
+      fields={fields}
+      transformLoad={transformLoad}
       transformSubmit={(values) => ({
         ...values,
         sequence: values.sequence !== undefined && values.sequence !== '' ? Number(values.sequence) : 0,

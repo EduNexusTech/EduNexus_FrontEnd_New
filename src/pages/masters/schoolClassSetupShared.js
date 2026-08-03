@@ -13,16 +13,21 @@ export const STD_PRESETS = [
 
 export const SECTION_PRESETS = ['A', 'B', 'C', 'D'].map((letter, i) => ({
   name: letter,
-  code: letter.toLowerCase(),
+  code: `sec_${letter.toLowerCase()}`,
   sequence: i + 1,
 }))
 
 export function toCode(value) {
-  return String(value || '')
+  let code = String(value || '')
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
+  // Master codes require at least 2 chars (letter + one more). Single letters → sec_a
+  if (code && /^[a-z]$/.test(code)) {
+    code = `sec_${code}`
+  }
+  return code
 }
 
 export function emptyStdRow(sequence = 1) {
@@ -38,7 +43,7 @@ export function pairKey(classId, sectionId) {
 }
 
 export const SETUP_NAV = [
-  { key: 'standards', label: '1. Standards', path: '/masters/setup/standards' },
-  { key: 'sections', label: '2. Sections', path: '/masters/setup/sections' },
-  { key: 'map', label: '3. Map', path: '/masters/setup/map' },
+  { key: 'standards', label: 'Standards', path: '/masters/setup/standards' },
+  { key: 'sections', label: 'Sections', path: '/masters/setup/sections' },
+  { key: 'map', label: 'Map', path: '/masters/setup/map' },
 ]
