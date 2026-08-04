@@ -77,12 +77,13 @@ export function FeeMasterList() {
       subtitle="Define fee types and default amounts for your school"
       breadcrumb={[
         { label: 'Fee Management', href: '/fees' },
-        { label: 'Step 1 — Fee Codes' },
+        { label: 'Masters', href: '/fees/masters' },
+        { label: def.labelPlural },
       ]}
       queryKey={queryKey}
       listFn={api.list}
       listParams={listParams}
-      deleteFn={api.delete}
+      deleteFn={def.listOnly ? undefined : api.delete}
       basePath={`/fees/masters/${entityKey}`}
       columns={def.columns}
       filters={schoolFilter}
@@ -102,6 +103,8 @@ export function FeeMasterForm() {
     return <div className="p-8 text-center text-muted">Fee master not found</div>
   }
 
+  const isCreateOnly = def.listOnly || !api.get
+
   return (
     <ResourceFormPage
       title={def.label}
@@ -110,9 +113,9 @@ export function FeeMasterForm() {
         { label: def.labelPlural, href: `/fees/masters/${entityKey}` },
       ]}
       queryKey={`fees-master-${entityKey}`}
-      getFn={api.get}
+      getFn={isCreateOnly ? undefined : api.get}
       createFn={api.create}
-      updateFn={api.update}
+      updateFn={api.update || api.create}
       basePath={`/fees/masters/${entityKey}`}
       fields={def.fields}
     />

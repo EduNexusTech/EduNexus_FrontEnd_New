@@ -6,8 +6,10 @@ import {
   FiCreditCard,
   FiDollarSign,
   FiFileText,
+  FiLayers,
   FiList,
   FiPlus,
+  FiSettings,
 } from 'react-icons/fi'
 import { PageHeader } from '@/components/common/PageHeader'
 import Button from '@/components/ui/Button'
@@ -15,7 +17,11 @@ import { SelectField } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { HubPageShell, HubLinkCard, HubStatGrid } from '@/components/hub/HubWidgets'
-import { FEE_SIMPLE_STEPS, FEE_HUB_EXTRAS } from '@/config/feeDefinitions'
+import {
+  FEE_SIMPLE_STEPS,
+  FEE_HUB_MODULES,
+  FEE_MASTER_NAV,
+} from '@/config/feeDefinitions'
 import { feesService, academicYearService } from '@/api/services'
 import { unwrapList } from '@/api/client'
 import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
@@ -24,7 +30,7 @@ function unwrap(res) {
   return res?.data?.data ?? res?.data ?? res ?? {}
 }
 
-const STEP_ICONS = [FiList, FiPlus, FiCreditCard, FiFileText]
+const STEP_ICONS = [FiList, FiLayers, FiPlus, FiCreditCard, FiFileText]
 
 export default function FeesHubPage() {
   const schoolScope = useSchoolScopedSelection()
@@ -80,19 +86,20 @@ export default function FeesHubPage() {
     { label: 'Collected', value: dash.total_collected ?? '—' },
     { label: 'Outstanding', value: dash.outstanding ?? '—' },
     { label: 'Overdue', value: dash.overdue ?? '—' },
-    { label: 'Fee Codes', value: String(dash.fee_heads ?? '—') },
+    { label: 'Pending Approvals', value: String(dash.concessions_pending ?? '0') },
   ]
 
   return (
     <HubPageShell>
       <Breadcrumb items={[{ label: 'Fee Management' }]} />
       <PageHeader
-        title="Fee Management"
-        description="Simple workflow — create fee codes, generate fees for students, collect payments."
+        title="Enterprise Fee Management"
+        description="Masters → structure → generate → collect → reports — full billing engine"
         actions={
-          <Link to="/fees/collect">
-            <Button variant="primary"><FiCreditCard className="h-4 w-4" /> Collect Payment</Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/fees/masters"><Button variant="outline"><FiList className="h-4 w-4" /> Masters</Button></Link>
+            <Link to="/fees/collect"><Button variant="primary"><FiCreditCard className="h-4 w-4" /> Collect Payment</Button></Link>
+          </div>
         }
       />
 
@@ -110,18 +117,15 @@ export default function FeesHubPage() {
             />
           </div>
         </div>
-        {!schoolScope.schoolId ? (
-          <p className="mt-3 text-sm text-muted">Select a school to start.</p>
-        ) : null}
       </Card>
 
       {schoolScope.schoolId ? <HubStatGrid stats={stats} /> : null}
 
       <div className="mb-8 mt-6">
         <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-slate-900">
-          <FiDollarSign className="h-5 w-5" /> Fee workflow
+          <FiDollarSign className="h-5 w-5" /> Core workflow
         </h2>
-        <p className="mb-4 text-sm text-muted">Follow these steps in order — each step uses school and academic year.</p>
+        <p className="mb-4 text-sm text-muted">Setup masters, build structures, assign fees, collect payments.</p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {FEE_SIMPLE_STEPS.map((step, idx) => {
             const Icon = STEP_ICONS[idx] || FiFileText
@@ -148,22 +152,35 @@ export default function FeesHubPage() {
         </div>
       </div>
 
-      {FEE_HUB_EXTRAS.length ? (
-        <div className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">More</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEE_HUB_EXTRAS.map((item) => (
-              <HubLinkCard
-                key={item.key}
-                to={item.path}
-                icon={FiFileText}
-                label={item.label}
-                description={item.description}
-              />
-            ))}
-          </div>
+      <div className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Enterprise modules</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {FEE_HUB_MODULES.map((item) => (
+            <HubLinkCard
+              key={item.key}
+              to={item.path}
+              icon={item.key === 'settings' ? FiSettings : FiFileText}
+              label={item.label}
+              description={item.desc}
+            />
+          ))}
         </div>
-      ) : null}
+      </div>
+
+      <div className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Fee masters</h2>
+        <div className="flex flex-wrap gap-2">
+          {FEE_MASTER_NAV.map((m) => (
+            <Link
+              key={m.key}
+              to={m.path}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm hover:border-primary/40 hover:bg-muted/30"
+            >
+              {m.label}
+            </Link>
+          ))}
+        </div>
+      </div>
     </HubPageShell>
   )
 }

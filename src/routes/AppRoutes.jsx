@@ -86,6 +86,19 @@ import {
 } from '@/pages/fees/FeesOperationsPages'
 import { FeeMasterList, FeeMasterForm, FeeModulePlaceholder } from '@/pages/fees/FeeMasterList'
 import ClassWiseFeePaidReportPage from '@/pages/fees/ClassWiseFeePaidReportPage'
+import {
+  FeeSettingsPage,
+  FeeStructureBuilderPage,
+  FeePaymentPlansPage,
+  FeeDiscountConcessionPage,
+  FeeDailyClosingPage,
+  FeeReportsHubPage,
+  FeeDailyCollectionReportPage,
+  FeeOutstandingReportPage,
+  FeeCollectionSummaryPage,
+  FeePaymentMethodsReportPage,
+  FeeMastersNavPage,
+} from '@/pages/fees/FeeEnterprisePages'
 import AssessmentsHubPage, {
   AssessmentsMarksPage,
   AssessmentsResultsPage,
@@ -286,6 +299,17 @@ export default function AppRoutes() {
           <Route path="/fees/generate" element={<FeesGeneratePage />} />
           <Route path="/fees/assign" element={<FeesGeneratePage />} />
           <Route path="/fees/defaulters" element={<FeesDefaultersPage />} />
+          <Route path="/fees/masters" element={<FeeMastersNavPage />} />
+          <Route path="/fees/structure" element={<FeeStructureBuilderPage />} />
+          <Route path="/fees/payment-plans" element={<FeePaymentPlansPage />} />
+          <Route path="/fees/discounts" element={<FeeDiscountConcessionPage />} />
+          <Route path="/fees/settings" element={<FeeSettingsPage />} />
+          <Route path="/fees/daily-closing" element={<FeeDailyClosingPage />} />
+          <Route path="/fees/reports" element={<FeeReportsHubPage />} />
+          <Route path="/fees/reports/daily-collection" element={<FeeDailyCollectionReportPage />} />
+          <Route path="/fees/reports/outstanding" element={<FeeOutstandingReportPage />} />
+          <Route path="/fees/reports/collection-summary" element={<FeeCollectionSummaryPage />} />
+          <Route path="/fees/reports/payment-methods" element={<FeePaymentMethodsReportPage />} />
           <Route path="/fees/reports/class-wise-paid" element={<ClassWiseFeePaidReportPage />} />
           <Route path="/fees/:moduleKey" element={<FeeModulePlaceholder />} />
           <Route path="/transport" element={<TransportPage />} />

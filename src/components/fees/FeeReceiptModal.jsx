@@ -7,87 +7,29 @@ import Button from '@/components/ui/Button'
 import { feesService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
 import { downloadBlob } from '@/utils/format'
+import ReceiptDocument from '@/components/fees/ReceiptDocument'
 
 function unwrap(res) {
   return res?.data?.data ?? res?.data ?? res ?? {}
 }
 
-function ReceiptDocument({ doc }) {
-  if (!doc?.receipt_number) return null
-
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm">
-      <h3 className="text-center font-serif text-xl font-bold tracking-wide">Fee Receipt</h3>
-
-      <div className="mt-6 grid gap-2 text-sm sm:grid-cols-2">
-        <p><span className="font-semibold">Student:</span> {doc.student?.full_name || '—'}</p>
-        <p><span className="font-semibold">Date:</span> {doc.issued_date || '—'}</p>
-        <p><span className="font-semibold">Institution:</span> {doc.institution?.name || '—'}</p>
-        <p><span className="font-semibold">Receipt #:</span> {doc.receipt_number}</p>
-        <p><span className="font-semibold">Term:</span> {doc.term || '—'}</p>
-        <p><span className="font-semibold">Adm. No.:</span> {doc.student?.admission_number || '—'}</p>
-        {doc.student?.class_name ? (
-          <p className="sm:col-span-2"><span className="font-semibold">Class:</span> {doc.student.class_name}</p>
-        ) : null}
-      </div>
-
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full border-collapse border border-slate-300 text-sm">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="border border-slate-300 px-3 py-2 text-left w-12">No.</th>
-              <th className="border border-slate-300 px-3 py-2 text-left">Breakdown</th>
-              <th className="border border-slate-300 px-3 py-2 text-right w-32">
-                Amount ({doc.currency || 'INR'})
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(doc.lines || []).map((line) => (
-              <tr key={line.no}>
-                <td className="border border-slate-300 px-3 py-2 text-center">{line.no}</td>
-                <td className="border border-slate-300 px-3 py-2">{line.description}</td>
-                <td className="border border-slate-300 px-3 py-2 text-right">{line.amount}</td>
-              </tr>
-            ))}
-            <tr className="font-semibold">
-              <td className="border border-slate-300 px-3 py-2" colSpan={2}>Total Paid</td>
-              <td className="border border-slate-300 px-3 py-2 text-right">{doc.total_paid}</td>
-            </tr>
-            <tr className="font-semibold">
-              <td className="border border-slate-300 px-3 py-2" colSpan={2}>Total Still Owed</td>
-              <td className="border border-slate-300 px-3 py-2 text-right">{doc.total_still_owed}</td>
-            </tr>
-            <tr className="font-semibold">
-              <td className="border border-slate-300 px-3 py-2" colSpan={2}>Balance</td>
-              <td className="border border-slate-300 px-3 py-2 text-right">{doc.balance}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-6 grid gap-2 text-sm sm:grid-cols-2">
-        <p><span className="font-semibold">Paid by:</span> {doc.payment?.paid_by || '—'}</p>
-        <p><span className="font-semibold">Mode:</span> {doc.payment?.payment_mode || '—'}</p>
-        <p><span className="font-semibold">Reference:</span> {doc.payment?.transaction_ref || '—'}</p>
-        <p><span className="font-semibold">Signature:</span> ________________</p>
-      </div>
-    </div>
-  )
-}
-
 export function FeeReceiptActions({ receiptId, receiptNumber, listConfig, schoolId, compact = false }) {
   const [viewOpen, setViewOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const resolvedSchoolId = schoolId || listConfig?.params?.school
 
   if (!receiptId) return <span className="text-slate-400">—</span>
 
   const handleDownload = async () => {
+    if (!resolvedSchoolId) {
+      toast.error('School context is required to download the receipt')
+      return
+    }
     setDownloading(true)
     try {
       const blob = await feesService.receiptPdf(
         receiptId,
-        { school: schoolId },
+        { school: resolvedSchoolId },
         listConfig,
       )
       if (!(blob instanceof Blob) || blob.size === 0) {
@@ -135,7 +77,7 @@ export function FeeReceiptActions({ receiptId, receiptNumber, listConfig, school
           onClose={() => setViewOpen(false)}
           receiptId={receiptId}
           listConfig={listConfig}
-          schoolId={schoolId}
+          schoolId={resolvedSchoolId}
           onDownload={handleDownload}
           downloading={downloading}
         />
@@ -160,7 +102,7 @@ export function FeeReceiptActions({ receiptId, receiptNumber, listConfig, school
         onClose={() => setViewOpen(false)}
         receiptId={receiptId}
         listConfig={listConfig}
-        schoolId={schoolId}
+        schoolId={resolvedSchoolId}
         onDownload={handleDownload}
         downloading={downloading}
       />
@@ -177,13 +119,15 @@ export default function FeeReceiptModal({
   onDownload,
   downloading = false,
 }) {
+  const resolvedSchoolId = schoolId || listConfig?.params?.school
+
   const detailQuery = useQuery({
-    queryKey: ['fee-receipt-detail', receiptId, schoolId],
-    enabled: open && Boolean(receiptId && schoolId),
+    queryKey: ['fee-receipt-detail', receiptId, resolvedSchoolId],
+    enabled: open && Boolean(receiptId && resolvedSchoolId),
     queryFn: async () => {
       const res = await feesService.receiptDetail(
         receiptId,
-        { school: schoolId },
+        { school: resolvedSchoolId },
         listConfig,
       )
       return unwrap(res)
@@ -198,10 +142,14 @@ export default function FeeReceiptModal({
       await onDownload()
       return
     }
+    if (!resolvedSchoolId) {
+      toast.error('School context is required to download the receipt')
+      return
+    }
     try {
       const blob = await feesService.receiptPdf(
         receiptId,
-        { school: schoolId },
+        { school: resolvedSchoolId },
         listConfig,
       )
       downloadBlob(blob, filename)
@@ -219,20 +167,27 @@ export default function FeeReceiptModal({
       footer={(
         <>
           <Button type="button" variant="outline" onClick={onClose}>Close</Button>
-          <Button type="button" onClick={handleDownload} disabled={downloading || detailQuery.isLoading}>
+          <Button
+            type="button"
+            onClick={handleDownload}
+            disabled={downloading || detailQuery.isLoading || !resolvedSchoolId}
+          >
             <FiDownload className="mr-1.5 h-4 w-4" />
             {downloading ? 'Downloading…' : 'Download PDF'}
           </Button>
         </>
       )}
     >
-      {detailQuery.isLoading ? (
+      {!resolvedSchoolId ? (
+        <p className="py-8 text-center text-red-600">School context is required to view this receipt.</p>
+      ) : null}
+      {resolvedSchoolId && detailQuery.isLoading ? (
         <p className="py-8 text-center text-slate-500">Loading receipt…</p>
       ) : null}
-      {detailQuery.isError ? (
+      {resolvedSchoolId && detailQuery.isError ? (
         <p className="py-8 text-center text-red-600">{getErrorMessage(detailQuery.error, 'Could not load receipt')}</p>
       ) : null}
-      {doc ? <ReceiptDocument doc={doc} /> : null}
+      {resolvedSchoolId && doc ? <ReceiptDocument doc={doc} /> : null}
     </Modal>
   )
 }
