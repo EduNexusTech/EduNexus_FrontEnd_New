@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { API_BASE_URL, API_TIMEOUT } from '@/config/constants'
+import { API_BASE_URL, API_TIMEOUT, TENANT_STORAGE_KEY } from '@/config/constants'
 import { getStoredAccessToken, getStoredRefreshToken, getStoredUser } from '@/utils/storage'
 
 if (import.meta.env.DEV) {
@@ -51,10 +51,29 @@ function resolveRefreshToken() {
 
 function resolveTenantHeader() {
   const user = authHandlers?.getUser?.() || getStoredUser()
-  const tenantId = user?.organization_id || user?.organization
-  if (!tenantId) return null
-  const id = typeof tenantId === 'object' ? tenantId?.id : tenantId
-  if (typeof id === 'string' && UUID_RE.test(id)) return id
+  const fromUser = user?.organization_id || user?.organization
+  if (fromUser) {
+    const id = typeof fromUser === 'object' ? fromUser?.id : fromUser
+    if (typeof id === 'string' && UUID_RE.test(id)) return id
+  }
+
+  try {
+    const raw = localStorage.getItem(TENANT_STORAGE_KEY)
+    if (raw) {
+      const tenant = JSON.parse(raw)
+      const tenantId = tenant?.organizationId
+      if (typeof tenantId === 'string' && UUID_RE.test(tenantId)) return tenantId
+    }
+  } catch {
+    // ignore malformed tenant storage
+  }
+
+  const schoolOrgId = user?.school?.organization || user?.school?.organization_id
+  if (schoolOrgId) {
+    const id = typeof schoolOrgId === 'object' ? schoolOrgId?.id : schoolOrgId
+    if (typeof id === 'string' && UUID_RE.test(id)) return id
+  }
+
   return null
 }
 

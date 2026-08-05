@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -7,14 +7,23 @@ import ResourceListPage, { StatusBadge } from '@/components/crud/ResourceListPag
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
 import UserPasswordModal from '@/components/users/UserPasswordModal'
 import Button from '@/components/ui/Button'
+import { SelectField } from '@/components/ui/Input'
 import { userService } from '@/api/services'
 import { getErrorMessage } from '@/api/client'
 import { ROLE_TYPES } from '@/config/constants'
+import { useAuth } from '@/contexts/AuthContext'
+import { useOrganizationOptions, useSchoolOptions } from '@/hooks/useFormOptions'
+import { getUserOrganizationId } from '@/utils/schoolScope'
 import { downloadBlob } from '@/utils/format'
 import { resolveRecordId } from '@/utils/record'
 import { confirmDialog } from '@/utils/confirm'
 
 const ROLE_LABELS = Object.fromEntries(ROLE_TYPES.map((role) => [role.value, role.label]))
+
+const USER_ROLE_FILTER_OPTIONS = [
+  { label: 'All roles', value: '' },
+  ...ROLE_TYPES,
+]
 
 function formatRoleType(item) {
   if (item.role_type) return ROLE_LABELS[item.role_type] || item.role_type
@@ -47,6 +56,13 @@ function buildColumns(onPasswordClick) {
     { accessorKey: 'email', header: 'Email' },
     { accessorKey: 'mobile_number', header: 'Mobile' },
     { accessorKey: 'organization_name', header: 'Organization' },
+    { accessorKey: 'school_name', header: 'School' },
+    {
+      id: 'role_type',
+      header: 'Role',
+      accessorFn: (row) => formatRoleType(row),
+      cell: ({ row }) => formatRoleType(row.original),
+    },
     { accessorKey: 'is_active', header: 'Status', cell: ({ getValue }) => <StatusBadge active={getValue()} /> },
     {
       id: 'password',
@@ -160,23 +176,89 @@ function UserDetailModal({ userId, open, onClose, onViewPassword }) {
 }
 
 export default function UserList() {
+  const { user, isSuperAdmin, isOrgAdmin } = useAuth()
   const { viewId, isOpen, openView, closeView } = useListDetailModal()
   const [passwordUser, setPasswordUser] = useState(null)
+  const [roleType, setRoleType] = useState('')
+  const [organizationId, setOrganizationId] = useState('')
+  const [schoolId, setSchoolId] = useState('')
 
-  const columns = buildColumns((user) => setPasswordUser(user))
+  const orgQuery = useOrganizationOptions(isSuperAdmin)
+  const userOrgId = getUserOrganizationId(user)
+  const effectiveOrgId = isSuperAdmin ? organizationId : userOrgId
+  const schoolQuery = useSchoolOptions(effectiveOrgId || undefined, Boolean(effectiveOrgId))
+
+  useEffect(() => {
+    if (isSuperAdmin || organizationId) return
+    if (userOrgId) setOrganizationId(userOrgId)
+  }, [isSuperAdmin, organizationId, userOrgId])
+
+  useEffect(() => {
+    setSchoolId('')
+  }, [organizationId])
+
+  const listParams = useMemo(() => {
+    const params = {}
+    if (roleType) params.role_type = roleType
+    if (isSuperAdmin && organizationId) params.organization = organizationId
+    if (schoolId) params.school = schoolId
+    return params
+  }, [roleType, isSuperAdmin, organizationId, schoolId])
+
+  const columns = buildColumns((userRow) => setPasswordUser(userRow))
+
+  const showOrgFilter = isSuperAdmin && orgQuery.options.length > 0
+  const showSchoolFilter = Boolean(effectiveOrgId) && schoolQuery.options.length > 0
+
+  const filters = (
+    <div className="flex flex-wrap items-center gap-2">
+      <SelectField
+        value={roleType}
+        onChange={(e) => setRoleType(e.target.value)}
+        options={USER_ROLE_FILTER_OPTIONS}
+        className="min-w-[190px]"
+        aria-label="Filter by role"
+      />
+      {showOrgFilter ? (
+        <SelectField
+          value={organizationId}
+          onChange={(e) => setOrganizationId(e.target.value)}
+          options={[{ label: 'All organizations', value: '' }, ...orgQuery.options]}
+          className="min-w-[220px]"
+          aria-label="Filter by organization"
+        />
+      ) : null}
+      {showSchoolFilter ? (
+        <SelectField
+          value={schoolId}
+          onChange={(e) => setSchoolId(e.target.value)}
+          options={[{ label: 'All schools', value: '' }, ...schoolQuery.options]}
+          className="min-w-[220px]"
+          aria-label="Filter by school"
+          disabled={!effectiveOrgId}
+        />
+      ) : null}
+    </div>
+  )
 
   return (
     <>
       <ResourceListPage
         title="Users"
-        subtitle="Manage platform users"
+        subtitle={
+          isOrgAdmin && !isSuperAdmin
+            ? 'Manage users in your organization — filter by role or school'
+            : 'Manage platform users — filter by role, organization, or school'
+        }
         queryKey="users"
         listFn={userService.list}
+        listParams={listParams}
         deleteFn={userService.delete}
         deleteSuccessMessage="User deleted"
         deleteBehavior="remove"
         basePath="/users"
         columns={columns}
+        filters={filters}
         enableBulkDelete
         bulkDeleteFn={async (ids) => userService.bulkAction(ids, 'delete')}
         onView={(item) => openView(item, resolveRecordId(item))}
@@ -184,7 +266,7 @@ export default function UserList() {
           <Button
             variant="excel"
             onClick={async () => {
-              const blob = await userService.export({})
+              const blob = await userService.export(listParams)
               downloadBlob(blob, 'users-export.csv')
               toast.success('Export downloaded')
             }}
