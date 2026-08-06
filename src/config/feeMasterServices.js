@@ -54,7 +54,10 @@ export const feeMasterServices = {
   },
   'concession-rules': {
     list: feesService.concessionRules,
+    get: feesService.getConcessionRule,
     create: feesService.createConcessionRule,
+    update: feesService.updateConcessionRule,
+    delete: feesService.deleteConcessionRule,
   },
   counters: {
     list: feesService.collectionCounters,

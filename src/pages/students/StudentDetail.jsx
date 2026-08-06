@@ -661,6 +661,7 @@ export default function StudentDetail() {
                   <Field label="Passport" value={student.passport_number} />
                   <Field label="Birth certificate" value={student.birth_certificate_number} />
                   <Field label="From admission" value={student.originated_from_admission} />
+                  <Field label="Staff child" value={student.is_staff_child} />
                 </Grid>
               </Section>
             </SoftCard>

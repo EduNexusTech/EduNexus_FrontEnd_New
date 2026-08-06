@@ -106,13 +106,19 @@ const DISCOUNT_TYPE_OPTIONS = [
   { label: 'Custom', value: 'custom' },
 ]
 
-const CONCESSION_TYPE_OPTIONS = [
+export const CONCESSION_TYPE_OPTIONS = [
   { label: 'Sibling', value: 'sibling' },
   { label: 'Staff Child', value: 'staff_child' },
   { label: 'Management Quota', value: 'management_quota' },
   { label: 'Government', value: 'government' },
   { label: 'Financial Aid', value: 'financial_aid' },
   { label: 'Custom', value: 'custom' },
+]
+
+export const CONCESSION_APPLY_SCOPE_OPTIONS = [
+  { label: 'All fee items', value: 'all' },
+  { label: 'Fee structure(s) only', value: 'fee_structure' },
+  { label: 'Fee code(s) only', value: 'fee_codes' },
 ]
 
 const LATE_FEE_FREQ = [
@@ -294,17 +300,21 @@ export const FEE_MASTER_DEFINITIONS = {
     label: 'Concession Rule',
     labelPlural: 'Concession Rules',
     serviceKey: 'concessionRules',
-    listOnly: true,
+    customForm: true,
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true },
-      { name: 'code', label: 'Code', type: 'text', required: true },
+      { name: 'code', label: 'Code', type: 'text', required: true, readOnlyOnEdit: true },
       { name: 'concession_type', label: 'Type', type: 'select', options: CONCESSION_TYPE_OPTIONS },
+      { name: 'apply_scope', label: 'Apply To', type: 'select', options: CONCESSION_APPLY_SCOPE_OPTIONS },
       { name: 'discount_percentage', label: 'Percentage', type: 'number' },
+      { name: 'discount_amount', label: 'Flat Amount', type: 'number' },
       { name: 'requires_approval', label: 'Requires Approval', type: 'checkbox' },
+      { name: 'is_active', label: 'Active', type: 'checkbox' },
     ],
     columns: [
       { accessorKey: 'name', header: 'Name' },
       { accessorKey: 'concession_type', header: 'Type' },
+      { accessorKey: 'apply_scope_label', header: 'Applies To' },
     ],
   },
   counters: {

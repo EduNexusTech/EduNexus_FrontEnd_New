@@ -75,9 +75,12 @@ export default function FeeStructureCompletionPanel({
                 <tr>
                   <th className="px-4 py-2 font-medium">Fee code</th>
                   <th className="px-4 py-2 font-medium">Fee head</th>
-                  <th className="px-4 py-2 font-medium">Amount</th>
+                  <th className="px-4 py-2 font-medium">Gross</th>
+                  <th className="px-4 py-2 font-medium">Concession</th>
+                  <th className="px-4 py-2 font-medium">Net</th>
                   <th className="px-4 py-2 font-medium">Paid</th>
                   <th className="px-4 py-2 font-medium">Outstanding</th>
+                  <th className="px-4 py-2 font-medium">Due / End</th>
                 </tr>
               </thead>
               <tbody>
@@ -85,10 +88,16 @@ export default function FeeStructureCompletionPanel({
                   <tr key={item.assignment_id || item.fee_head_code} className="border-t border-slate-100">
                     <td className="px-4 py-2 font-medium">{item.fee_head_code || '—'}</td>
                     <td className="px-4 py-2">{item.fee_head_name}</td>
+                    <td className="px-4 py-2">{item.gross_amount ?? item.net_amount}</td>
+                    <td className="px-4 py-2 text-blue-700">{Number(item.concession_amount) > 0 ? item.concession_amount : '—'}</td>
                     <td className="px-4 py-2">{item.net_amount}</td>
                     <td className="px-4 py-2 text-emerald-700">{item.paid_amount}</td>
                     <td className={`px-4 py-2 ${item.is_paid ? 'text-emerald-700' : 'text-amber-700 font-medium'}`}>
                       {item.is_paid ? '0.00' : item.balance_due}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-muted">
+                      {item.due_date || '—'}
+                      {item.end_date ? ` → ${item.end_date}` : ''}
                     </td>
                   </tr>
                 ))}

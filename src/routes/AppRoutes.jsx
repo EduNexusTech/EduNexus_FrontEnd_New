@@ -84,8 +84,10 @@ import {
   FeesDefaultersPage,
   FeesLedgerPage,
 } from '@/pages/fees/FeesOperationsPages'
-import { FeeMasterList, FeeMasterForm, FeeModulePlaceholder } from '@/pages/fees/FeeMasterList'
+import { FeeMasterList, FeeMasterForm, FeeMasterDetail, FeeModulePlaceholder } from '@/pages/fees/FeeMasterList'
 import ClassWiseFeePaidReportPage from '@/pages/fees/ClassWiseFeePaidReportPage'
+import StaffChildrenReportPage from '@/pages/fees/StaffChildrenReportPage'
+import ReportsHubPage from '@/pages/reports/ReportsHubPage'
 import {
   FeeSettingsPage,
   FeeStructureBuilderPage,
@@ -294,6 +296,7 @@ export default function AppRoutes() {
           <Route path="/fees/masters/:entityKey" element={<FeeMasterList />} />
           <Route path="/fees/masters/:entityKey/new" element={<FeeMasterForm />} />
           <Route path="/fees/masters/:entityKey/:id/edit" element={<FeeMasterForm />} />
+          <Route path="/fees/masters/:entityKey/:id" element={<FeeMasterDetail />} />
           <Route path="/fees/collect" element={<FeesCollectPage />} />
           <Route path="/fees/ledger" element={<FeesLedgerPage />} />
           <Route path="/fees/generate" element={<FeesGeneratePage />} />
@@ -311,12 +314,14 @@ export default function AppRoutes() {
           <Route path="/fees/reports/collection-summary" element={<FeeCollectionSummaryPage />} />
           <Route path="/fees/reports/payment-methods" element={<FeePaymentMethodsReportPage />} />
           <Route path="/fees/reports/class-wise-paid" element={<ClassWiseFeePaidReportPage />} />
+          <Route path="/fees/reports/staff-children" element={<Navigate to="/reports/staff-children" replace />} />
           <Route path="/fees/:moduleKey" element={<FeeModulePlaceholder />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/library/new" element={<LibraryBookForm />} />
           <Route path="/library/:id/edit" element={<LibraryBookForm />} />
-          <Route path="/reports" element={<DocumentsHubPage />} />
+          <Route path="/reports" element={<ReportsHubPage />} />
+          <Route path="/reports/staff-children" element={<StaffChildrenReportPage />} />
 
           <Route path="/school-users" element={<SchoolUserList />} />
           <Route path="/school-users/new" element={<SchoolUserForm />} />

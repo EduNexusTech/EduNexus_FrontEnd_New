@@ -83,6 +83,7 @@ export default function ClassWiseFeePaidReportPage() {
   )
 
   const [yearId, setYearId] = useState('')
+  const [templateId, setTemplateId] = useState('')
   const [sectionId, setSectionId] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
@@ -113,9 +114,33 @@ export default function ClassWiseFeePaidReportPage() {
   }, [yearId, yearOptions])
 
   useEffect(() => {
+    setTemplateId('')
     setSectionId('')
     setStatusFilter('all')
   }, [yearId, schoolScope.schoolId])
+
+  const templatesQuery = useQuery({
+    queryKey: ['fee-templates-paid-report', schoolScope.schoolId, yearId],
+    queryFn: () =>
+      feesService.templates(
+        { school: schoolScope.schoolId, academic_year: yearId, page_size: 200, is_active: true },
+        listConfig,
+      ),
+    enabled: Boolean(schoolScope.schoolId && yearId),
+  })
+
+  const templateOptions = useMemo(() => {
+    const { results } = unwrapList(templatesQuery.data)
+    return (results || []).map((t) => ({
+      label: t.code ? `${t.name} (${t.code})` : t.name,
+      value: String(t.id),
+    }))
+  }, [templatesQuery.data])
+
+  useEffect(() => {
+    setSectionId('')
+    setStatusFilter('all')
+  }, [templateId])
 
   const sectionsQuery = useQuery({
     queryKey: ['class-sections-fee-paid', schoolScope.schoolId, yearId],
@@ -141,24 +166,25 @@ export default function ClassWiseFeePaidReportPage() {
   )
 
   const overviewQuery = useQuery({
-    queryKey: ['class-wise-fee-paid-overview', schoolScope.schoolId, yearId],
+    queryKey: ['class-wise-fee-paid-overview', schoolScope.schoolId, yearId, templateId],
     queryFn: async () => {
       const res = await feesService.classWiseFeePaid(
-        { school: schoolScope.schoolId, academic_year: yearId },
+        { school: schoolScope.schoolId, academic_year: yearId, template_id: templateId },
         listConfig,
       )
       return unwrap(res)
     },
-    enabled: Boolean(schoolScope.schoolId && yearId && !sectionId),
+    enabled: Boolean(schoolScope.schoolId && yearId && templateId && !sectionId),
   })
 
   const detailQuery = useQuery({
-    queryKey: ['class-wise-fee-paid-detail', schoolScope.schoolId, yearId, sectionId, statusFilter],
+    queryKey: ['class-wise-fee-paid-detail', schoolScope.schoolId, yearId, templateId, sectionId, statusFilter],
     queryFn: async () => {
       const res = await feesService.classWiseFeePaid(
         {
           school: schoolScope.schoolId,
           academic_year: yearId,
+          template_id: templateId,
           class_section: sectionId,
           status: statusFilter,
         },
@@ -166,7 +192,7 @@ export default function ClassWiseFeePaidReportPage() {
       )
       return unwrap(res)
     },
-    enabled: Boolean(schoolScope.schoolId && yearId && sectionId),
+    enabled: Boolean(schoolScope.schoolId && yearId && templateId && sectionId),
   })
 
   const report = sectionId ? detailQuery.data : overviewQuery.data
@@ -213,7 +239,8 @@ export default function ClassWiseFeePaidReportPage() {
         { header: 'Admission No.', accessor: (r) => r.admission_number || '' },
         { header: 'Name', accessor: (r) => r.full_name || '' },
         { header: 'Roll No.', accessor: (r) => r.roll_number || '' },
-        { header: 'Invoiced', accessor: (r) => r.total_invoiced || '' },
+        { header: 'Assigned', accessor: (r) => r.total_assigned || r.total_invoiced || '' },
+        { header: 'Concession', accessor: (r) => r.total_concession || '' },
         { header: 'Paid', accessor: (r) => r.total_paid || '' },
         { header: 'Outstanding', accessor: (r) => r.outstanding || '' },
         { header: 'Status', accessor: (r) => r.payment_status || '' },
@@ -235,7 +262,7 @@ export default function ClassWiseFeePaidReportPage() {
       />
       <PageHeader
         title="Class-wise Fee Paid Report"
-        description="View who has paid fees — summary by class or student list for a selected section"
+        description="View who has paid fees for a selected fee structure — summary by class or student list for a section"
         actions={
           <Link to="/fees">
             <Button variant="secondary">Back to Fees Hub</Button>
@@ -244,7 +271,7 @@ export default function ClassWiseFeePaidReportPage() {
       />
 
       <Card className="p-5">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <SchoolScopeField
             schoolId={schoolScope.schoolId}
             setSchoolId={schoolScope.setSchoolId}
@@ -260,6 +287,14 @@ export default function ClassWiseFeePaidReportPage() {
             required
           />
           <SelectField
+            label="Fee structure"
+            value={templateId}
+            onChange={(e) => setTemplateId(e.target.value)}
+            options={[{ label: 'Select fee structure…', value: '' }, ...templateOptions]}
+            disabled={!yearId || templatesQuery.isLoading}
+            required
+          />
+          <SelectField
             label="Class & section"
             value={sectionId}
             onChange={(e) => setSectionId(e.target.value)}
@@ -267,7 +302,7 @@ export default function ClassWiseFeePaidReportPage() {
               { label: 'All classes (summary)', value: '' },
               ...sectionOptions,
             ]}
-            disabled={!yearId || sectionsQuery.isLoading}
+            disabled={!yearId || !templateId || sectionsQuery.isLoading}
           />
           {sectionId ? (
             <SelectField
@@ -278,6 +313,17 @@ export default function ClassWiseFeePaidReportPage() {
             />
           ) : null}
         </div>
+
+        {report?.fee_structure ? (
+          <p className="mt-3 text-sm text-muted">
+            Showing payment status for fee structure:{' '}
+            <span className="font-medium text-foreground">
+              {report.fee_structure.name}
+              {report.fee_structure.code ? ` (${report.fee_structure.code})` : ''}
+            </span>
+            . Only payments collected against this structure are included.
+          </p>
+        ) : null}
 
         {report?.summary ? (
           <div className="mt-5 space-y-4">
@@ -299,7 +345,11 @@ export default function ClassWiseFeePaidReportPage() {
 
       {!yearId ? (
         <Card className="p-6 text-center text-sm text-muted">
-          Select school and academic year to load the report.
+          Select school and academic year to load fee structures.
+        </Card>
+      ) : !templateId ? (
+        <Card className="p-6 text-center text-sm text-muted">
+          Select fee structure to load the data.
         </Card>
       ) : isLoading ? (
         <PageLoader />
@@ -373,7 +423,8 @@ export default function ClassWiseFeePaidReportPage() {
                 <th className="px-4 py-3 text-left font-semibold">Admission No.</th>
                 <th className="px-4 py-3 text-left font-semibold">Name</th>
                 <th className="px-4 py-3 text-left font-semibold">Roll No.</th>
-                <th className="px-4 py-3 text-right font-semibold">Invoiced</th>
+                <th className="px-4 py-3 text-right font-semibold">Assigned</th>
+                <th className="px-4 py-3 text-right font-semibold">Concession</th>
                 <th className="px-4 py-3 text-right font-semibold">Paid</th>
                 <th className="px-4 py-3 text-right font-semibold">Outstanding</th>
                 <th className="px-4 py-3 text-left font-semibold">Status</th>
@@ -384,7 +435,7 @@ export default function ClassWiseFeePaidReportPage() {
             <tbody>
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
                     No students match the selected filters.
                   </td>
                 </tr>
@@ -394,7 +445,8 @@ export default function ClassWiseFeePaidReportPage() {
                     <td className="px-4 py-2">{row.admission_number || '—'}</td>
                     <td className="px-4 py-2 font-medium">{row.full_name || '—'}</td>
                     <td className="px-4 py-2">{row.roll_number || '—'}</td>
-                    <td className="px-4 py-2 text-right">{row.total_invoiced}</td>
+                    <td className="px-4 py-2 text-right">{row.total_assigned ?? row.total_invoiced}</td>
+                    <td className="px-4 py-2 text-right text-blue-700">{row.total_concession || '—'}</td>
                     <td className="px-4 py-2 text-right">{row.total_paid}</td>
                     <td className="px-4 py-2 text-right">{row.outstanding}</td>
                     <td className="px-4 py-2"><StatusBadge status={row.payment_status} /></td>

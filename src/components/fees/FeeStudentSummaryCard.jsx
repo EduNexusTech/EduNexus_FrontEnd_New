@@ -68,6 +68,26 @@ export default function FeeStudentSummaryCard({
             <ContactRow label="Mother" name={student.mother_name} mobile={student.mother_mobile} />
           </div>
 
+          {student.is_staff_child || student.staff_child_status === 'Yes' ? (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm">
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                <span>
+                  <span className="font-medium text-slate-700">Staff child: </span>
+                  <span className="font-semibold text-emerald-800">Yes</span>
+                </span>
+                {student.staff_name ? (
+                  <span>
+                    <span className="font-medium text-slate-700">Staff name: </span>
+                    <span className="font-semibold text-slate-900">{student.staff_name}</span>
+                    {student.staff_employee_id ? (
+                      <span className="text-muted"> ({student.staff_employee_id})</span>
+                    ) : null}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           {outstanding != null && outstanding !== '' ? (
             <p className="pt-1 text-sm font-semibold text-slate-900">
               Outstanding: <span className="text-red-700">{outstanding}</span>

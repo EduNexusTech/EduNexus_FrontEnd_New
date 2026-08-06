@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ResourceListPage from '@/components/crud/ResourceListPage'
-import ResourceFormPage from '@/components/crud/ResourceFormPage'
+import ResourceFormPage, { ResourceDetailPage } from '@/components/crud/ResourceFormPage'
+import Button from '@/components/ui/Button'
 import SchoolScopeField from '@/components/forms/SchoolScopeField'
 import { getFeeMasterDefinition } from '@/config/feeDefinitions'
 import { getFeeMasterService } from '@/config/feeMasterServices'
@@ -9,6 +10,7 @@ import { buildScopedPayload } from '@/utils/scopePayload'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
 import FeeBulkActions from '@/pages/fees/FeeBulkActions'
+import ConcessionRuleForm from '@/pages/fees/ConcessionRuleForm'
 
 function useFeeMasterApi(entityKey) {
   const schoolScope = useSchoolScopedSelection()
@@ -99,6 +101,10 @@ export function FeeMasterForm() {
   const def = getFeeMasterDefinition(entityKey)
   const { api } = useFeeMasterApi(entityKey)
 
+  if (entityKey === 'concession-rules') {
+    return <ConcessionRuleForm />
+  }
+
   if (!def || !api) {
     return <div className="p-8 text-center text-muted">Fee master not found</div>
   }
@@ -118,6 +124,100 @@ export function FeeMasterForm() {
       updateFn={api.update || api.create}
       basePath={`/fees/masters/${entityKey}`}
       fields={def.fields}
+    />
+  )
+}
+
+export function FeeMasterDetail() {
+  const { entityKey, id } = useParams()
+  const def = getFeeMasterDefinition(entityKey)
+  const { api } = useFeeMasterApi(entityKey)
+
+  if (!def || !api) {
+    return <div className="p-8 text-center text-muted">Fee master not found</div>
+  }
+
+  if (!api.get) {
+    return (
+      <div className="p-8 text-center text-muted">
+        View is not available for this master.{' '}
+        <Link to={`/fees/masters/${entityKey}`} className="text-primary underline">
+          Back to list
+        </Link>
+      </div>
+    )
+  }
+
+  const detailFields = def.fields.map((field) => ({
+    key: field.name,
+    label: field.label,
+    render: (item) => {
+      const value = item?.[field.name]
+      if (field.name === 'apply_scope') {
+        const scope = (field.options || []).find((opt) => String(opt.value) === String(value))
+        return scope?.label || String(value || 'all')
+      }
+      if (field.name === 'applies_to_templates' || field.name === 'applies_to_fee_heads') {
+        const labels = item?.[`${field.name.replace(/s$/, '')}_labels`]
+          || item?.[field.name === 'applies_to_templates' ? 'applies_to_template_labels' : 'applies_to_fee_head_labels']
+        if (Array.isArray(labels) && labels.length) return labels.join(', ')
+        if (Array.isArray(value) && value.length) return value.join(', ')
+        return '—'
+      }
+      if (field.type === 'checkbox') return value ? 'Yes' : 'No'
+      if (value == null || value === '') return '—'
+      if (field.type === 'select') {
+        const option = (field.options || []).find((opt) => String(opt.value) === String(value))
+        return option?.label || String(value)
+      }
+      return String(value)
+    },
+  }))
+
+  if (entityKey === 'concession-rules') {
+    detailFields.push(
+      {
+        key: 'applies_to_template_labels',
+        label: 'Fee structure(s)',
+        render: (item) => {
+          if (item.apply_scope !== 'fee_structure') return '—'
+          const labels = item.applies_to_template_labels || []
+          return labels.length ? labels.join(', ') : '—'
+        },
+      },
+      {
+        key: 'applies_to_fee_head_labels',
+        label: 'Fee code(s)',
+        render: (item) => {
+          if (item.apply_scope !== 'fee_codes') return '—'
+          const labels = item.applies_to_fee_head_labels || []
+          return labels.length ? labels.join(', ') : '—'
+        },
+      },
+    )
+  }
+
+  return (
+    <ResourceDetailPage
+      title={def.label}
+      breadcrumb={[
+        { label: 'Fee Management', href: '/fees' },
+        { label: def.labelPlural, href: `/fees/masters/${entityKey}` },
+        { label: 'Details' },
+      ]}
+      queryKey={`fees-master-${entityKey}`}
+      getFn={api.get}
+      basePath={`/fees/masters/${entityKey}`}
+      fields={detailFields}
+      actions={(item) => {
+        const recordId = item?.id || id
+        if (def.listOnly || !api.update) return null
+        return (
+          <Link to={`/fees/masters/${entityKey}/${recordId}/edit`}>
+            <Button variant="primary">Edit</Button>
+          </Link>
+        )
+      }}
     />
   )
 }

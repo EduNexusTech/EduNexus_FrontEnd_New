@@ -53,6 +53,7 @@ const STATUS_BADGE = {
   paid: 'bg-emerald-100 text-emerald-800',
   partial: 'bg-amber-100 text-amber-800',
   unpaid: 'bg-red-100 text-red-800',
+  overdue: 'bg-red-200 text-red-900',
   none: 'bg-slate-100 text-slate-600',
 }
 
@@ -297,6 +298,10 @@ export function FeesCollectPage() {
       father_mobile: profile?.father_mobile || student?.father_mobile,
       mother_name: profile?.mother_name || student?.mother_name,
       mother_mobile: profile?.mother_mobile || student?.mother_mobile,
+      is_staff_child: profile?.is_staff_child ?? Boolean(student?.is_staff_child),
+      staff_child_status: profile?.staff_child_status || (student?.is_staff_child ? 'Yes' : 'No'),
+      staff_name: profile?.staff_name || student?.staff_name || '',
+      staff_employee_id: profile?.staff_employee_id || student?.staff_employee_id || '',
     }
   }, [student, profile])
 
@@ -331,7 +336,7 @@ export function FeesCollectPage() {
     () =>
       feeItems
         .filter((item) => selectedIds.has(item.assignment_id))
-        .reduce((sum, item) => sum + Number(item.balance_due || 0), 0),
+        .reduce((sum, item) => sum + Number(item.collect_amount ?? item.balance_due ?? 0), 0),
     [feeItems, selectedIds],
   )
 
@@ -462,9 +467,14 @@ export function FeesCollectPage() {
                     <th className="px-4 py-3 w-12">Pay</th>
                     <th className="px-4 py-3">Fee code</th>
                     <th className="px-4 py-3">Structure</th>
-                    <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Gross</th>
+                    <th className="px-4 py-3">Concession</th>
+                    <th className="px-4 py-3">Net</th>
                     <th className="px-4 py-3">Paid</th>
-                    <th className="px-4 py-3">Outstanding</th>
+                    <th className="px-4 py-3">Due</th>
+                    <th className="px-4 py-3">Late fee</th>
+                    <th className="px-4 py-3">Collect</th>
+                    <th className="px-4 py-3">Due / End</th>
                     <th className="px-4 py-3">Status</th>
                   </tr>
                 </thead>
@@ -472,7 +482,7 @@ export function FeesCollectPage() {
                   {feeItems.map((item) => (
                     <tr
                       key={item.assignment_id}
-                      className={`border-t border-border ${item.is_paid ? 'bg-emerald-50/30' : ''}`}
+                      className={`border-t border-border ${item.is_paid ? 'bg-emerald-50/30' : item.is_overdue ? 'bg-red-50/40' : ''}`}
                     >
                       <td className="px-4 py-3">
                         {item.can_collect ? (
@@ -491,21 +501,35 @@ export function FeesCollectPage() {
                         <span className="ml-1 text-muted">({item.fee_head_code})</span>
                       </td>
                       <td className="px-4 py-3 text-muted">{item.structure_name || '—'}</td>
+                      <td className="px-4 py-3">{item.gross_amount}</td>
+                      <td className="px-4 py-3 text-blue-700">
+                        {Number(item.concession_amount) > 0
+                          ? item.concession_amount
+                          : Number(item.pending_concession_amount) > 0
+                            ? `${item.pending_concession_amount} (pending)`
+                            : '—'}
+                      </td>
                       <td className="px-4 py-3">{item.net_amount}</td>
                       <td className="px-4 py-3 text-emerald-700">{item.paid_amount}</td>
-                      <td className="px-4 py-3 font-medium">{item.balance_due}</td>
+                      <td className="px-4 py-3">{item.balance_due}</td>
+                      <td className="px-4 py-3 text-red-700">{Number(item.late_fee) > 0 ? item.late_fee : '—'}</td>
+                      <td className="px-4 py-3 font-semibold">{item.can_collect ? item.collect_amount : '—'}</td>
+                      <td className="px-4 py-3 text-xs text-muted">
+                        {item.due_date || '—'}
+                        {item.end_date ? ` → ${item.end_date}` : ''}
+                      </td>
                       <td className="px-4 py-3">
-                        <PaymentStatusBadge status={item.is_paid ? 'paid' : item.status === 'partial' ? 'partial' : 'unpaid'} />
+                        <PaymentStatusBadge status={item.is_paid ? 'paid' : item.is_overdue ? 'overdue' : item.status === 'partial' ? 'partial' : 'unpaid'} />
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot className="border-t border-border bg-slate-50/80">
                   <tr>
-                    <td colSpan={5} className="px-4 py-3 text-right font-medium">
+                    <td colSpan={9} className="px-4 py-3 text-right font-medium">
                       Selected to collect
                     </td>
-                    <td colSpan={2} className="px-4 py-3 font-semibold">
+                    <td colSpan={3} className="px-4 py-3 font-semibold">
                       {selectedTotal.toLocaleString()}
                     </td>
                   </tr>
@@ -1092,6 +1116,12 @@ export function FeesGeneratePage() {
                 <p className="mb-2 text-sm font-semibold">
                   {selectedTemplate.name} — {selectedTemplate.lines.length} fee code(s) · Total {structureTotal.toLocaleString()}
                 </p>
+                {(selectedTemplate.effective_from || selectedTemplate.effective_to) ? (
+                  <p className="mb-2 text-xs text-muted">
+                    Due: {selectedTemplate.effective_from || '—'} · End: {selectedTemplate.effective_to || '—'}
+                    {selectedTemplate.effective_to ? ' (late fee applies after end date)' : ''}
+                  </p>
+                ) : null}
                 <ul className="space-y-1 text-sm">
                   {selectedTemplate.lines.map((line) => (
                     <li key={line.id} className="flex justify-between gap-4">

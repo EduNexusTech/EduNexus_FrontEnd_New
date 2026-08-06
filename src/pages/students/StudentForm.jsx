@@ -7,6 +7,7 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import Input, { Textarea, SelectField } from '@/components/ui/Input'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { academicYearService, studentService } from '@/api/services'
 import { listActiveClassSections } from '@/api/activeClassSections'
@@ -44,6 +45,7 @@ const defaultValues = {
   emergency_contact_name: '',
   emergency_contact_phone: '',
   status: 'active',
+  is_staff_child: false,
   notes: '',
 }
 
@@ -226,6 +228,7 @@ export default function StudentForm() {
       emergency_contact_name: item.emergency_contact_name || '',
       emergency_contact_phone: item.emergency_contact_phone || '',
       status: item.status || 'active',
+      is_staff_child: Boolean(item.is_staff_child),
       notes: item.notes || '',
     })
     setPhotoUrl(item.photo_url || '')
@@ -380,6 +383,13 @@ export default function StudentForm() {
           <Input label="Emergency Phone" error={errors.emergency_contact_phone?.message} {...registerValidated(register, 'emergency_contact_phone', { label: 'Emergency phone' })} />
           <SelectField label="Status" options={STUDENT_STATUS_OPTIONS} {...register('status')} />
           <div className="sm:col-span-2 lg:col-span-3">
+            <Checkbox
+              label="Staff child"
+              description="Mark this student as a staff child for fee concessions and reporting."
+              {...register('is_staff_child')}
+            />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-3">
             <Textarea label="Notes" {...register('notes')} />
           </div>
 
@@ -417,6 +427,7 @@ export default function StudentForm() {
                     emergency_contact_name: item?.emergency_contact_name || '',
                     emergency_contact_phone: item?.emergency_contact_phone || '',
                     status: item?.status || 'active',
+                    is_staff_child: Boolean(item?.is_staff_child),
                     notes: item?.notes || '',
                   })
                   setPendingPhotoFile(null)

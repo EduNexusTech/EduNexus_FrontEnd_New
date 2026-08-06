@@ -138,6 +138,8 @@ export function FeeStructureBuilderPage() {
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [selectedHeads, setSelectedHeads] = useState({})
 
   const headsQuery = useQuery({
@@ -213,6 +215,8 @@ export function FeeStructureBuilderPage() {
           code: code.toLowerCase().replace(/\s+/g, '_'),
           academic_year_id: yearId,
           scope: 'school',
+          effective_from: dueDate || undefined,
+          effective_to: endDate || undefined,
           lines: selectedLines,
         },
         listConfig,
@@ -250,6 +254,10 @@ export function FeeStructureBuilderPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <Input label="Structure name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Term 1 Fee" />
           <Input label="Code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="term1_fee" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <Input label="End date (late fee after this)" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         </div>
 
         <div className="space-y-2">
@@ -462,13 +470,43 @@ export function FeeDiscountConcessionPage() {
     queryFn: () => feesService.appliedDiscounts({ status: 'pending' }, listConfig),
     enabled: Boolean(schoolScope.schoolId),
   })
-  const pending = unwrap(pendingDiscounts.data)?.results || unwrapList(pendingDiscounts.data).results || []
+  const pendingDiscountRows = unwrap(pendingDiscounts.data)?.results || unwrapList(pendingDiscounts.data).results || []
 
-  const approveMut = useMutation({
+  const pendingConcessions = useQuery({
+    queryKey: ['applied-concessions-pending', schoolScope.schoolId],
+    queryFn: () => feesService.appliedConcessions({ status: 'pending' }, listConfig),
+    enabled: Boolean(schoolScope.schoolId),
+  })
+  const pendingConcessionRows = unwrap(pendingConcessions.data)?.results || unwrapList(pendingConcessions.data).results || []
+
+  const approveDiscountMut = useMutation({
     mutationFn: (id) => feesService.approveDiscount(id, {}, listConfig),
     onSuccess: () => {
-      toast.success('Approved')
+      toast.success('Discount approved')
       queryClient.invalidateQueries({ queryKey: ['applied-discounts-pending'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+
+  const approveConcessionMut = useMutation({
+    mutationFn: (id) => feesService.approveConcession(id, {}, listConfig),
+    onSuccess: () => {
+      toast.success('Concession approved')
+      queryClient.invalidateQueries({ queryKey: ['applied-concessions-pending'] })
+      queryClient.invalidateQueries({ queryKey: ['fee-items-collect'] })
+      queryClient.invalidateQueries({ queryKey: ['fee-profile-collect'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+
+  const refreshConcessionQueueMut = useMutation({
+    mutationFn: () => feesService.refreshConcessionQueue(listConfig),
+    onSuccess: (res) => {
+      const stats = unwrap(res)
+      const created = stats?.created ?? 0
+      const reopened = stats?.reopened ?? 0
+      toast.success(`Queue refreshed (${created} new, ${reopened} re-queued)`)
+      queryClient.invalidateQueries({ queryKey: ['applied-concessions-pending'] })
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
@@ -478,7 +516,7 @@ export function FeeDiscountConcessionPage() {
       <Breadcrumb items={[{ label: 'Fee Management', href: '/fees' }, { label: 'Discounts & Concessions' }]} />
       <PageHeader
         title="Discount & Concession Engine"
-        description="Manage rules and approve pending discounts"
+        description="Manage rules and approve pending discounts and concessions"
         actions={
           <div className="flex gap-2">
             <Link to="/fees/masters/discount-rules"><Button variant="outline">Discount rules</Button></Link>
@@ -488,13 +526,58 @@ export function FeeDiscountConcessionPage() {
       />
       <Card className="p-5">
         <h3 className="mb-3 font-semibold">Pending discount approvals</h3>
-        {!pending.length ? <p className="text-sm text-muted">No pending discounts.</p> : (
+        {!pendingDiscountRows.length ? <p className="text-sm text-muted">No pending discounts.</p> : (
           <ul className="space-y-2">
-            {pending.map((d) => (
+            {pendingDiscountRows.map((d) => (
               <li key={d.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
                 <span>{d.student_name || d.student} · {d.amount} · {d.discount_type}</span>
-                <Button size="sm" variant="primary" onClick={() => approveMut.mutate(d.id)}>
+                <Button size="sm" variant="primary" onClick={() => approveDiscountMut.mutate(d.id)}>
                   <FiCheck className="h-4 w-4" /> Approve
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+      <Card className="p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold">Pending concession approvals</h3>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={refreshConcessionQueueMut.isPending}
+            onClick={() => refreshConcessionQueueMut.mutate()}
+          >
+            Scan for pending concessions
+          </Button>
+        </div>
+        <p className="mb-3 text-sm text-muted">
+          When a concession rule has &quot;Requires approval&quot;, matching concessions stay pending until you approve them here. After approval, the reduced net fee appears on Collect Fee.
+        </p>
+        {pendingConcessions.isLoading ? (
+          <p className="text-sm text-muted">Loading…</p>
+        ) : !pendingConcessionRows.length ? (
+          <p className="text-sm text-muted">
+            No pending concessions. If staff-child concessions were already applied, click &quot;Scan for pending concessions&quot; to re-queue items that require approval.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {pendingConcessionRows.map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-3 rounded border px-3 py-2 text-sm">
+                <span>
+                  {[c.student_name, c.admission_number].filter(Boolean).join(' · ')}
+                  {' · '}{c.amount}
+                  {c.rule_name ? ` · ${c.rule_name}` : ''}
+                  {c.structure_name ? ` · ${c.structure_name}` : ''}
+                  {c.fee_head_name ? ` · ${c.fee_head_name}` : ''}
+                </span>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  disabled={approveConcessionMut.isPending}
+                  onClick={() => approveConcessionMut.mutate(c.id)}
+                >
+                  <FiCheck className="h-4 w-4" /> {approveConcessionMut.isPending ? 'Approving…' : 'Approve'}
                 </Button>
               </li>
             ))}

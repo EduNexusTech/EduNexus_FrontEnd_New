@@ -37,6 +37,21 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
 import { cn } from '@/lib/utils'
+import { REPORT_MENU_ITEMS } from '@/config/reportDefinitions'
+
+const reportIconMap = {
+  'reports-overview': FiGrid,
+  'staff-children': FiUsers,
+  'class-wise-students': FiUsers,
+  'attendance-reports': FiCalendar,
+}
+
+const reportNavChildren = REPORT_MENU_ITEMS.map((item) => ({
+  id: item.id,
+  label: item.label,
+  path: item.path,
+  icon: reportIconMap[item.id] || (item.id.startsWith('fee-') ? FiCreditCard : FiBarChart2),
+}))
 
 const iconMap = {
   dashboard: FiGrid,
@@ -192,7 +207,13 @@ const schoolAdminNav = [
   { id: 'fees', label: 'Fees', path: '/fees', icon: FiCreditCard },
   { id: 'transport', label: 'Transport', path: '/transport', icon: FiTruck },
   { id: 'library', label: 'Library', path: '/library', icon: FiBook },
-  { id: 'reports', label: 'Reports', path: '/reports', icon: FiBarChart2 },
+  { id: 'documents', label: 'Documents', path: '/documents', icon: FiFileText },
+  {
+    id: 'reports',
+    label: 'Reports',
+    icon: FiBarChart2,
+    children: reportNavChildren,
+  },
   {
     id: 'school',
     label: 'School Admin',
@@ -270,7 +291,10 @@ function isNavItemActive(pathname, itemPath) {
     )
   }
   if (itemPath === '/students') {
-    return pathname === '/students' || pathname.startsWith('/students/')
+    return (
+      (pathname === '/students' || pathname.startsWith('/students/'))
+      && !pathname.startsWith('/students/reports/')
+    )
   }
   if (itemPath === '/teachers') {
     return pathname === '/teachers' || pathname.startsWith('/teachers/')
@@ -286,6 +310,25 @@ function isNavItemActive(pathname, itemPath) {
   }
   if (itemPath === '/communications') {
     return pathname === '/communications' || pathname.startsWith('/communications/')
+  }
+  if (itemPath === '/documents') {
+    return pathname === '/documents' || pathname.startsWith('/documents/')
+  }
+  if (itemPath === '/reports') {
+    return pathname === '/reports'
+  }
+  if (itemPath === '/fees') {
+    return (
+      (pathname === '/fees' || pathname.startsWith('/fees/'))
+      && !pathname.startsWith('/fees/reports')
+      && pathname !== '/fees/defaulters'
+    )
+  }
+  if (itemPath === '/attendance') {
+    return (
+      (pathname === '/attendance' || pathname.startsWith('/attendance/'))
+      && !pathname.startsWith('/attendance/reports')
+    )
   }
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`)
 }
