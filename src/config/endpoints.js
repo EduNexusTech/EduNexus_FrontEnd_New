@@ -577,6 +577,9 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/api/v1/menus/${id}/`,
     MY_MENUS: '/api/v1/menus/my-menus/',
     TREE: '/api/v1/menus/tree/',
+    SCHOOL_ADMIN_TREE: '/api/v1/menus/school-admin-tree/',
+    SCHOOL_MAPPING: '/api/v1/menus/school-mapping/',
+    SCHOOL_MODULE: '/api/v1/menus/school-module/',
     REORDER: '/api/v1/menus/reorder/',
   },
   MASTERS: {

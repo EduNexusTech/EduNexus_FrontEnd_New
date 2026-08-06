@@ -741,6 +741,23 @@ export const menuService = {
   delete: (id) => apiDelete(API_ENDPOINTS.MENUS.DETAIL(id)),
   myMenus: () => apiGet(API_ENDPOINTS.MENUS.MY_MENUS),
   tree: (params) => apiGet(API_ENDPOINTS.MENUS.TREE, params),
+  schoolAdminTree: (params) => apiGet(API_ENDPOINTS.MENUS.SCHOOL_ADMIN_TREE, params),
+  updateSchoolMapping: (data) => {
+    const { organization, ...body } = data
+    return apiPatch(
+      API_ENDPOINTS.MENUS.SCHOOL_MAPPING,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
+  updateSchoolModule: (data) => {
+    const { organization, ...body } = data
+    return apiPatch(
+      API_ENDPOINTS.MENUS.SCHOOL_MODULE,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
   reorder: (items) => apiPost(API_ENDPOINTS.MENUS.REORDER, { items }),
 }
 

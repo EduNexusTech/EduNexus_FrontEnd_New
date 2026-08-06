@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import {
   FiGrid,
   FiUsers,
@@ -36,6 +37,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
+import { menuService } from '@/api/services'
+import { unwrapData } from '@/api/client'
+import { modulesToNavItems, unwrapMenuModules } from '@/utils/navFromApi'
 import { cn } from '@/lib/utils'
 import { REPORT_MENU_ITEMS } from '@/config/reportDefinitions'
 
@@ -436,7 +440,44 @@ function SidebarNav({ items, collapsed, onNavigate }) {
 export default function Sidebar({ mobile, onClose }) {
   const { user, isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
   const { sidebarCollapsed, toggleSidebar } = useUI()
-  const navItems = resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin })
+
+  const usesDynamicSchoolNav = Boolean(
+    isSchoolAdmin || (user?.school_id && !isSuperAdmin && !isOrgAdmin),
+  )
+
+  const dynamicMenusQuery = useQuery({
+    queryKey: ['menus', 'my-menus', user?.id, user?.school_id || user?.school],
+    queryFn: () => menuService.myMenus(),
+    enabled: Boolean(usesDynamicSchoolNav && user?.id),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    retry: 2,
+  })
+
+  const navItems = useMemo(() => {
+    if (isSuperAdmin) return superAdminNav
+    if (isOrgAdmin) return orgAdminNav
+    if (usesDynamicSchoolNav) {
+      if (dynamicMenusQuery.isSuccess) {
+        const modules = unwrapMenuModules(unwrapData(dynamicMenusQuery.data))
+        const items = modulesToNavItems(modules)
+        if (items.length) return items
+      }
+      if (dynamicMenusQuery.isLoading) return []
+      if (dynamicMenusQuery.isError) return schoolAdminNav
+      return schoolAdminNav
+    }
+    return schoolAdminNav
+  }, [
+    isSuperAdmin,
+    isOrgAdmin,
+    usesDynamicSchoolNav,
+    dynamicMenusQuery.isSuccess,
+    dynamicMenusQuery.isLoading,
+    dynamicMenusQuery.isError,
+    dynamicMenusQuery.data,
+  ])
+
   const collapsed = !mobile && sidebarCollapsed
 
   const displayName =
